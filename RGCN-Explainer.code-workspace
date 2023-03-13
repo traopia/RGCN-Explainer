@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../kgbench-loader"
+		},
+		{
+			"path": "../torch-rgcn"
+		}
+	],
+	"settings": {}
+}
