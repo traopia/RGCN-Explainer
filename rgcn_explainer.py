@@ -25,7 +25,7 @@ import networkx as nx
 
 #rgcn 
 from rgcn_model import adj, enrich, sum_sparse, RGCN
-from utils import dict_index_classes, dict_triples_semantics, visualize_data, visualize_result, find_n_hop_neighbors, match_to_classes, match_to_triples, edge_index_oneadj
+from rgcn_explainer_utils import dict_index_classes, dict_triples_semantics, visualize, find_n_hop_neighbors, match_to_classes, match_to_triples, edge_index_oneadj
 
 
 
@@ -225,7 +225,7 @@ class Explain(nn.Module):
         return self.neighbors,self.n_hops, self.node_idx
 
 
-def main(node_idx, n_hops):
+def main(node_idx, n_hops, threshold):
     data = kg.load('aifb', torch=True) 
     print(f'Number of entities: {data.num_entities}') #data.i2e
     print(f'Number of classes: {data.num_classes}')
@@ -235,7 +235,7 @@ def main(node_idx, n_hops):
 
     explainer = Explain(model = model, data = data, node_idx = node_idx, n_hops = n_hops)
     optimizer = torch.optim.Adam(explainer.parameters(), lr=0.01)
-
+    print('start training')
     explainer.train()
     for epoch in range(100):
         explainer.zero_grad()
@@ -266,15 +266,18 @@ def main(node_idx, n_hops):
 
     # sem_triples = dict_triples_semantics(data, masked_ver)
     # print('semantic triples: ', sem_triples)
-    visualize_result(node_idx, masked_ver, neighbors,data,n_hops)
-    visualize_data(node_idx, data, n_hops)
+    # visualize_result(node_idx, masked_ver, neighbors,data,n_hops)
+    # visualize_data(node_idx, data, n_hops)
+
+    visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=False)
+    visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=True)
     dict_index = dict_index_classes(data,masked_ver)
     print(dict_index)
     print(masked_ver.coalesce().values())
 
 
 if __name__ == "__main__":
-    main(5757,1)
+    main(5797,1,0.5)
 
 
 

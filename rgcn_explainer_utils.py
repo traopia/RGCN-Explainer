@@ -18,7 +18,7 @@ def dict_index_classes(data, masked_ver):
             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1])
     return dict        
   
-def dict_triples_semantics(data,  masked_ver, sub_triples):
+def dict_triples_semantics(data,  masked_ver):
     """ 
     Function to get a dictionary where the keys are the triples in indexes and values their semantic values
     Input:
@@ -31,7 +31,7 @@ def dict_triples_semantics(data,  masked_ver, sub_triples):
     indices_nodes = masked_ver.coalesce().indices().detach().numpy()
     new_ver = indices_nodes[0]%data.num_entities
     new_index = np.transpose(np.stack((new_ver, indices_nodes[1])))
-    #sub_triples = match_to_triples(new_index, data.triples)
+    sub_triples = match_to_triples(new_index, data.triples)
     dict = {}
     for i in range(len(sub_triples)):
 
@@ -171,41 +171,95 @@ def edge_index_oneadj(triples):
     return edge_index
 
 
-def visualize_data(node_idx, data, num_hops):
-    """Visualizes the n-hop neighborhood of a given node."""
-    edge_index = edge_index_oneadj(data.triples)
-    sub_edges, neighborhoods, sub_edges_tensor = find_n_hop_neighbors(edge_index, num_hops, node_idx)
+def sub_sparse_tensor(sparse_tensor, threshold,data):
+    nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() > threshold]
+    nonzero_indices[0] = nonzero_indices[0]%data.num_entities
+    nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() > threshold]
+    sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)
+    return sel_masked_ver
 
-    G = nx.from_edgelist(sub_edges)
+
+def encode_classes(dict_index):
+    d = []
+    for k,v in dict_index.items():
+        d.append(v)
+    a = np.unique(d)
+    dict = {}
+    for i,j in zip(a, range(len(a))):
+        dict[i] = j
+        
+    return dict
+
+
+def encode_dict(dict_index):
+    encoded_dict = {}
+    dict = encode_classes(dict_index)
+    for k,v in dict_index.items():
+        for k1,v1 in dict.items():
+            if v==k1:
+                encoded_dict[k] = v1
+    return encoded_dict
+
+def visualize(node_idx, n_hop, data, masked_ver,threshold, result_weights=False ):
+    """ 
+    Visualize important nodes for node idx prediction
+    """
+    dict_index = dict_index_classes(data,masked_ver)
     
-    #create dict of index - node: to visualize index of the node
+    #select only nodes with a certain threshold
+    sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data)
+    indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
+    new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) #original edge indexes
+
+    
+    
+    G = nx.Graph()
+    if result_weights:
+        values = sel_masked_ver.coalesce().values().detach().numpy()
+        for s,p,o in zip(indices_nodes[0],values , indices_nodes[1]):
+            G.add_edge(int(s), int(o), weight=np.round(p, 3))
+
+    else:
+        #get triples to get relations 
+        triples_matched = match_to_triples(np.array(new_index), data.triples)
+        for s,p,o in triples_matched:
+            G.add_edge(int(s), int(o), weight=int(p))
+
+    edges,weights = zip(*nx.get_edge_attributes(G,'weight').items())
+
+    pos = nx.circular_layout(G)
+
+    ordered_dict = {}
+    for item in list(G.nodes):
+        if item in ordered_dict:
+            ordered_dict[item].append(dict_index[item])
+        else:
+            ordered_dict[item] =  dict_index[item]
+
+    dict_index = ordered_dict
+
     labeldict = {}
     for node in G.nodes:
-        labeldict[node] = node 
-    print(G.nodes)
-    print(G.number_of_edges)
+        labeldict[int(node)] = int(node)  
+
+    print('dict index:', dict_index)
+    color_list = list(encode_dict(dict_index).values())
 
 
+    
+    if result_weights:
+        
+        nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=weights, node_color =  color_list, cmap="Set2",edge_cmap=plt.cm.Reds)
+        nx.draw_networkx_edge_labels( G, pos,edge_labels=nx.get_edge_attributes(G,'weight'),font_size=8,font_color='red')
+        sm = plt.cm.ScalarMappable(cmap=plt.cm.Reds, norm=plt.Normalize(vmin=0, vmax=1))
+        sm.set_array(weights)
+        cbar = plt.colorbar(sm)
+        cbar.ax.set_title('Weight')
+        plt.title("Node {}'s {}-hop neighborhood important nodes".format(node_idx, n_hop))
+    else:
+        nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=weights,node_color =  color_list, cmap="Set2")
+        nx.draw_networkx_edge_labels( G, pos,edge_labels=nx.get_edge_attributes(G,'weight'),font_size=8,font_color='red')
 
+    plt.show()
 
-    #can get it through original triples 
-    triples_matched = match_to_triples(np.array(sub_edges), data.triples)
-    print(triples_matched)
-    edge_colors = triples_matched[:,1].detach().numpy()
-    print(edge_colors)
-    colormap = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=min(edge_colors), vmax=max(edge_colors)), cmap = "rainbow")
-
-    # Create a color map for each value in the list
-    colors = [colormap.to_rgba(val) for val in edge_colors]
-    #cmap=cm.rainbow(np.array(edge_colors))
-
-
-    # draw graph with edge colors
-    plt.figure()  
-    plt.title("Node {}'s {}-hop neighborhood".format(node_idx, num_hops))
-    pos = nx.circular_layout(G)
-    nx.draw(G, pos=pos, with_labels=True, edge_color = colors, edge_cmap=plt.cm.Reds,labels = labeldict, cmap="Set2" )
-
-
-
-    plt.show()        
+        
