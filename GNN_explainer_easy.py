@@ -287,17 +287,19 @@ def visualize_result(node_idx, masked_adj, neighbors, data, num_hops):
     labeldict = {}
     for i,j in zip(range(len(neighbors)),neighbors):
         labeldict[i] = j
-    print(labeldict)    
-
+    #print(labeldict)    
+    a = nx.get_edge_attributes(G,'weight')
+    weights = {key : round(a[key], 3) for key in a}
 
     edge_colors = [masked_adj.detach().numpy()[u][v] for u, v in G.edges()]
-    print(len(edge_colors))
+    print(edge_colors)
     # draw graph with edge colors
     plt.figure()  
     plt.title("Node {}'s {}-hop neighborhood important nodes".format(node_idx, num_hops))
     pos = nx.circular_layout(G)
     nx.draw(G, pos=pos, with_labels=True, edge_color=edge_colors, edge_cmap=plt.cm.Reds,labels = labeldict, node_color = data.y[neighbors], cmap="Set2" )
-    print(data.y[neighbors])
+    nx.draw_networkx_edge_labels( G, pos,edge_labels=weights,font_size=8,font_color='red')
+
     # add colorbar legend
     sm = plt.cm.ScalarMappable(cmap=plt.cm.Reds, norm=plt.Normalize(vmin=0, vmax=1))
     sm.set_array(edge_colors)
@@ -305,6 +307,9 @@ def visualize_result(node_idx, masked_adj, neighbors, data, num_hops):
     cbar.ax.set_title('Weight')
 
     plt.show()  
+
+
+    
 
 def denoise_graph(adj, node_idx, feat=None, label=None, threshold=None, threshold_num=None, max_component=True):
     """Cleaning a graph by thresholding its node values.
@@ -504,7 +509,7 @@ class Explain(nn.Module):
 
 
 
-def main():
+def main(node_idx, n_hops):
     dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
     print(f'Number of graphs: {len(dataset)}')
     print(f'Number of features: {dataset.num_features}')
@@ -515,7 +520,7 @@ def main():
     print(f'Number of edges: {data.num_edges}')
 
 
-    explainer = Explain(model = torch.load('cora_chk/model_cora'), data = data, node_idx = 1, n_hops=2)
+    explainer = Explain(model = torch.load('cora_chk/model_cora'), data = data, node_idx= node_idx, n_hops= n_hops)
     optimizer = torch.optim.Adam(explainer.parameters(), lr=0.01)
     
     explainer.train()
@@ -570,4 +575,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(node_idx = 2, n_hops = 2)

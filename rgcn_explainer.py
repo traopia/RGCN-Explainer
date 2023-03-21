@@ -1,3 +1,4 @@
+from responses import FalseBool
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -25,7 +26,7 @@ import networkx as nx
 
 #rgcn 
 from rgcn_model import adj, enrich, sum_sparse, RGCN
-from rgcn_explainer_utils import dict_index_classes, dict_triples_semantics, visualize, find_n_hop_neighbors, match_to_classes, match_to_triples, edge_index_oneadj
+from rgcn_explainer_utils import dict_index_classes, dict_triples_semantics, visualize, find_n_hop_neighbors, match_to_classes, match_to_triples, edge_index_oneadj, get_relations, d_classes
 
 
 
@@ -225,59 +226,64 @@ class Explain(nn.Module):
         return self.neighbors,self.n_hops, self.node_idx
 
 
-def main(node_idx, n_hops, threshold):
+def main(node_idx, n_hops, threshold, train):
     data = kg.load('aifb', torch=True) 
     print(f'Number of entities: {data.num_entities}') #data.i2e
     print(f'Number of classes: {data.num_classes}')
     print(f'Types of relations: {data.num_relations}') #data.i2r
-    
-    model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
+    data.entities = np.append(data.triples[:,0].detach().numpy(),(data.triples[:,2].detach().numpy()))
+    get_relations(data)
+    d_classes(data)
+    if train:
+        model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
 
-    explainer = Explain(model = model, data = data, node_idx = node_idx, n_hops = n_hops)
-    optimizer = torch.optim.Adam(explainer.parameters(), lr=0.01)
-    print('start training')
-    explainer.train()
-    for epoch in range(100):
-        explainer.zero_grad()
-        optimizer.zero_grad()
-        ypred, masked_hor, masked_ver = explainer.forward()
-        loss = explainer.criterion(epoch)
-        neighbors,n_hops, node_idx = explainer.return_stuff()
-        #pred_label, original_label, neighbors, sub_label, sub_feat, num_hops = explainer.return_stuff()
+        explainer = Explain(model = model, data = data, node_idx = node_idx, n_hops = n_hops)
+        optimizer = torch.optim.Adam(explainer.parameters(), lr=0.01)
+        print('start training')
+        explainer.train()
+        for epoch in range(100):
+            explainer.zero_grad()
+            optimizer.zero_grad()
+            ypred, masked_hor, masked_ver = explainer.forward()
+            loss = explainer.criterion(epoch)
+            neighbors,n_hops, node_idx = explainer.return_stuff()
+            #pred_label, original_label, neighbors, sub_label, sub_feat, num_hops = explainer.return_stuff()
+            
+
+
+
+            loss.backward()
+            optimizer.step()
         
 
 
+            if epoch % 10 == 0:
 
-        loss.backward()
-        optimizer.step()
-       
+                print(
+                "epoch: ",
+                epoch,
+                "; loss: ",
+                loss.item(),
 
-
-        if epoch % 10 == 0:
-
-            print(
-            "epoch: ",
-            epoch,
-            "; loss: ",
-            loss.item(),
-
-            "; pred: ",
-            ypred )
-
+                "; pred: ",
+                ypred )
+        torch.save(masked_ver, f'aifb_chk/masked_ver{node_idx}')
     # sem_triples = dict_triples_semantics(data, masked_ver)
     # print('semantic triples: ', sem_triples)
     # visualize_result(node_idx, masked_ver, neighbors,data,n_hops)
     # visualize_data(node_idx, data, n_hops)
-
-    visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=False)
-    visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=True)
+    else:
+        masked_ver = torch.load(f'aifb_chk/masked_ver{node_idx}')
+    visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=False, low_threshold=False)
+    visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=True, low_threshold=FalseBool())
     dict_index = dict_index_classes(data,masked_ver)
-    print(dict_index)
-    print(masked_ver.coalesce().values())
+    print('dict index:' ,dict_index)
+    #print('masked ver values: ', masked_ver.coalesce().values())
+    
 
 
 if __name__ == "__main__":
-    main(5797,1,0.5)
+    main(5797,0,0.5, train=False)
 
 
 

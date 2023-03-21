@@ -18,7 +18,7 @@ def dict_index_classes(data, masked_ver):
             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1])
     return dict        
   
-def dict_triples_semantics(data,  masked_ver):
+def dict_triples_semantics(data,  masked_ver, sub_triples):
     """ 
     Function to get a dictionary where the keys are the triples in indexes and values their semantic values
     Input:
@@ -31,15 +31,17 @@ def dict_triples_semantics(data,  masked_ver):
     indices_nodes = masked_ver.coalesce().indices().detach().numpy()
     new_ver = indices_nodes[0]%data.num_entities
     new_index = np.transpose(np.stack((new_ver, indices_nodes[1])))
-    sub_triples = match_to_triples(new_index, data.triples)
+    #sub_triples = match_to_triples(new_index, data.triples)
     dict = {}
+    all_p = []
     for i in range(len(sub_triples)):
 
         s = dict_index[int(sub_triples[:,0][i])]
-
-        p = str(data.i2r[int(sub_triples[:,1][i])]).split('/')[3]
+        p = data.i2rel[int(sub_triples[:,1][i])][0]
         o = dict_index[int(sub_triples[:,2][i])]
+        all_p.append(p)
         dict[sub_triples[i]] = s + ' ' + p + ' ' + o 
+    print(set(all_p))    
     return dict 
 
 
@@ -171,11 +173,17 @@ def edge_index_oneadj(triples):
     return edge_index
 
 
-def sub_sparse_tensor(sparse_tensor, threshold,data):
-    nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() > threshold]
-    nonzero_indices[0] = nonzero_indices[0]%data.num_entities
-    nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() > threshold]
-    sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)
+def sub_sparse_tensor(sparse_tensor, threshold, data, low_threshold=False):
+    if low_threshold:
+        nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() < threshold]
+        nonzero_indices[0] = nonzero_indices[0]%data.num_entities
+        nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() < threshold]
+        sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)
+    else:
+        nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() > threshold]
+        nonzero_indices[0] = nonzero_indices[0]%data.num_entities
+        nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() > threshold]
+        sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)    
     return sel_masked_ver
 
 
@@ -200,14 +208,15 @@ def encode_dict(dict_index):
                 encoded_dict[k] = v1
     return encoded_dict
 
-def visualize(node_idx, n_hop, data, masked_ver,threshold, result_weights=False ):
+def visualize(node_idx, n_hop, data, masked_ver,threshold, result_weights=False, low_threshold=False ):
     """ 
     Visualize important nodes for node idx prediction
     """
     dict_index = dict_index_classes(data,masked_ver)
     
     #select only nodes with a certain threshold
-    sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data)
+    sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
+    print('sel masked ver',sel_masked_ver)
     indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) #original edge indexes
 
@@ -217,7 +226,7 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold, result_weights=False 
     if result_weights:
         values = sel_masked_ver.coalesce().values().detach().numpy()
         for s,p,o in zip(indices_nodes[0],values , indices_nodes[1]):
-            G.add_edge(int(s), int(o), weight=np.round(p, 3))
+            G.add_edge(int(s), int(o), weight=np.round(p, 2))
 
     else:
         #get triples to get relations 
@@ -226,6 +235,8 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold, result_weights=False 
             G.add_edge(int(s), int(o), weight=int(p))
 
     edges,weights = zip(*nx.get_edge_attributes(G,'weight').items())
+    print('weights', weights)
+    print('edges', edges)
 
     pos = nx.circular_layout(G)
 
@@ -243,23 +254,84 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold, result_weights=False 
         labeldict[int(node)] = int(node)  
 
     print('dict index:', dict_index)
+
+    # dict = {}
+    # for k,v in dict_index.items():
+    #     for k1,v1 in data.entities_classes.items():
+    #         if v==k1: 
+
+    #             dict[k] = v1
+    #         else:
+    #             if k not in dict:
+    #                 dict[k] = 0
+                
+
+    # color_list = list(dict.values())
     color_list = list(encode_dict(dict_index).values())
 
 
     
     if result_weights:
         
-        nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=weights, node_color =  color_list, cmap="Set2",edge_cmap=plt.cm.Reds)
+        nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=weights, node_color =  color_list, cmap="Set2",edge_cmap=plt.cm.Reds,font_size=8)
         nx.draw_networkx_edge_labels( G, pos,edge_labels=nx.get_edge_attributes(G,'weight'),font_size=8,font_color='red')
-        sm = plt.cm.ScalarMappable(cmap=plt.cm.Reds, norm=plt.Normalize(vmin=0, vmax=1))
-        sm.set_array(weights)
-        cbar = plt.colorbar(sm)
-        cbar.ax.set_title('Weight')
+        # sm = plt.cm.ScalarMappable(cmap=plt.cm.Reds, norm=plt.Normalize(vmin=0, vmax=1))
+        # sm.set_array(weights)
+        # cbar = plt.colorbar(sm)
+        # cbar.ax.set_title('Weight')
         plt.title("Node {}'s {}-hop neighborhood important nodes".format(node_idx, n_hop))
     else:
-        nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=weights,node_color =  color_list, cmap="Set2")
-        nx.draw_networkx_edge_labels( G, pos,edge_labels=nx.get_edge_attributes(G,'weight'),font_size=8,font_color='red')
-
+        rel = nx.get_edge_attributes(G,'weight')
+        for k,v in rel.items():
+            rel[k] = data.i2rel[v][0]
+        nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=weights,node_color =  color_list, cmap="Set2",font_size=8)
+        nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=8,font_color='red')
+        
+    if result_weights:
+        plt.savefig(f'aifb_chk/graphs/Explanation_{node_idx}_{n_hop}_weights.png')
+    else:
+        plt.savefig(f'aifb_chk/graphs/Explanation_{node_idx}_{n_hop}_relations.png')    
     plt.show()
 
-        
+def get_relations(data):
+
+    all_relations = []
+    for i in range(data.num_relations):
+        if '#' in str(data.i2r[i]).split('/')[3]:
+            all_relations.append(str(data.i2r[i]).split('/')[3].split('#')[1])
+        else:
+            all_relations.append(str(data.i2r[i]).split('/')[3])
+    dict = {}
+    for i in range(len(all_relations)):
+        dict[i] = [all_relations[i]]
+        dict[i].append(data.i2r[i])
+
+    data.i2rel = dict
+    return data.i2rel        
+
+
+def d_classes(data):
+    """ 
+    Get classes of nodes (select only the alphanum - not literals)
+    """
+    indices_nodes = data.entities
+    d = list(data.e2i.keys())
+    values_indices_nodes = [d[i] for i in indices_nodes]
+    dict = {}
+    for i in range(len(values_indices_nodes)):
+        try:
+            dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i]).split('/')[3]
+            
+        except IndexError :
+            dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i])
+
+    a = encode_classes(dict)   
+    d = {}
+
+    c = 0
+    for k in a.keys():
+        if k.isalpha():
+            d[k] = c
+            c+=1
+    data.entities_classes = d
+    return d    
