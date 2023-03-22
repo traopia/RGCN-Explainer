@@ -32,6 +32,10 @@ from rgcn_explainer_utils import dict_index_classes, dict_triples_semantics, vis
 
 #Get adjacency matrix: in this context this is hor / ver graph
 def hor_ver_graph(triples, n, r):
+    """ 
+    input: triples, number of nodes, number of relations
+    output: hor_graph, ver_graph : horizontally and vertically stacked adjacency matrix
+    """
     #triples = enrich(triples_small, n, r)
 
     hor_ind, hor_size = adj(triples, n, 2*r+1, vertical=False)
@@ -241,7 +245,7 @@ def main(node_idx, n_hops, threshold, train):
         optimizer = torch.optim.Adam(explainer.parameters(), lr=0.01)
         print('start training')
         explainer.train()
-        for epoch in range(100):
+        for epoch in range(500):
             explainer.zero_grad()
             optimizer.zero_grad()
             ypred, masked_hor, masked_ver = explainer.forward()
@@ -283,7 +287,7 @@ def main(node_idx, n_hops, threshold, train):
 
 
 if __name__ == "__main__":
-    main(5797,0,0.5, train=False)
+    main(5757,0,0, train=True)
 
 
 

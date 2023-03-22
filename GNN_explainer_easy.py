@@ -237,7 +237,7 @@ def adj_feat_grad(node_idx, pred_label_node, model , adj,x, ):
     loss.backward()
     return adj.grad, x.grad
 
-def log_adj_grad(adj, masked_adj, node_idx, pred_label,pred_label_node, x, epoch, label=None):
+def log_adj_grad(adj, masked_adj, node_idx, pred_label,pred_label_node, x, epoch, model, label=None):
     """ 
     Computes the gradient of the adjacency matrix with respect to the loss
     
@@ -419,6 +419,7 @@ class Explain(nn.Module):
         feat_mask = (torch.sigmoid(self.feat_mask))
         x = self.sub_feat * feat_mask
         #ypred, adj_att = model(self.subdata, masked_adj)
+        #print(x.shape, self.masked_adj.shape)
         ypred, adj_att = self.model(x, self.masked_adj)
         node_pred = ypred[self.node_idx_new, :]
         res = nn.Softmax(dim=0)(node_pred)
@@ -490,9 +491,13 @@ class Explain(nn.Module):
         self.model.zero_grad()
         self.adj.requires_grad = True
         self.x.requires_grad = True
+        if self.adj.grad is not None:
+            print('self.adj.grad', self.adj.grad)
+            self.adj.grad.zero_() # zero out the gradient
+            self.x.grad.zero_() # zero out the gradient
 
-
-        x, adj = self.x, self.adj
+        else:
+            x, adj = self.x, self.adj
         ypred, _ = self.model(x, adj)
 
 
@@ -502,7 +507,7 @@ class Explain(nn.Module):
         loss.backward()
         print(self.adj.grad)
         print(self.x.grad)
-        return self.adj, self.x.grad    
+        return self.adj.grad, self.x.grad    
     
 
         
@@ -524,7 +529,7 @@ def main(node_idx, n_hops):
     optimizer = torch.optim.Adam(explainer.parameters(), lr=0.01)
     
     explainer.train()
-    for epoch in range(100):
+    for epoch in range(500):
         explainer.zero_grad()
         optimizer.zero_grad()
         ypred, adj_atts, sub_adj = explainer.forward()
@@ -538,15 +543,15 @@ def main(node_idx, n_hops):
         optimizer.step()
         mask_density = explainer.mask_density()
         single_subgraph_label = sub_label.squeeze()
-        if epoch % 25 == 0:
-        #     explainer.log_mask(epoch)
-        #     explainer.log_masked_adj(
-        #         node_idx_new, epoch, label=single_subgraph_label
-        #     )
+        # if epoch % 25 == 0:
+        # #     explainer.log_mask(epoch)
+        # #     explainer.log_masked_adj(
+        # #         node_idx_new, epoch, label=single_subgraph_label
+        # #     )
 
 
-            explainer.log_adj_grad(
-                node_idx_new, pred_label, epoch, label=single_subgraph_label)
+        #     explainer.log_adj_grad(
+        #         node_idx_new, pred_label, epoch, label=single_subgraph_label)
 
 
 
@@ -571,8 +576,8 @@ def main(node_idx, n_hops):
     masked_adj = adj_atts * sub_adj.squeeze()
     print(masked_adj)
 
-    visualize_result(1, masked_adj, neighbors,data,num_hops)
+    visualize_result(node_idx, masked_adj, neighbors,data,n_hops)
 
 
 if __name__ == '__main__':
-    main(node_idx = 2, n_hops = 2)
+    main(node_idx = 1, n_hops = 2)

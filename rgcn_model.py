@@ -211,8 +211,64 @@ class RGCN(nn.Module):
 
         assert h.size() == (n, c)
 
-        return h + self.bias2 # -- softmax is applied in the loss
+        return h + self.bias2
     
+    def forward3(self, hor_graph, ver_graph):
+
+
+        ## Layer 1
+
+        n, rn = hor_graph.size() #horizontally stacked adjacency matrix size
+        r = rn // n
+        e = self.emb
+        b, c = self.bases, self.numcls
+
+        if self.bases1 is not None:
+            # weights = torch.einsum('rb, bij -> rij', self.comps1, self.bases1)
+            weights = torch.mm(self.comps1, self.bases1.view(b, n*e)).view(r, n, e)
+        else:
+            weights = self.weights1
+
+        assert weights.size() == (r, n, e) #r relations, n nodes, e embedding size
+
+        # Apply weights and sum over relations
+        #hidden layer
+        h = torch.mm(hor_graph, weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
+        assert h.size() == (n, e)
+
+        h = F.relu(h + self.bias1) #apply non linearity and add bias
+
+        ## Layer 2
+
+        # Multiply adjacencies by hidden
+        h = torch.mm(ver_graph, h) # sparse mm
+        h = h.view(r, n, e) # new dim for the relations
+
+        if self.bases2 is not None:
+            # weights = torch.einsum('rb, bij -> rij', self.comps2, self.bases2)
+            weights = torch.mm(self.comps2, self.bases2.view(b, e * c)).view(r, e, c)
+        else:
+            weights = self.weights2
+
+        # Apply weights, sum over relations
+        # h = torch.einsum('rhc, rnh -> nc', weights, h)
+        h = torch.bmm(h, weights).sum(dim=0)
+
+        assert h.size() == (n, c)
+
+        return h + self.bias2, hor_graph, ver_graph # -- softmax is applied in the loss
+    
+    # def forward3(self, ver_graph):
+    #     n, rn = ver_graph.size() #horizontally stacked adjacency matrix size
+    #     r = rn // n
+    #     e = self.emb
+    #     b, c = self.bases, self.numcls
+
+    #     weights = torch.mm(self.comps1, self.bases1.view(b, n*e)).view(r, n, e)
+
+
+
+
 
 
 
