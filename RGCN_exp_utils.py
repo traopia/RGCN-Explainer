@@ -102,19 +102,3 @@ def construct_edge_mask( num_nodes, init_strategy="normal", const_val=1.0):
 
 #Masked 'adjacency' - masked hor vergraph
 
-def _masked_adj(mask,adj, diag_mask, graph):
-    """ Masked adjacency matrix 
-    input: edge_mask, sub_adj, diag_mask
-    output: masked_adj
-    """
-    sym_mask = mask
-    sym_mask = torch.sigmoid(mask)
-    
-    sym_mask = (sym_mask + sym_mask.t()) / 2
-    adj = torch.tensor(adj)
-    masked_adj = adj * sym_mask
-
-    #return masked_adj #* diag_mask
-    return torch.sparse.FloatTensor(indices=graph.coalesce().indices(), values= masked_adj, size=graph.coalesce().size())
-
-
