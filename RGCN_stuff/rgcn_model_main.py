@@ -7,7 +7,7 @@ import fire, sys
 import math
 
 from kgbench import load, tic, toc, d
-from rgcn_model import RGCN
+from RGCN_stuff.rgcn_model import RGCN
 
 
 

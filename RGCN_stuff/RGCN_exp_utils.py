@@ -1,7 +1,7 @@
 import torch
 import math
 import torch.nn as nn
-from rgcn_model import adj, enrich, sum_sparse, RGCN
+from RGCN_stuff.rgcn_model import adj, enrich, sum_sparse, RGCN
 
 #Get adjacency matrix: in this context this is hor / ver graph
 def hor_ver_graph(triples, n, r):
