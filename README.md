@@ -5,9 +5,13 @@ The idea is to extend GNNExplainer for relational graphs.
 
 
 PROBLEMS: 
-    - The masked adjacency values are not vaguely similar to the one that you can find by running ( which is the PyG implementation)
-    - The masked adjacency values are all in a similar range (by tweaking some parameter I can still see that they are just all around the same values - I would very much say because the explainer model is not learning) 
+
+    1.  The masked adjacency values are not vaguely similar to the one that you can find by running ( which is the PyG implementation)
+    
+    2. The masked adjacency values are all in a similar range (by tweaking some parameter I can still see that they are just all around the same values -- I would very much say because the explainer model is not learning) 
+    
             Example:
+            
             masked_adj tensor(indices=tensor([[0, 0, 0, 1, 1, 1, 2, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 7, 7,
                         7],
                        [1, 5, 7, 0, 4, 6, 5, 7, 1, 5, 6, 0, 2, 4, 7, 1, 4, 0, 3,
@@ -18,8 +22,11 @@ PROBLEMS:
             size=(8, 8), nnz=20, layout=torch.sparse_coo)
 
 
-    - The adj_att which I actually use to make prediction over the training of the explain model is instead more different but still very different from how it should be:
+    3. The adj_att which I actually use to make prediction over the training of the explain model is instead more different but still very different from how it should be:
+    
+    
             Example:
+            
             adj here: tensor(indices=tensor([[0, 0, 0, 1, 1, 1, 2, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 7, 7,
                         7],
                        [1, 5, 7, 0, 4, 6, 5, 7, 1, 5, 6, 0, 2, 4, 7, 1, 4, 0, 3,
@@ -29,8 +36,10 @@ PROBLEMS:
                             0.7926, 0.6784, 0.7400, 0.5324, 0.8150, 0.7926]),
             size=(8, 8), nnz=20, layout=torch.sparse_coo, grad_fn=<ToSparseBackward0>)
 
-    - If I use the masked adjacency to make prediction - might get the correct label with argmax - but compared to using the original full matrix way lower (you can see by just seeing the last rows of the outuput) : 
+    4.  If I use the masked adjacency to make prediction - might get the correct label with argmax - but compared to using the original full matrix way lower (you can see by just seeing the last rows of the outuput) : 
+    
             Example:
+            
             ypred model tensor([0.0118, 0.0176, 0.0048, 0.9284, 0.0175, 0.0138, 0.0060],
                 grad_fn=<SoftmaxBackward0>) tensor(3)
             ypred explainer tensor([0.1449, 0.0242, 0.2411, 0.3232, 0.1908, 0.0513, 0.0245],
@@ -40,10 +49,14 @@ PROBLEMS:
             original tensor(3)
 
 
-- In PyG folder: run GNN_exp_pyg.py
-    - So for example same node as before (0 in Cora): this is the masked adjacency
+In PyG folder: run GNN_exp_pyg.py
+
+    1.  So for example same node as before (0 in Cora): this is the masked adjacency
         Example:
-        masked adjacency: tensor(indices=tensor([[   0,    0,    0,  633,  633,  633,  926, 1166, 1701,1701, 1701, 1862, 1862, 1862, 1862, 1866, 1866, 2582,
+        
+        masked adjacency:
+        
+        tensor(indices=tensor([[   0,    0,    0,  633,  633,  633,  926, 1166, 1701,1701, 1701, 1862, 1862, 1862, 1862, 1866,           1866,2582,
                         2582, 2582],
                        [ 633, 1862, 2582,    0, 1701, 1866, 1862, 2582,  633,
                         1862, 1866,    0,  926, 1701, 2582,  633, 1701,    0,
@@ -53,7 +66,8 @@ PROBLEMS:
                       0.7242, 0.7247, 0.2770, 0.7310, 0.2772, 0.6494]),
        size=(2583, 2583), nnz=20, layout=torch.sparse_coo)
 
-    - And those are the predictions - model way more suere - namely predictions with masked adjacency are better
+    2. And those are the predictions - model way more suere - namely predictions with masked adjacency are better
+    
         true label: tensor(3) 
         full model pred label: tensor(3) 
         full model pred prob: tensor(0.9332, grad_fn=<SelectBackward0>) tensor([0.0118, 0.0129, 0.0082, 0.9332, 0.0255, 0.0057, 0.0027],
@@ -65,12 +79,16 @@ PROBLEMS:
         size of explained graph: 20
 
 
-    #DIfference; here its not that a neighborhood is chosen and work onky on that - but take neighbors index and then select them from the edge indexes (thats why in the matrix before we have actual indexes vs other implementation)
+    ### DIfference; here its not that a neighborhood is chosen and work onky on that - but take neighbors index and then select them from the edge indexes (thats why in the matrix before we have actual indexes vs other implementation)
+
 
 - In the RGCN folder there is all the stuff for the extension when I still thought that the GNNExp I did was alright :') But if we can make it work (and spot whats wrong)     - then the work in this folder is ready to work meaningfully again!
 (anyway for explanation: run rgcn_explainer.py)
+
     - Just mention the fact that this was the masked adjacencey for instance:
-    masked_ver tensor(indices=tensor([[ 23430,  23444,  23490,  23546,  24301,  24407,  24427,
+    
+    masked_ver 
+    tensor(indices=tensor([[ 23430,  23444,  23490,  23546,  24301,  24407,  24427,
                          24475,  24503,  24543,  88607, 196312, 229452, 254307,
                         254307, 254307, 254307, 254307, 254307, 254307, 254307,
                         254307, 254307, 328872],
