@@ -19,7 +19,7 @@ def go(name='IMDb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='
 
     
     if name == 'IMDb':
-        data = torch.load('RGCN_stuff/IMDb_typePeople_data.pt')
+        data = torch.load('IMDb_typePeople_data.pt')
     else:
         data = load(name, torch=True, prune_dist=2 if prune else None, final=final, include_val=include_val)    
 
