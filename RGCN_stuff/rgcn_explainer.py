@@ -126,7 +126,7 @@ def loss_fc(edge_mask,  pred, pred_label,label, node_idx, epoch, print=False):
     mask = edge_mask
     mask = torch.sigmoid(mask)
 
-    size_loss = 0.5 * torch.sum(mask)
+    size_loss = 0.8 * torch.sum(mask)
 
 
 
@@ -254,12 +254,12 @@ def main(n_hops, threshold, train):
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
     high = []
     low = []
-    for node_idx in d[1]:
+    for node_idx in d[3]:
         if train:
             model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
 
             explainer = Explain(model = model, data = data, node_idx = node_idx, n_hops = n_hops)
-            optimizer = torch.optim.Adam(explainer.parameters(), lr=0.01)
+            optimizer = torch.optim.Adam(explainer.parameters(), lr=0.1)
             print('start training')
             explainer.train()
             for epoch in range(50):
@@ -300,14 +300,25 @@ def main(n_hops, threshold, train):
         h = selected(masked_ver, threshold,data, low_threshold=False)
         print('most important relations: ', h)
         high.append(h)
-        print('high:', high)
-
-
-        # l =  visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=False, low_threshold=True)
+        #print('high:', high)
         if len(h) < len(masked_ver.coalesce().values()):
             l = selected(masked_ver, threshold,data, low_threshold=True)
             print('least important relations: ', l)
             low.append(l)
+        with open('aifb_chk/Important_relation.txt', 'a') as f:
+            f.write('\n node: ')
+            f.write(str(node_idx))
+            f.write('\n Most important relations:')
+            f.write(str(h))
+            f.write('\n Least important relations:')
+            f.write(str(l))
+            f.close()
+        #print('low:', low)
+
+
+
+        # l =  visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=False, low_threshold=True)
+
         # l = selected(masked_ver, threshold,data, low_threshold=True)
         # print('least important relations: ', l)
         # low.append(l)
@@ -323,6 +334,12 @@ def main(n_hops, threshold, train):
     print('high', high)
 
     print('low', low)    
+    with open('aifb_chk/Counter_imp_relations.txt', 'a') as f:
+        f.write('\n high:')
+        f.write(str(high))
+        f.write('\n low:')
+        f.write(str(low))
+        f.close()
 
 
 def main2(node_idx, n_hops, threshold, train):
@@ -350,6 +367,7 @@ def main2(node_idx, n_hops, threshold, train):
             explainer.zero_grad()
             optimizer.zero_grad()
             ypred, masked_hor, masked_ver = explainer.forward()
+            print('masked_ver', masked_ver.to_sparse())
             loss = explainer.criterion(epoch)
             neighbors,n_hops, node_idx = explainer.return_stuff()
             #pred_label, original_label, neighbors, sub_label, sub_feat, num_hops = explainer.return_stuff()
@@ -363,7 +381,7 @@ def main2(node_idx, n_hops, threshold, train):
 
 
             if epoch % 10 == 0:
-
+                
                 print(
                 "epoch: ",
                 epoch,
@@ -372,8 +390,8 @@ def main2(node_idx, n_hops, threshold, train):
 
                 "; pred: ",
                 ypred )
-        torch.save(masked_ver, f'aifb_chk/masked_ver{node_idx}')
-        torch.save(masked_hor, f'aifb_chk/masked_hor{node_idx}')
+            torch.save(masked_ver, f'masked_ver{node_idx}_{epoch}')
+            torch.save(masked_hor, f'masked_hor{node_idx}_{epoch}')
         #print('masked_ver', masked_ver)
 
     else:
@@ -398,7 +416,7 @@ def main2(node_idx, n_hops, threshold, train):
 
 
 
-    visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=True, low_threshold=False)
+    #visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=True, low_threshold=False)
     # dict_index = dict_index_classes(data,masked_ver)
 
 
@@ -410,6 +428,8 @@ def main2(node_idx, n_hops, threshold, train):
     model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
     ypred = model.forward2(masked_hor, masked_ver)
     node_pred = ypred[node_idx, :]
+    #print(nn.Softmax(dim=1)(ypred))
+    #print(nn.Softmax(dim=0)(node_pred))
     res = nn.Softmax(dim=0)(node_pred)
     print('ypred', res)
 
@@ -421,10 +441,12 @@ def main2(node_idx, n_hops, threshold, train):
 
     hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
     y_full = model.forward2(hor_graph, ver_graph)
+    print(nn.Softmax(dim=1)(y_full))
     node_pred_full = y_full[node_idx, :]
+    #print(nn.Softmax(dim=0)(node_pred_full))
     res_full = nn.Softmax(dim=0)(node_pred_full)
     print('ypred full', res_full)
-
+    h,v = torch.load('masked_hor_forward'), torch.load('masked_ver_forward')
     y_full3 = model.forward3(ver_graph)
     node_pred_full3 = y_full3[0][node_idx, :]
     res_full3 = nn.Softmax(dim=0)(node_pred_full3)
@@ -439,7 +461,7 @@ def main2(node_idx, n_hops, threshold, train):
 
 
 if __name__ == "__main__":
-    main2(5757,0,0.5, train=False)
+    main2(5757,2,0.5, train=True)
     #main(1,0.5, train=True)
 
 

@@ -215,7 +215,7 @@ def selected(masked_ver, threshold,data, low_threshold):
     indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) 
     triples_matched = match_to_triples(np.array(new_index), data.triples)
-    print(triples_matched)
+    #print(triples_matched)
     l = []
     for i in triples_matched[:,1]:
         l.append(data.i2rel[int(i)][0])

@@ -5,23 +5,29 @@ from collections import Counter
 import kgbench as kg
 import fire, sys
 import math
-
+import os
 from kgbench import load, tic, toc, d
-from RGCN_stuff.rgcn_model import RGCN
+from rgcn_model import RGCN
 
 
 
 
-def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=True,  emb=16, bases=None, printnorms=True):
+def go(name='IMDb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=True):
 
-    include_val = name in ('aifb','mutag','bgs','am')
+    include_val = name in ('aifb','mutag','bgs','am', 'IMDb')
     # -- For these datasets, the validation is added to the training for the final eval.
 
-    data = load(name, torch=True, prune_dist=2 if prune else None, final=final, include_val=include_val)
+    
+    if name == 'IMDb':
+        data = torch.load('RGCN_stuff/IMDb_typePeople_data.pt')
+    else:
+        data = load(name, torch=True, prune_dist=2 if prune else None, final=final, include_val=include_val)    
 
-    print(f'{data.triples.size(0)} triples')
+    #print(f'{data.triples.size(0)} triples')
+    print(f'{data.triples.shape[0]} triples ')
     print(f'{data.num_entities} entities')
     print(f'{data.num_relations} relations')
+    data.triples = torch.tensor(data.triples, dtype=torch.int32)[:8285]
 
     tic()
     rgcn = RGCN(data.triples, n=data.num_entities, r=data.num_relations, numcls=data.num_classes, emb=emb, bases=bases)
@@ -56,11 +62,20 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='
         loss = F.cross_entropy(out_train, clst, reduction='mean')
         if l2 != 0.0:
             loss = loss + l2 * rgcn.penalty()
-
+        correct = []
+        mislabeled = []
         # compute performance metrics
         with torch.no_grad():
             training_acc = (out[idxt, :].argmax(dim=1) == clst).sum().item() / idxt.size(0)
             withheld_acc = (out[idxw, :].argmax(dim=1) == clsw).sum().item() / idxw.size(0)
+        #     for i in range(idxw.size(0)):
+        #         if out[idxw, :].argmax(dim=1)[i] == clsw[i]:
+        #             correct.append(idxw[i])
+        #         else:
+        #             mislabeled.append(idxw[i])
+        # print('correct',correct)
+        # print('mislabeled',mislabeled)
+
             #torch.save(out[idxw, :].argmax(dim=1) , 'aifb_chk/prediction_aifb')
         loss.backward()
         opt.step()
@@ -92,8 +107,13 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='
             print('relations with largest weight norms in layer 2.')
             for rel, w in ctr.most_common(printnorms):
                 print(f'     norm {w:.4} for {rel} ')
-        torch.save(out[idxw, :], 'aifb_chk/prediction_aifb')
-        torch.save(rgcn,'aifb_chk/model_aifb')
+        #torch.save(out[idxw, :], 'aifb_chk/prediction_aifb')
+
+        if not os.path.exists(f'{name}_chk'):
+            os.makedirs(f'{name}_chk')
+        torch.save(out[idxw, :], f'{name}_chk/prediction_{name}')
+        #torch.save(rgcn,'aifb_chk/model_aifb')
+        torch.save(rgcn, f'{name}_chk/model_{name}')
         print(f'epoch {e:02}: loss {loss:.2}, train acc {training_acc:.2}, \t withheld acc {withheld_acc:.2} \t ({toc():.5}s)')
 
 

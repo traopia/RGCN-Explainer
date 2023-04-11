@@ -373,7 +373,14 @@ def main(node_idx, n_hops, epochs):
     print(f'Number of nodes: {data.num_nodes}')
     print(f'Number of edges: {data.num_edges}')
 
-    model = Net(dataset)
+    input_dim = dataset.num_features
+    output_dim = dataset.num_classes
+
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = Net(input_dim, output_dim).to(device)
+
+    #model = Net(dataset)
     model = torch.load('cora_chk/model_cora') #load the trained model
 
 

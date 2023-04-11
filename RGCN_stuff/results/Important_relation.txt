@@ -1,0 +1,112 @@
+LABEL 1
+node: 5731
+Most important relations:Counter({'isWorkedOnBy': 11, 'author': 11, 'isAbout': 8, 'member': 2, 'dealtWithIn': 1, 'fax': 1, 'phone': 1, 'name': 1, 'homepage': 1, '1999': 1, 'photo': 1, 'projectInfo': 1, 'hasProject': 1})
+Least important relations:Counter({'publication': 11, 'isAbout': 7, 'worksAtProject': 2})
+node: 5905
+Most important relations:Counter({'fax': 1, 'phone': 1, 'name': 1, '1999': 1, 'photo': 1, 'publication': 1, 'author': 1})
+Least important relations:Counter({'publication': 11, 'isAbout': 7, 'worksAtProject': 2})
+node: 5808
+Most important relations:Counter({'isAbout': 4, 'author': 3, 'member': 2, 'hasProject': 2, 'isWorkedOnBy': 1, 'dealtWithIn': 1, 'carriesOut': 1, 'fax': 1, 'phone': 1, 'name': 1, 'worksAtProject': 1, 'photo': 1, 'homepage': 1, 'carriedOutBy': 1})
+Least important relations:Counter({'publishes': 3, 'publication': 3, '1999': 2, 'projectInfo': 2})
+node: 5785
+Most important relations:Counter({'author': 7, 'isWorkedOnBy': 5, 'dealtWithIn': 3, 'hasProject': 3, 'member': 2, 'carriesOut': 1, 'phone': 1, 'fax': 1, 'name': 1, 'photo': 1, 'worksAtProject': 1, 'carriedOutBy': 1, 'isAbout': 1})
+Least important relations:Counter({'isAbout': 8, 'publishes': 7, 'publication': 7, 'projectInfo': 3, '1999': 2})
+
+LABEL 0
+node: 5678
+Most important relations:Counter({'author': 16, 'isAbout': 13, 'hasProject': 10, 'isWorkedOnBy': 6, 'dealtWithIn': 6, 'member': 3, 'carriedOutBy': 2, 'fax': 1, 'phone': 1, 'homepage': 1, 'name': 1, 'photo': 1, 'worksAtProject': 1, 'projectInfo': 1, 'editor': 1})
+Least important relations:Counter({'publishes': 17, 'publication': 17, 'projectInfo': 9, 'isAbout': 8, 'carriesOut': 2, '1999': 2})
+node: 5724
+Most important relations:Counter({'fax': 1, 'phone': 1, 'homepage': 1, 'name': 1, '1999': 1, 'publication': 1, 'author': 1})
+Least important relations:Counter({'publishes': 17, 'publication': 17, 'projectInfo': 9, 'isAbout': 8, 'carriesOut': 2, '1999': 2})
+node: 5699
+Most important relations:Counter({'fax': 1, 'phone': 1, 'name': 1, 'homepage': 1, '1999': 1})
+Least important relations:Counter({'publishes': 17, 'publication': 17, 'projectInfo': 9, 'isAbout': 8, 'carriesOut': 2, '1999': 2})
+node: 5688
+Most important relations:Counter({'fax': 1, 'phone': 1, 'name': 1, '1999': 1})
+Least important relations:Counter({'publishes': 17, 'publication': 17, 'projectInfo': 9, 'isAbout': 8, 'carriesOut': 2, '1999': 2})
+node: 5702
+Most important relations:Counter({'fax': 1, 'phone': 1, 'name': 1, '1999': 1, 'publication': 1, 'author': 1})
+Least important relations:Counter({'publishes': 17, 'publication': 17, 'projectInfo': 9, 'isAbout': 8, 'carriesOut': 2, '1999': 2})
+node: 5714
+Most important relations:Counter({'fax': 1, 'phone': 1, 'name': 1, '1999': 1})
+Least important relations:Counter({'publishes': 17, 'publication': 17, 'projectInfo': 9, 'isAbout': 8, 'carriesOut': 2, '1999': 2})
+node: 5708
+Most important relations:Counter({'fax': 1, 'phone': 1, 'homepage': 1, 'name': 1, '1999': 1})
+Least important relations:Counter({'publishes': 17, 'publication': 17, 'projectInfo': 9, 'isAbout': 8, 'carriesOut': 2, '1999': 2})
+node: 5843
+Most important relations:Counter({'isWorkedOnBy': 7, 'author': 5, 'dealtWithIn': 3, 'member': 2, 'hasProject': 2, 'fax': 1, 'phone': 1, 'name': 1, '1999': 1, 'homepage': 1, 'worksAtProject': 1, 'isAbout': 1})
+Least important relations:Counter({'isAbout': 7, 'publication': 5, 'dealtWithIn': 4, 'projectInfo': 4, 'hasProject': 2})
+node: 5873
+Most important relations:Counter({'phone': 1, 'fax': 1, 'name': 1, '1999': 1, 'photo': 1})
+Least important relations:Counter({'isAbout': 7, 'publication': 5, 'dealtWithIn': 4, 'projectInfo': 4, 'hasProject': 2})
+node: 5697
+Most important relations:Counter({'fax': 1, 'phone': 1, 'homepage': 1, 'name': 1, '1999': 1})
+Least important relations:Counter({'isAbout': 7, 'publication': 5, 'dealtWithIn': 4, 'projectInfo': 4, 'hasProject': 2})
+node: 5783
+Most important relations:Counter({'author': 4, 'isWorkedOnBy': 3, 'fax': 1, 'phone': 1, 'name': 1, '1999': 1, 'photo': 1})
+Least important relations:Counter({'publication': 4})
+node: 5701
+Most important relations:Counter({'fax': 1, 'phone': 1, 'homepage': 1, 'name': 1, '1999': 1})
+Least important relations:Counter({'publication': 4})
+node: 5845
+Most important relations:Counter({'author': 11, 'isWorkedOnBy': 8, 'isAbout': 8, 'hasProject': 8, 'dealtWithIn': 5, 'member': 4, 'carriedOutBy': 3, 'phone': 1, 'fax': 1, 'name': 1, 'photo': 1, 'projectInfo': 1})
+Least important relations:Counter({'isAbout': 12, 'publishes': 11, 'publication': 11, 'projectInfo': 9, 'dealtWithIn': 7, 'carriesOut': 3, '1999': 2, 'worksAtProject': 2, 'hasProject': 2})
+node: 5778
+Most important relations:Counter({'author': 5, 'member': 1, 'fax': 1, 'phone': 1, 'name': 1, 'homepage': 1, 'photo': 1})
+Least important relations:Counter({'publishes': 5, 'publication': 5, '1999': 2})
+
+node: 5757
+Most important relations:Counter({'author': 10, 'fax': 1, 'phone': 1, 'name': 1, '1999': 1})
+Least important relations:Counter({'publication': 10})
+node: 5797
+Most important relations:Counter({'author': 21, 'isAbout': 13, 'isWorkedOnBy': 7, 'member': 7, 'hasProject': 7, 'carriedOutBy': 6, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1})
+Least important relations:Counter({'isAbout': 41, 'projectInfo': 32, 'hasProject': 25, 'publishes': 21, 'publication': 21, 'dealtWithIn': 14, 'carriesOut': 6, 'worksAtProject': 6, '1999': 2})
+node: 5900
+Most important relations:Counter({'author': 48, 'hasProject': 28, 'isWorkedOnBy': 9, 'isAbout': 6, 'member': 3, 'dealtWithIn': 1, 'phone': 1, 'fax': 1, 'name': 1, '1999': 1, 'photo': 1, 'homepage': 1})
+Least important relations:Counter({'isAbout': 149, 'projectInfo': 65, 'publication': 48, 'hasProject': 37, 'dealtWithIn': 8, 'worksAtProject': 2})
+node: 5677
+Most important relations:Counter({'author': 38, 'fax': 1, 'phone': 1, 'name': 1, '1999': 1, 'editor': 1})
+Least important relations:Counter({'publication': 39})
+node: 5791
+Most important relations:Counter({'author': 152, 'hasProject': 54, 'isAbout': 26, 'isWorkedOnBy': 15, 'member': 15, 'carriedOutBy': 14, 'editor': 13, 'projectInfo': 3, 'dealtWithIn': 1, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1, 'homepage': 1})
+Least important relations:Counter({'isAbout': 580, 'projectInfo': 211, 'publishes': 165, 'publication': 165, 'hasProject': 160, 'dealtWithIn': 70, 'carriesOut': 14, 'worksAtProject': 11, '1999': 2})
+node: 5811
+Most important relations:Counter({'author': 10, 'hasProject': 8, 'member': 6, 'isWorkedOnBy': 5, 'carriedOutBy': 5, 'isAbout': 5, 'projectInfo': 2, 'dealtWithIn': 1, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1})
+Least important relations:Counter({'publishes': 10, 'publication': 10, 'isAbout': 10, 'projectInfo': 8, 'carriesOut': 5, 'worksAtProject': 5, '1999': 2, 'hasProject': 2})
+node: 5831
+Most important relations:Counter({'isWorkedOnBy': 6, 'author': 3, 'hasProject': 3, 'member': 2, 'carriesOut': 1, 'phone': 1, 'fax': 1, 'name': 1, 'photo': 1, 'worksAtProject': 1, 'carriedOutBy': 1, 'isAbout': 1})
+Least important relations:Counter({'publishes': 3, 'publication': 3, 'projectInfo': 3, '1999': 2})
+node: 5839
+Most important relations:Counter({'member': 2, 'carriesOut': 1, 'publishes': 1, 'phone': 1, 'fax': 1, 'name': 1, 'photo': 1, 'worksAtProject': 1, 'publication': 1, 'carriedOutBy': 1, 'author': 1})
+Least important relations:Counter({'1999': 2})
+node: 5755
+Most important relations:Counter({'author': 22, 'hasProject': 6, 'isWorkedOnBy': 5, 'isAbout': 4, 'member': 3, 'dealtWithIn': 2, 'carriedOutBy': 2, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1})
+Least important relations:Counter({'isAbout': 39, 'projectInfo': 36, 'hasProject': 30, 'publishes': 22, 'publication': 22, 'dealtWithIn': 4, 'carriesOut': 2, '1999': 2, 'worksAtProject': 2})
+node: 5844
+Most important relations:Counter({'author': 2, 'fax': 1, 'homepage': 1, 'phone': 1, 'name': 1, '1999': 1})
+Least important relations:Counter({'publication': 2})
+node: 5861
+Most important relations:Counter({'author': 64, 'hasProject': 13, 'isAbout': 11, 'isWorkedOnBy': 5, 'member': 2, 'dealtWithIn': 1, 'phone': 1, 'fax': 1, 'name': 1, '1999': 1, 'photo': 1, 'worksAtProject': 1, 'homepage': 1, 'editor': 1})
+Least important relations:Counter({'publication': 65, 'projectInfo': 37, 'hasProject': 24, 'isAbout': 23})
+
+
+LABEL 3: 
+node: 5857
+Most important relations:Counter({'author': 6, 'member': 4, 'carriedOutBy': 3, 'hasProject': 2, 'isWorkedOnBy': 1, 'dealtWithIn': 1, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1, 'isAbout': 1})
+Least important relations:Counter({'publishes': 6, 'publication': 6, 'carriesOut': 3, '1999': 2, 'worksAtProject': 2, 'projectInfo': 2})
+node: 5752
+Most important relations:Counter({'author': 9, 'isWorkedOnBy': 5, 'isAbout': 5, 'dealtWithIn': 4, 'member': 3, 'carriedOutBy': 2, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1})
+Least important relations:Counter({'isAbout': 11, 'publishes': 9, 'publication': 9, 'carriesOut': 2, '1999': 2, 'worksAtProject': 2})
+node: 5795
+Most important relations:Counter({'author': 4, 'isWorkedOnBy': 2, 'dealtWithIn': 2, 'member': 2, 'carriesOut': 1, 'phone': 1, 'fax': 1, 'name': 1, 'photo': 1, 'worksAtProject': 1, 'carriedOutBy': 1, 'projectInfo': 1, 'isAbout': 1, 'hasProject': 1})
+Least important relations:Counter({'publishes': 4, 'publication': 4, '1999': 2, 'isAbout': 2})
+node: 5753
+Most important relations:Counter({'isWorkedOnBy': 2, 'dealtWithIn': 2, 'member': 2, 'carriesOut': 1, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1, 'worksAtProject': 1, 'carriedOutBy': 1})
+Least important relations:Counter({'1999': 2, 'isAbout': 2})
+node: 5798
+Most important relations:Counter({'member': 1, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1})
+Least important relations:Counter({'1999': 2})
+node: 5854
+Most important relations:Counter({'author': 14, 'isWorkedOnBy': 11, 'isAbout': 8, 'member': 1, 'fax': 1, 'phone': 1, 'name': 1, 'photo': 1})
+Least important relations:Counter({'publishes': 14, 'publication': 14, 'isAbout': 10, '1999': 2})

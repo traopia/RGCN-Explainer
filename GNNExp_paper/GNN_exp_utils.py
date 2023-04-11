@@ -134,16 +134,31 @@ def adj_feat_grad(node_idx, pred_label_node, model , adj,x, ):
 
 
 
+# class Net(torch.nn.Module):
+#     def __init__(self,dataset):
+#         super().__init__()
+#         torch.manual_seed(1234567)
+#         self.conv1 = GCNConv(dataset.num_features, 16)
+#         self.conv2 = GCNConv(16, dataset.num_classes)
+
+#     def forward(self, x, adj):
+#         edge_index = adj.nonzero().t()
+#         x = F.relu(self.conv1(x, edge_index))
+#         x = F.dropout(x, training=self.training)
+#         x = self.conv2(x, edge_index)
+#         return F.log_softmax(x, dim=1), adj
+    
+    
 class Net(torch.nn.Module):
-    def __init__(self,dataset):
+    def __init__(self, input_dim, output_dim):
         super().__init__()
         torch.manual_seed(1234567)
-        self.conv1 = GCNConv(dataset.num_features, 16)
-        self.conv2 = GCNConv(16, dataset.num_classes)
+        self.conv1 = GCNConv(input_dim, 16)
+        self.conv2 = GCNConv(16, output_dim)
 
     def forward(self, x, adj):
         edge_index = adj.nonzero().t()
         x = F.relu(self.conv1(x, edge_index))
         x = F.dropout(x, training=self.training)
         x = self.conv2(x, edge_index)
-        return F.log_softmax(x, dim=1), adj
+        return F.log_softmax(x, dim=1), adj    
