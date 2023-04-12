@@ -1,0 +1,23 @@
+rgcn_torch.py:79: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  data.edge_type = torch.tensor(data.triples[:, 1])
+Cuda is available: True
+Selected device: cuda
+GPU memory occupied: 359 MB.
+Number of entities: 2420556
+Number of classes: 19
+Types of relations: 228
+tensor([  0,   3,   3,  ...,  10, 226, 227])
+tensor([192, 192, 192,  ...,  76,  76,  76])
+GPU memory occupied: 2482 MB.
+GPU memory occupied: 2482 MB.
+Epoch: 01, Loss: 4.0614, Train: 0.2789 Test: 0.0896
+Traceback (most recent call last):
+  File "rgcn_torch.py", line 138, in <module>
+    loss = train()
+  File "rgcn_torch.py", line 122, in train
+    loss.backward()
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/torch/_tensor.py", line 487, in backward
+    torch.autograd.backward(
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/torch/autograd/__init__.py", line 200, in backward
+    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 9.77 GiB (GPU 0; 23.65 GiB total capacity; 5.13 GiB already allocated; 891.56 MiB free; 22.03 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
