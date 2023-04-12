@@ -13,8 +13,54 @@ from kgbench import Data
 import torch
 torch.cuda.empty_cache()
 
+from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo
 
+def check_gpu_availability():
+    # Check if CUDA is available
+    print(f"Cuda is available: {torch.cuda.is_available()}")
 
+def getting_device(gpu_prefence=True) -> torch.device:
+    """
+    This function gets the torch device to be used for computations, 
+    based on the GPU preference specified by the user.
+    """
+    
+    # If GPU is preferred and available, set device to CUDA
+    if gpu_prefence and torch.cuda.is_available():
+        device = torch.device('cuda')
+    # If GPU is not preferred or not available, set device to CPU
+    else: 
+        device = torch.device("cpu")
+    
+    # Print the selected device
+    print(f"Selected device: {device}")
+    
+    # Return the device
+    return device
+
+# Define a function to print GPU memory utilization
+def print_gpu_utilization():
+    # Initialize the PyNVML library
+    nvmlInit()
+    # Get a handle to the first GPU in the system
+    handle = nvmlDeviceGetHandleByIndex(0)
+    # Get information about the memory usage on the GPU
+    info = nvmlDeviceGetMemoryInfo(handle)
+    # Print the GPU memory usage in MB
+    print(f"GPU memory occupied: {info.used//1024**2} MB.")
+
+# Define a function to print training summary information
+def print_summary(result):
+    # Print the total training time in seconds
+    print(f"Time: {result.metrics['train_runtime']:.2f}")
+    # Print the number of training samples processed per second
+    print(f"Samples/second: {result.metrics['train_samples_per_second']:.2f}")
+    # Print the GPU memory utilization
+    print_gpu_utilization()
+
+check_gpu_availability()
+device = getting_device(gpu_prefence=True)
+print_gpu_utilization()
 
 
 #data = kg.load('aifb', torch=True) 
@@ -65,8 +111,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #device = torch.device('cpu') if args.dataset == 'AM' else device
 model, data = Net().to(device), data.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
-
-
+print_gpu_utilization()
+torch.cuda.empty_cache()
+print_gpu_utilization()
 def train():
     model.train()
     optimizer.zero_grad()
