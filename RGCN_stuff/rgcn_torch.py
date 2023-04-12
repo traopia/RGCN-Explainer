@@ -7,34 +7,38 @@ import torch.nn.functional as F
 from torch_geometric.datasets import Entities
 from torch_geometric.nn import FastRGCNConv, RGCNConv
 from torch_geometric.utils import k_hop_subgraph
+import kgbench as kg
+from kgbench import Data
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', type=str, default='AIFB',
-                    choices=['AIFB', 'MUTAG', 'BGS', 'AM'])
-args = parser.parse_args()
 
-# Trade memory consumption for faster computation.
-if args.dataset in ['AIFB', 'MUTAG']:
-    RGCNConv = FastRGCNConv
 
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'data', 'Entities')
-dataset = Entities(path, args.dataset)
-data = dataset[0]
 
-# BGS and AM graphs are too big to process them in a full-batch fashion.
-# Since our model does only make use of a rather small receptive field, we
-# filter the graph to only contain the nodes that are at most 2-hop neighbors
-# away from any training/test node.
+data = kg.load('aifb', torch=True) 
+print(f'Number of entities: {data.num_entities}') #data.i2e
+print(f'Number of classes: {data.num_classes}')
+print(f'Types of relations: {data.num_relations}') #data.i2r
+data.triples
+idxt, clst = data.training[:, 0], data.training[:, 1]
+idxw, clsw = data.withheld[:, 0], data.withheld[:, 1]
+data.train_idx, data.train_y = idxt.long(), clst.long()
+data.test_idx, data.test_y = idxw.long(), clsw.long()
+data.edge_index = torch.stack((data.triples[:, 0], data.triples[:, 2]),dim=0)
+data.edge_type = torch.tensor(data.triples[:, 1])
+
+
 node_idx = torch.cat([data.train_idx, data.test_idx], dim=0)
 node_idx, edge_index, mapping, edge_mask = k_hop_subgraph(
     node_idx, 2, data.edge_index, relabel_nodes=True)
 
 data.num_nodes = node_idx.size(0)
 data.edge_index = edge_index
+print(data.edge_type)
 data.edge_type = data.edge_type[edge_mask]
+print(data.edge_type)
 data.train_idx = mapping[:data.train_idx.size(0)]
 data.test_idx = mapping[data.train_idx.size(0):]
 
+dataset = data
 
 class Net(torch.nn.Module):
     def __init__(self):
@@ -51,7 +55,7 @@ class Net(torch.nn.Module):
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu') if args.dataset == 'AM' else device
+#device = torch.device('cpu') if args.dataset == 'AM' else device
 model, data = Net().to(device), data.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
 
@@ -80,4 +84,4 @@ for epoch in range(1, 51):
     train_acc, test_acc = test()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Train: {train_acc:.4f} '
           f'Test: {test_acc:.4f}')
-torch.save(Net,'model_am_torch')
+torch.save(Net,'model_aifb_torch')
