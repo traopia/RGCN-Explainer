@@ -13,15 +13,18 @@ from kgbench import Data
 
 
 
-data = kg.load('aifb', torch=True) 
+#data = kg.load('aifb', torch=True) 
+data = torch.load("RGCN_stuff/IMDb_typePeople_data.pt")
 print(f'Number of entities: {data.num_entities}') #data.i2e
 print(f'Number of classes: {data.num_classes}')
 print(f'Types of relations: {data.num_relations}') #data.i2r
 data.triples
-idxt, clst = data.training[:, 0], data.training[:, 1]
-idxw, clsw = data.withheld[:, 0], data.withheld[:, 1]
+data.num_classes = 58
+idxt, clst = torch.Tensor(data.training[:, 0]), torch.Tensor(data.training[:, 1])
+idxw, clsw = torch.Tensor(data.withheld[:, 0]), torch.Tensor(data.withheld[:, 1])
 data.train_idx, data.train_y = idxt.long(), clst.long()
 data.test_idx, data.test_y = idxw.long(), clsw.long()
+data.triples = torch.tensor(data.triples)
 data.edge_index = torch.stack((data.triples[:, 0], data.triples[:, 2]),dim=0)
 data.edge_type = torch.tensor(data.triples[:, 1])
 
@@ -76,6 +79,7 @@ def test():
     pred = model(data.edge_index, data.edge_type).argmax(dim=-1)
     train_acc = float((pred[data.train_idx] == data.train_y).float().mean())
     test_acc = float((pred[data.test_idx] == data.test_y).float().mean())
+    torch.save(pred, 'pred_imdb_torch')
     return train_acc, test_acc
 
 
@@ -84,4 +88,4 @@ for epoch in range(1, 51):
     train_acc, test_acc = test()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Train: {train_acc:.4f} '
           f'Test: {test_acc:.4f}')
-torch.save(Net,'model_aifb_torch')
+torch.save(Net,'model_imdb_torch')
