@@ -18,7 +18,7 @@ torch.cuda.empty_cache()
 
 
 #data = kg.load('aifb', torch=True) 
-data = torch.load("RGCN_stuff/IMDb_typePeople_data.pt")
+data = torch.load("IMDb_typePeople_data.pt")
 print(f'Number of entities: {data.num_entities}') #data.i2e
 print(f'Number of classes: {data.num_classes}')
 print(f'Types of relations: {data.num_relations}') #data.i2r
