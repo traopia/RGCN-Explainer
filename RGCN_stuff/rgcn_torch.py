@@ -10,6 +10,10 @@ from torch_geometric.utils import k_hop_subgraph
 import kgbench as kg
 from kgbench import Data
 
+import torch
+torch.cuda.empty_cache()
+
+
 
 
 
