@@ -27,8 +27,7 @@ import networkx as nx
 
 #rgcn 
 from rgcn_model import adj, enrich, sum_sparse, RGCN
-from rgcn_explainer_utils import dict_index_classes, dict_triples_semantics, selected, visualize, find_n_hop_neighbors, match_to_classes, match_to_triples, edge_index_oneadj, get_relations, d_classes
-
+from rgcn_explainer_utils import *
 
 
 #Get adjacency matrix: in this context this is hor / ver graph
@@ -143,7 +142,7 @@ def loss_fc(edge_mask,  pred, pred_label,label, node_idx, epoch, print=False):
 
 
 class Explain(nn.Module):
-    def __init__(self, model, data, node_idx, n_hops):
+    def __init__(self, model, data, node_idx, n_hops,prune=True):
         super(Explain, self).__init__()
         #Those are the parameters of the original data and model
         self.model = model
@@ -154,7 +153,7 @@ class Explain(nn.Module):
         #self.triples = enrich(data.triples, self.n, self.r)
         self.triples = data.triples
         self.node_idx = node_idx
-        self.n_hops = n_hops
+        self.n_hops = 0 if prune else n_hops
         #self.adj = get_adjacency(data)
         self.edge_index = edge_index_oneadj(self.triples)
        
@@ -163,7 +162,7 @@ class Explain(nn.Module):
         self.epoch = 1
         self.hor_graph, self.ver_graph = hor_ver_graph(self.triples, self.n, self.r)
         #self.pred_label = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/prediction_aifb')
-        self.pred_label = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/prediction_aifb_final')
+        self.pred_label = torch.load('aifb_chk/prediction_aifb')
         self.sub_edges, self.neighbors, self.sub_edges_tensor = find_n_hop_neighbors(self.edge_index, n=self.n_hops, node=self.node_idx)
         self.sub_triples = match_to_triples(self.sub_edges_tensor.t(),self.triples)
         self.sub_hor_graph, self.sub_ver_graph = hor_ver_graph(self.sub_triples, self.n, self.r)
@@ -212,14 +211,14 @@ class Explain(nn.Module):
 
         ypred = self.model.forward2(masked_hor, masked_ver)
         #ypred = self.model.forward3(masked_ver)
-        # print('ypred',ypred[0])
+        print('ypred',ypred[0])
         # print('masked_ver', masked_ver)
         #print(len(self.neighbors))
         #print(self.edge_mask.shape)
         
         node_pred = ypred[self.node_idx, :]
         res = nn.Softmax(dim=0)(node_pred)
-        #print(res)
+        print(res)
         # torch.save(masked_hor,'masked_hor_forward')
         # torch.save(masked_ver,'masked_ver_forward')
   
@@ -257,7 +256,7 @@ def main(n_hops, threshold, train):
     high = []
     low = []
     relations = [data.i2rel[i][0] for i in range(len(data.i2rel))]
-    model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb_final')
+    model = torch.load('aifb_chk/model_aifb')
     #model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
     relations = ['label', 'node_idx'] + relations
     df = pd.DataFrame(columns=relations)
@@ -297,8 +296,8 @@ def main(n_hops, threshold, train):
                         "; pred: ",
                         ypred )
 
-                torch.save(masked_ver, f'aifb_chk/masked_adj_final/masked_ver{node_idx}')
-                torch.save(masked_hor, f'aifb_chk/masked_adj_final/masked_hor{node_idx}')
+                torch.save(masked_ver, f'aifb_chk/masked_adj/masked_ver{node_idx}')
+                torch.save(masked_hor, f'aifb_chk/masked_adj/masked_hor{node_idx}')
                 print('masked_ver', masked_ver)
 
             else:
@@ -326,13 +325,17 @@ def main(n_hops, threshold, train):
             h.update(info)
             df.loc[str(node_idx)] = h
 
-    df.to_csv('RGCN_stuff/Relations_Important_all_final.csv', index=False)    
+    df.to_csv('RGCN_stuff/Relations_Important_all.csv', index=False)    
 
 
 
-def main2(node_idx, n_hops, threshold, train):
+def main2(name, node_idx, n_hops, threshold, train, prune = True):
+    #name = 'aifb'
+    data = kg.load(name, torch=True)  
+    if prune:
+        data = prunee(data, 2)
 
-    data = kg.load('aifb', torch=True) 
+          
     print(f'Number of entities: {data.num_entities}') #data.i2e
     print(f'Number of classes: {data.num_classes}')
     print(f'Types of relations: {data.num_relations}') #data.i2r
@@ -340,8 +343,9 @@ def main2(node_idx, n_hops, threshold, train):
     get_relations(data)
     d_classes(data)
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
-    model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
+    model = torch.load(f'{name}_chk/model_{name}_prune_{prune}')
     if train:
+        print('train modality')
 
         #model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
 
@@ -377,12 +381,12 @@ def main2(node_idx, n_hops, threshold, train):
                 ypred )
             if epoch ==49:
                 print('masked_ver', masked_ver)
-                print('pred 99:', nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :]))
+                #print('pred 99:', nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :]))
                 
 
     else:
-        masked_ver = torch.load(f'aifb_chk/masked_adj/masked_ver{node_idx}')
-        masked_hor = torch.load(f'aifb_chk/masked_adj/masked_hor{node_idx}')
+        masked_ver = torch.load(f'{name}_chk/masked_adj/masked_ver{node_idx}')
+        masked_hor = torch.load(f'{name}_chk/masked_adj/masked_hor{node_idx}') 
     print('masked_ver', masked_ver)
     #h = visualize(node_idx, n_hops, data, masked_ver,threshold, result_weights=False, low_threshold=False)
     h = selected(masked_ver, threshold,data, low_threshold=False)
@@ -405,12 +409,11 @@ def main2(node_idx, n_hops, threshold, train):
     relations = ['label', 'node_idx'] + relations
     df = pd.DataFrame(columns=relations)
     h = dict(h)
-    #h = {'isWorkedOnBy': 11, 'author': 11, 'isAbout': 8, 'member': 2, 'dealtWithIn': 1, 'fax': 1, 'phone': 1, 'name': 1, 'homepage': 1, '1999': 1, 'photo': 1, 'projectInfo': 1, 'hasProject': 1}
     info = {'label':0, 'node_idx': str(node_idx)}
     h.update(info)
     df.loc[str(node_idx)] = h
 
-    df.to_csv(f'RGCN_stuff/Relations_Important_{node_idx}.csv', index=False)
+    df.to_csv(f'RGCN_stuff/Relations_Important_{name}_{node_idx}.csv', index=False)
     # dict_index = dict_index_classes(data,masked_ver)
 
     #CHECK RESULTS WITH SUB AND FULL GRAPH 
@@ -428,10 +431,10 @@ def main2(node_idx, n_hops, threshold, train):
     print('ypred full', res_full)
 
     #Prediciction with full graph but forward on only vertically stacked adjacency 
-    y_full3 = model.forward3(ver_graph)
-    node_pred_full3 = y_full3[0][node_idx, :]
-    res_full3 = nn.Softmax(dim=0)(node_pred_full3)
-    print('ypred full3', res_full3)
+    # y_full3 = model.forward3(ver_graph)
+    # node_pred_full3 = y_full3[0][node_idx, :]
+    # res_full3 = nn.Softmax(dim=0)(node_pred_full3)
+    # print('ypred full3', res_full3)
 
 
 
@@ -441,7 +444,7 @@ def main2(node_idx, n_hops, threshold, train):
     mislabeled, mislabeled_exp = [], []
     correct, correct_exp  = [], []
     for i in range(data.withheld.shape[0]):
-        if torch.load('aifb_chk/prediction_aifb').argmax(dim=1)[i] != data.withheld[i][1]:
+        if torch.load(f'{name}_chk/prediction_{name}_prune_{prune}').argmax(dim=1)[i] != data.withheld[i][1]:
             mislabeled.append(data.withheld[i][0])
         else:
             correct.append(data.withheld[i][0])
@@ -457,9 +460,9 @@ def main2(node_idx, n_hops, threshold, train):
 
 
 if __name__ == "__main__":
-    #main2(5757,0,0.5, train=True)
+    main2(name = 'aifb', node_idx = 5757, n_hops = 2,threshold = 0.5, train=True)
 
-    main(n_hops = 2,threshold = 0.5, train=True)
+    #main(n_hops = 2,threshold = 0.5, train=True)
 
 
 

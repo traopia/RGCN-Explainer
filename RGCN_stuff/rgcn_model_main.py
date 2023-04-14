@@ -12,109 +12,34 @@ from rgcn_model import RGCN
 
 import numpy as np
 
-def prune_f(data , n=2):
-    """
-    Prune a given dataset. That is, reduce the number of triples to an n-hop neighborhood around the labeled nodes. This
-    can save a lot of memory if the model being used is known to look only to a certain depth in the graph.
+from rgcn_explainer_utils import prunee
 
-    Note that switching between non-final and final mode will result in different pruned graphs.
-
-    :param data:
-    :return:
-    """
-
-    data_triples = data.triples
-    data_training = data.training
-    data_withheld = data.withheld
-
-    if data.torch:
-        data_triples = data_triples.numpy()
-        data_training = data_training.numpy()
-        data_withheld = data_withheld.numpy()
-
-    assert n >= 1
-
-    entities = set()
-
-    for e in data_training[:, 0]:
-        entities.add(e)
-    for e in data_withheld[:, 0]:
-        entities.add(e)
-
-    entities_add = set()
-    for _ in range(n):
-        for s, p, o in data_triples:
-            if s in entities:
-                entities_add.add(o)
-            if o in entities:
-                entities_add.add(s)
-        entities.update(entities_add)
-
-    # new index to old index
-    n2o = list(entities)
-    o2n = {o: n for n, o in enumerate(entities)}
-
-    nw = data
-
-    nw.num_entities = len(n2o)
-    nw.num_relations = data.num_relations
-
-    nw.i2e = [data.i2e[n2o[i]] for i in range(len(n2o))]
-    nw.e2i = {e: i for i, e in enumerate(nw.i2e)}
-
-    # relations are unchanged, but copied for the sake of GC
-    nw.i2r = list(data.i2r)
-    nw.r2i = dict(data.r2i)
-
-    # count the new number of triples
-    num = 0
-    for s, p, o in data_triples:
-        if s in entities and o in entities:
-            num += 1
-
-    nw.triples = np.zeros((num, 3), dtype=int)
-
-    row = 0
-    for s, p, o in data_triples:
-        if s in entities and o in entities:
-            s, o =  o2n[s], o2n[o]
-            nw.triples[row, :] = (s, p, o)
-            row += 1
-
-    nw.training = data_training.copy()
-    for i in range(nw.training.shape[0]):
-        nw.training[i, 0] = o2n[nw.training[i, 0]]
-
-    nw.withheld = data_withheld.copy()
-    for i in range(nw.withheld.shape[0]):
-        nw.withheld[i, 0] = o2n[nw.withheld[i, 0]]
-
-    nw.num_classes = data.num_classes
-
-    nw.final = data.final
-    nw.torch = data.torch
-    if nw.torch:  # this should be constant-time/memory
-        nw.triples = torch.from_numpy(nw.triples)
-        nw.training = torch.from_numpy(nw.training)
-        nw.withheld = torch.from_numpy(nw.withheld)
-
-    return nw
-
-def go(name='IMDb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=True):
+def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=True):
 
     include_val = name in ('aifb','mutag','bgs','am', 'IMDb')
     # -- For these datasets, the validation is added to the training for the final eval.
 
     
     if name == 'IMDb':
+        
         data = torch.load('IMDb_typePeople_data.pt')
-        data = prune_f(data, n=2)
+        data.training = data.training_people
+        data.withheld = data.withheld_people
+        if prune:
+            data = prunee(data, n=2)
+
     else:
-        data = load(name, torch=True, prune_dist=2 if prune else None, final=final, include_val=include_val)    
+
+        data = load(name, torch=True)   
+        if prune:
+            data = prunee(data, n=2)
+
 
     #print(f'{data.triples.size(0)} triples')
     print(f'{data.triples.shape[0]} triples ')
     print(f'{data.num_entities} entities')
+    if prune:
+        print(f'{data.num_entities_new} entities after pruning')
     print(f'{data.num_relations} relations')
     data.triples = torch.tensor(data.triples, dtype=torch.int32)[:8285]
 
@@ -200,9 +125,10 @@ def go(name='IMDb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='a
 
         if not os.path.exists(f'{name}_chk'):
             os.makedirs(f'{name}_chk')
-        torch.save(out[idxw, :], f'{name}_chk/prediction_{name}')
+        
+        torch.save(out[idxw, :], f'{name}_chk/prediction_{name}_prune_{prune}')
         #torch.save(rgcn,'aifb_chk/model_aifb')
-        torch.save(rgcn, f'{name}_chk/model_{name}')
+        torch.save(rgcn, f'{name}_chk/model_{name}_prune_{prune}')
         print(f'epoch {e:02}: loss {loss:.2}, train acc {training_acc:.2}, \t withheld acc {withheld_acc:.2} \t ({toc():.5}s)')
 
 

@@ -3,7 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import torch
 from collections import Counter
-
+from kgbench import load, tic, toc, d, Data
 
 def dict_index_classes(data, masked_ver):
     indices_nodes = masked_ver.coalesce().indices().detach().numpy()
@@ -164,6 +164,7 @@ def match_to_triples(tensor1, tensor2):
         for j,j1,j2, index in zip(tensor2[:,0],tensor2[:,1],  tensor2[:,2], range(len(tensor2[:,0]))):
             if i == j and i2 == j2:
                 matching.append(tensor2[index])
+                
 
     result = torch.stack(matching)
     return result
@@ -359,3 +360,97 @@ def d_classes(data):
             c+=1
     data.entities_classes = d
     return d    
+
+
+
+
+
+def prunee(data , n=2):
+    """
+    Prune a given dataset. That is, reduce the number of triples to an n-hop neighborhood around the labeled nodes. This
+    can save a lot of memory if the model being used is known to look only to a certain depth in the graph.
+
+    Note that switching between non-final and final mode will result in different pruned graphs.
+
+    :param data:
+    :return:
+    """
+
+    data_triples = data.triples
+    data_training = data.training
+    data_withheld = data.withheld
+
+    if data.torch:
+        data_triples = data_triples.numpy()
+        data_training = data_training.numpy()
+        data_withheld = data_withheld.numpy()
+
+    assert n >= 1
+
+    entities = set()
+
+    for e in data_training[:, 0]:
+        entities.add(e)
+    for e in data_withheld[:, 0]:
+        entities.add(e)
+
+    entities_add = set()
+    for _ in range(n):
+        for s, p, o in data_triples:
+            if s in entities:
+                entities_add.add(o)
+            if o in entities:
+                entities_add.add(s)
+        entities.update(entities_add)
+    #print(entities)
+    # new index to old index
+    n2o = list(entities)
+    o2n = {o: n for n, o in enumerate(entities)}
+
+    nw = Data(dir=None)
+    nw.num_entities_new = len(n2o)
+    nw.num_entities = data.num_entities
+    nw.num_relations = data.num_relations
+    nw.i2e = data.i2e
+    nw.e2i = data.e2i
+    #nw.i2e = [data.i2e[i] for i in range(len(n2o))] #[data.i2e[n2o[i]] for i in range(len(n2o))]
+    #nw.e2i = {e: i for i, e in enumerate(nw.i2e)}
+
+    # relations are unchanged, but copied for the sake of GC
+    nw.i2r = list(data.i2r)
+    nw.r2i = dict(data.r2i)
+
+    # count the new number of triples
+    num = 0
+    for s, p, o in data_triples:
+        if s in entities and o in entities:
+            num += 1
+
+    nw.triples = np.zeros((num, 3), dtype=int)
+
+    row = 0
+    for s, p, o in data_triples:
+        if s in entities and o in entities:
+            #s, o =  o2n[s], o2n[o]
+            s,o = s,o
+            nw.triples[row, :] = (s, p, o)
+            row += 1
+
+    nw.training = data_training.copy()
+    for i in range(nw.training.shape[0]):
+        nw.training[i, 0] = nw.training[i, 0] #o2n[nw.training[i, 0]]
+
+    nw.withheld = data_withheld.copy()
+    for i in range(nw.withheld.shape[0]):
+        nw.withheld[i, 0] = nw.withheld[i, 0] #o2n[nw.withheld[i, 0]]
+
+    nw.num_classes = data.num_classes
+
+    nw.final = data.final
+    nw.torch = data.torch
+    if nw.torch:  # this should be constant-time/memory
+        nw.triples = torch.from_numpy(nw.triples)
+        nw.training = torch.from_numpy(nw.training)
+        nw.withheld = torch.from_numpy(nw.withheld)
+
+    return nw
