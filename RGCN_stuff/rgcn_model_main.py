@@ -8,13 +8,14 @@ import math
 import os
 from kgbench import load, tic, toc, d, Data
 from rgcn_model import RGCN
+from gpu_functions import *
 
 
 import numpy as np
 
 from rgcn_explainer_utils import prunee
 
-def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=True):
+def go(name='IMDb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=True):
 
     include_val = name in ('aifb','mutag','bgs','am', 'IMDb')
     # -- For these datasets, the validation is added to the training for the final eval.
@@ -41,7 +42,7 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='a
     if prune:
         print(f'{data.num_entities_new} entities after pruning')
     print(f'{data.num_relations} relations')
-    data.triples = torch.tensor(data.triples, dtype=torch.int32)[:8285]
+    data.triples = torch.tensor(data.triples, dtype=torch.int32)
 
     tic()
     rgcn = RGCN(data.triples, n=data.num_entities, r=data.num_relations, numcls=data.num_classes, emb=emb, bases=bases)
@@ -52,6 +53,7 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='a
 
         data.training = data.training.cuda()
         data.withheld = data.withheld.cuda()
+        clean_gpu()
 
     print(f'construct: {toc():.5}s')
 
