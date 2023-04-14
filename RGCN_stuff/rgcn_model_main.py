@@ -12,7 +12,7 @@ from rgcn_model import RGCN
 
 import numpy as np
 
-def prune(data , n=2):
+def prune_f(data , n=2):
     """
     Prune a given dataset. That is, reduce the number of triples to an n-hop neighborhood around the labeled nodes. This
     can save a lot of memory if the model being used is known to look only to a certain depth in the graph.
@@ -100,7 +100,7 @@ def prune(data , n=2):
 
     return nw
 
-def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=True):
+def go(name='IMDb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=True):
 
     include_val = name in ('aifb','mutag','bgs','am', 'IMDb')
     # -- For these datasets, the validation is added to the training for the final eval.
@@ -108,7 +108,7 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='a
     
     if name == 'IMDb':
         data = torch.load('IMDb_typePeople_data.pt')
-        data = prune(data, n=2)
+        data = prune_f(data, n=2)
     else:
         data = load(name, torch=True, prune_dist=2 if prune else None, final=final, include_val=include_val)    
 
