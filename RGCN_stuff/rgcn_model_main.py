@@ -65,6 +65,7 @@ def go(name='am', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='ada
         raise Exception(f'Optimizer {optimizer} not known')
 
     for e in range(epochs):
+        clean_gpu()
         tic()
         opt.zero_grad()
         out = rgcn()
@@ -95,6 +96,7 @@ def go(name='am', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='ada
             #torch.save(out[idxw, :].argmax(dim=1) , 'aifb_chk/prediction_aifb')
         loss.backward()
         opt.step()
+        clean_gpu()
 
         if printnorms is not None:
             # Print relation norms layer 1
