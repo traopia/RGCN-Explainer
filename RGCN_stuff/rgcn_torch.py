@@ -9,6 +9,7 @@ from torch_geometric.nn import FastRGCNConv, RGCNConv
 from torch_geometric.utils import k_hop_subgraph
 import kgbench as kg
 from kgbench import Data
+from gpu_functions import *
 
 import torch
 torch.cuda.empty_cache()
@@ -96,7 +97,7 @@ data.train_idx = mapping[:data.train_idx.size(0)]
 data.test_idx = mapping[data.train_idx.size(0):]
 
 dataset = data
-
+clean_gpu()
 class Net(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -112,12 +113,13 @@ class Net(torch.nn.Module):
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+clean_gpu()
 #device = torch.device('cpu') if args.dataset == 'AM' else device
 model, data = Net().to(device), data.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
-#print_gpu_utilization()
+print_gpu_utilization()
 torch.cuda.empty_cache()
-#print_gpu_utilization()
+print_gpu_utilization()
 def train():
     model.train()
     optimizer.zero_grad()
@@ -127,7 +129,7 @@ def train():
     optimizer.step()
     return float(loss)
 
-
+clean_gpu()
 @torch.no_grad()
 def test():
     model.eval()
@@ -144,3 +146,4 @@ for epoch in range(1, 51):
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Train: {train_acc:.4f} '
           f'Test: {test_acc:.4f}')
 torch.save(Net,'model_imdb_torch')
+clean_gpu()
