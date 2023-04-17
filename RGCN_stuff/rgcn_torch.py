@@ -13,6 +13,8 @@ from kgbench import Data
 import torch
 torch.cuda.empty_cache()
 
+from rgcn_explainer_utils import prunee
+
 from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo
 
 def check_gpu_availability():
@@ -49,7 +51,7 @@ def print_gpu_utilization():
     # Print the GPU memory usage in MB
     print(f"GPU memory occupied: {info.used//1024**2} MB.")
 
-# Define a function to print training summary information
+# # Define a function to print training summary information
 def print_summary(result):
     # Print the total training time in seconds
     print(f"Time: {result.metrics['train_runtime']:.2f}")
@@ -63,8 +65,10 @@ device = getting_device(gpu_prefence=True)
 print_gpu_utilization()
 
 
-#data = kg.load('aifb', torch=True) 
-data = torch.load("IMDb_typePeople_data.pt")
+#data = kg.load('am', torch=True) 
+data = torch.load('IMDb_typePeople_data.pt')
+data = prunee(data, n=2)
+#data = torch.load("IMDb_typePeople_data.pt")
 print(f'Number of entities: {data.num_entities}') #data.i2e
 print(f'Number of classes: {data.num_classes}')
 print(f'Types of relations: {data.num_relations}') #data.i2r
@@ -111,9 +115,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #device = torch.device('cpu') if args.dataset == 'AM' else device
 model, data = Net().to(device), data.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
-print_gpu_utilization()
+#print_gpu_utilization()
 torch.cuda.empty_cache()
-print_gpu_utilization()
+#print_gpu_utilization()
 def train():
     model.train()
     optimizer.zero_grad()
