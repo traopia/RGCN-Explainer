@@ -1,5 +1,7 @@
 from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo
 import torch 
+import torch.cuda as cuda
+import gc
 
 # define utils functions to facilitate gpu 
 
