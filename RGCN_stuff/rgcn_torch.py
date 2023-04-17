@@ -145,5 +145,6 @@ for epoch in range(1, 51):
     train_acc, test_acc = test()
     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Train: {train_acc:.4f} '
           f'Test: {test_acc:.4f}')
+    clean_gpu()
 torch.save(Net,'model_imdb_torch')
 clean_gpu()
