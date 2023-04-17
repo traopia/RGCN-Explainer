@@ -69,8 +69,9 @@ print_gpu_utilization()
 data = kg.load('am', torch=True) 
 #data = torch.load('IMDb_typePeople_data.pt')
 data = prunee(data, n=2)
-data.training = data.training_people
-data.withheld = data.withheld_people
+
+# data.training = data.training_people
+# data.withheld = data.withheld_people
 #data = torch.load("IMDb_typePeople_data.pt")
 print(f'Number of entities: {data.num_entities}') #data.i2e
 print(f'Number of classes: {data.num_classes}')
