@@ -1,7 +1,7 @@
 # RGCN-Explainer
 The idea is to extend GNNExplainer for relational graphs. 
 
-- GNNExp_paper folder: Run GNN_exp.py 
+- python3 RGCN_stuff/r.py
 
 
 PROBLEMS: 

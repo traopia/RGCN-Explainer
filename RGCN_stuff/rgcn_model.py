@@ -109,7 +109,7 @@ class RGCN(nn.Module):
     Classic RGCN
     """
 
-    def __init__(self, triples, n, r, numcls, emb=16, bases=None):
+    def __init__(self, triples, n, r, numcls, emb=16, bases=None, Explain = None):
 
         super().__init__()
 
@@ -128,7 +128,10 @@ class RGCN(nn.Module):
         r = rn // n #number of relations enriched divided by number of nodes
 
         vals = torch.ones(ver_ind.size(0), dtype=torch.float) #number of enriched triples
-        vals = vals / sum_sparse(ver_ind, vals, ver_size) #normalize the values by the number of edges
+        if Explain != None:
+            vals = Explain
+
+        #vals = vals / sum_sparse(ver_ind, vals, ver_size) #normalize the values by the number of edges
 
         hor_graph = torch.sparse.FloatTensor(indices=hor_ind.t(), values=vals, size=hor_size) #size: n,r, emb
         
@@ -168,6 +171,7 @@ class RGCN(nn.Module):
         self.bias1 = nn.Parameter(torch.FloatTensor(emb).zero_())
         self.bias2 = nn.Parameter(torch.FloatTensor(numcls).zero_())
 
+
     def forward2(self, hor_graph, ver_graph):
 
 
@@ -188,7 +192,8 @@ class RGCN(nn.Module):
 
         # Apply weights and sum over relations
         #hidden layer
-        h = torch.mm(hor_graph, weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
+
+        h = torch.sparse.mm(hor_graph, weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
         assert h.size() == (n, e)
 
         h = F.relu(h + self.bias1) #apply non linearity and add bias
@@ -196,7 +201,7 @@ class RGCN(nn.Module):
         ## Layer 2
 
         # Multiply adjacencies by hidden
-        h = torch.mm(ver_graph, h) # sparse mm
+        h = torch.sparse.mm(ver_graph, h) # sparse mm
         h = h.view(r, n, e) # new dim for the relations
 
         if self.bases2 is not None:
@@ -213,97 +218,6 @@ class RGCN(nn.Module):
 
         return h + self.bias2
     
-    def forward3(self, hor_graph, ver_graph):
-
-
-        ## Layer 1
-
-        n, rn = hor_graph.size() #horizontally stacked adjacency matrix size
-        r = rn // n
-        e = self.emb
-        b, c = self.bases, self.numcls
-
-        if self.bases1 is not None:
-            # weights = torch.einsum('rb, bij -> rij', self.comps1, self.bases1)
-            weights = torch.mm(self.comps1, self.bases1.view(b, n*e)).view(r, n, e)
-        else:
-            weights = self.weights1
-
-        assert weights.size() == (r, n, e) #r relations, n nodes, e embedding size
-
-        # Apply weights and sum over relations
-        #hidden layer
-        h = torch.mm(hor_graph, weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
-        assert h.size() == (n, e)
-
-        h = F.relu(h + self.bias1) #apply non linearity and add bias
-
-        ## Layer 2
-
-        # Multiply adjacencies by hidden
-        h = torch.mm(ver_graph, h) # sparse mm
-        h = h.view(r, n, e) # new dim for the relations
-
-        if self.bases2 is not None:
-            # weights = torch.einsum('rb, bij -> rij', self.comps2, self.bases2)
-            weights = torch.mm(self.comps2, self.bases2.view(b, e * c)).view(r, e, c)
-        else:
-            weights = self.weights2
-
-        # Apply weights, sum over relations
-        # h = torch.einsum('rhc, rnh -> nc', weights, h)
-        h = torch.bmm(h, weights).sum(dim=0)
-
-        assert h.size() == (n, c)
-
-        return h + self.bias2, hor_graph, ver_graph # -- softmax is applied in the loss
-    
-    def forward3(self, ver_graph, data = None):
-        n, rn = ver_graph.t().size() #horizontally stacked adjacency matrix size
-        r = rn // n
-        e = self.emb
-        b, c = self.bases, self.numcls
-
-        if self.bases1 is not None:
-            # weights = torch.einsum('rb, bij -> rij', self.comps1, self.bases1)
-            weights = torch.mm(self.comps1, self.bases1.view(b, n*e)).view(r, n, e)
-        else:
-            weights = self.weights1
-
-        assert weights.size() == (r, n, e) #r relations, n nodes, e embedding size
-
-        # Apply weights and sum over relations
-        #hidden layer
-        h = torch.mm(ver_graph.t(), weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
-        assert h.size() == (n, e)
-
-        h = F.relu(h + self.bias1) #apply non linearity and add bias
-
-        ## Layer 2
-
-        # Multiply adjacencies by hidden
-        h = torch.mm(ver_graph, h) # sparse mm
-        h = h.view(r, n, e) # new dim for the relations
-
-        if self.bases2 is not None:
-            # weights = torch.einsum('rb, bij -> rij', self.comps2, self.bases2)
-            weights = torch.mm(self.comps2, self.bases2.view(b, e * c)).view(r, e, c)
-        else:
-            weights = self.weights2
-
-        # Apply weights, sum over relations
-        # h = torch.einsum('rhc, rnh -> nc', weights, h)
-        h = torch.bmm(h, weights).sum(dim=0)
-
-        assert h.size() == (n, c)
-
-        return h + self.bias2,  ver_graph # -- softmax is applied in the loss
-
-
-
-
-
-
 
 
     def forward(self):

@@ -1,3 +1,5 @@
 neighbors/
 RGCN_stuff/IMDb_typePeople_data.pt
 data
+datasets-conversion
+chk

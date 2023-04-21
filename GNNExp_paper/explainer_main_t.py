@@ -119,9 +119,9 @@ class Explainer:
         return node_idx_new, sub_adj, sub_feat, sub_label, neighbors
 
     def explain(self, node_idx):
-        print("node label:", self.label[node_idx])
+        #print("node label:", self.label[node_idx])
         node_idx_new, sub_adj, sub_feat, sub_label, neighbors = self.extract_neighborhood()
-        print("neigh graph idx: ", self, node_idx, node_idx_new)
+        #print("neigh graph idx: ", self, node_idx, node_idx_new)
 
         sub_adj = np.expand_dims(sub_adj, axis=0)
         sub_feat = np.expand_dims(sub_feat, axis=0)
@@ -129,7 +129,7 @@ class Explainer:
         x = torch.tensor(sub_feat, requires_grad=True, dtype=torch.float)
         label = torch.tensor(sub_label, dtype=torch.long)
         pred_label = np.argmax(self.pred[neighbors], axis=1)
-        print("Node predicted label: ", pred_label[node_idx_new])
+        #print("Node predicted label: ", pred_label[node_idx_new])
 
         # Explainer model whose parameters are to be learned
         explainer = ExplainModule(
@@ -181,8 +181,8 @@ class Explainer:
                 # )
         print('Finished Training')
 
-        masked_adj = (explainer.masked_adj[0].cpu().detach().numpy() * sub_adj.squeeze())
-
+        #masked_adj = (explainer.masked_adj[0].cpu().detach().numpy() * sub_adj.squeeze())
+        masked_adj = explainer.masked_adj[0].cpu().detach().numpy()
         # adj_atts = torch.sigmoid(adj_atts).squeeze()
         # masked_adj = adj_atts.cpu().detach().numpy() * sub_adj.squeeze()
         # torch.save(masked_adj, 'cora_chk/masked_adj')
@@ -212,7 +212,7 @@ class ExplainModule(nn.Module):
         self.optimizer = torch.optim.Adam(params, lr=0.1)
 
         self.coeffs = {
-            "size": 0.005,  # 0.005,
+            "size": 0.01 , # 0.005,
             "feat_size": 1.0,
             "ent": 1.0,
             "feat_ent": 0.1,
@@ -234,7 +234,7 @@ class ExplainModule(nn.Module):
                 nn.init.constant_(mask, 0.0)
         return mask
 
-    def construct_edge_mask(self, num_nodes, init_strategy="normal", const_val=1.0):
+    def construct_edge_mask(self, num_nodes, init_strategy="const", const_val=1.0):
         """
         Construct edge mask
         """
@@ -259,7 +259,10 @@ class ExplainModule(nn.Module):
 
         sym_mask = (sym_mask + sym_mask.t()) / 2
         adj = self.adj
+        print('adj', adj)
+        print('sym_mask', sym_mask.shape)
         masked_adj = adj * sym_mask
+        print('masked_adj', masked_adj.shape)
         return masked_adj * self.diag_mask
 
     def mask_density(self):
@@ -281,9 +284,11 @@ class ExplainModule(nn.Module):
         # print(self.masked_adj.shape)
         ypred, adj_att = self.model(x, self.masked_adj)
         # print(self.mask)
+        print('ypred:', ypred)
         node_pred = ypred[0][node_idx, :]
         res = nn.Softmax(dim=0)(node_pred)
-        print('adj here:', adj_att.to_sparse())
+        
+        #print('adj here:', adj_att.to_sparse())
         # torch.save(adj_att, 'cora_chk/adj_att')
         print('res:', res)
         return res, adj_att
@@ -330,7 +335,7 @@ class ExplainModule(nn.Module):
         # size loss
         mask = self.mask
         # print('mask', mask)
-        print('gradient of the mask:', mask.grad)  # None at the beginning
+        #print('gradient of the mask:', mask.grad)  # None at the beginning
 
         mask = torch.sigmoid(self.mask)  # sigmoid of the mask
 
@@ -548,6 +553,23 @@ def arg_parse():
     return parser.parse_args()
 
 from torch_geometric.data import Data
+
+
+
+def sub_sparse_tensor(sparse_tensor, threshold, low_threshold=False):
+    if low_threshold:
+        nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() < threshold]
+        nonzero_indices[0] = nonzero_indices[0]
+        nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() < threshold]
+        sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)
+    else:
+        nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() > threshold]
+        nonzero_indices[0] = nonzero_indices[0]
+        nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() > threshold]
+        sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)    
+    return sel_masked_ver
+
+
 def main():
     # dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
     # print(f'Number of graphs: {len(dataset)}')
@@ -618,20 +640,25 @@ def main():
     # # print('mislabeled', mislabeled)    
     # # print('correct',correct)
     # torch.save(correct, 'cora_chk/correct')
-    print('masked_adj', torch.Tensor(masked_adj).to_sparse())
-    print('masked_adj', type(masked_adj))
+
+
+    #print('masked_adj', torch.Tensor(masked_adj).to_sparse())
+    #print('masked_adj', type(masked_adj))
 
     masked_adj = torch.Tensor(masked_adj)
 
     masked_adj = torch.Tensor(masked_adj.reshape(1, masked_adj.shape[0], masked_adj.shape[0]))
     data.x = data.x[neighbors,:]
     data.x = torch.Tensor(data.x.reshape(1, data.x.shape[0], data.x.shape[1]))
-    print('data.x', data.x.shape)
-    print('masked_adj', masked_adj.shape)
-    print('masked_adj', masked_adj.to_sparse())
-    print('sub_adj', torch.Tensor(sub_adj).to_sparse())
+    #print('data.x', data.x.shape)
+    #print('masked_adj', masked_adj.shape)
+    #print('masked_adj', masked_adj.to_sparse())
+    #print('sub_adj', torch.Tensor(sub_adj).to_sparse())
     sub_adj = torch.Tensor(sub_adj).reshape(1, masked_adj.shape[1], masked_adj.shape[1])
-    print('sub_adj', sub_adj.shape)
+    #print('sub_adj', sub_adj.shape)
+
+    sel = sub_sparse_tensor(masked_adj.to_sparse(), 0.5, low_threshold=False)
+    print('sel',sel)
     ypred = model(data.x, masked_adj)
     yp = model(data.x, sub_adj)
     
