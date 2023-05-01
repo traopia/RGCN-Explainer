@@ -48,7 +48,7 @@ def hor_ver_graph(triples, n, r):
     #number of relations is 2*r+1 because we added the inverse and self loop
 
     _, rn = hor_size #horizontally stacked adjacency matrix size
-    #print(hor_size)
+
     r = rn // n #number of relations enriched divided by number of nodes
 
     vals = torch.ones(ver_ind.size(0), dtype=torch.float) #number of enriched triples
@@ -104,7 +104,7 @@ class Explain(nn.Module):
         self.sub_edges, self.neighbors, self.sub_edges_tensor = find_n_hop_neighbors(self.edge_index, n=self.n_hops, node=self.node_idx)
         self.sub_triples = match_to_triples(self.sub_edges_tensor.t(),self.triples)
         self.sub_hor_graph, self.sub_ver_graph = hor_ver_graph(self.sub_triples, self.n, self.r)
-        #print(self.sub_hor_graph)
+
 
         self.num_nodes = self.sub_hor_graph.coalesce().values().shape[0]   
         print(self.num_nodes)
@@ -124,10 +124,9 @@ class Explain(nn.Module):
         
         sym_mask = (sym_mask + sym_mask.t()) / 2
         adj = torch.tensor(adj)
-    
-        #print('adj',adj)
+
         masked_adj = adj * sym_mask
-        #print('masked',masked_adj, masked_adj.shape)
+
         result = torch.sparse_coo_tensor(indices=sub_graph.coalesce().indices(), values= masked_adj, size=sub_graph.coalesce().size())
 
         return result
@@ -212,72 +211,108 @@ class Explain(nn.Module):
         if self.pyg_torch:
             ypred = self.model.forward(self.masked_hor.coalesce().indices(), self.masked_hor.coalesce().values())
         ypred = self.model.forward2(self.masked_hor, self.masked_ver)
-        print(ypred)
         
-        #ypred = self.model.forward3(masked_ver)
-        #print('ypred',ypred[0])
-        # print('masked_ver', masked_ver)
-        #print(len(self.neighbors))
-        #print(self.edge_mask.shape)
         name = self.name
         node_pred = ypred[self.node_idx, :]
         res = nn.Softmax(dim=0)(node_pred)
-        #print(res)
-        # if not os.path.exists(f'{name}_chk/masked_adj'):
-        #     os.makedirs(f'{name}_chk/masked_adj')        
-        # torch.save(masked_ver, f'{name}_chk/masked_adj/masked_ver{self.node_idx}')
-        # torch.save(masked_hor, f'{name}_chk/masked_adj/masked_hor{self.node_idx}')   
 
   
         return res, self.masked_hor, self.masked_ver
+
+    def variance_loss(self, mask):
+        std = torch.std(mask)
+        mse = torch.mean((std - 1)**2)
+        return mse
     
-    # def loss_fc(self, pred, pred_label, node_idx, epoch, grid_coeff):
+    def size_var_loss(self, mask):
+        "Computes the variance of the mask and promuoves it"
+        mask_without_small = mask[mask > 0.5]
+        if len(mask_without_small) < len(mask):
+            size_loss = 10*  torch.var(mask_without_small)
+        else:    
+            size_loss =  torch.var(mask_without_small)
+        #size_loss_f = torch.mean((size_loss - 1)**2) 
+        return size_loss
+
+
+    def target_label(self,node_idx):
+        pass
+
+    
+
+
+    # def loss_fc(self, pred, pred_label, node_idx, epoch, grid_coeff, size, size_num):
     #     """
     #     Args:
-    #         pred: y_e :  prediction made by current model
-    #         pred_label: y_hat : the label predicted by the original model.
+    #         pred: prediction made by current model
+    #         pred_label: the label predicted by the original model.
     #     """
-    #     size_num = grid_coeff['size_num']
-    #     size = grid_coeff['size']
+    #     budget = 1
+    #     lambda_reg = 0.1
+    #     mask = self.mask
+    #     mask = torch.sigmoid(self.mask)  # sigmoid of the mask- because of the normal initialization of the mask some values are > 1 or < 0
+    #     print(mask)
+    #     self.num_high = len(mask[mask > 0.5])#len([i for i in mask if i > 0.5])
 
-    #     #PRED LOSS
-    #     #pred_label_node = pred_label[node_idx] #pred label is the prediction made by the original model
+    #     #Prediction loss
     #     gt_label_node = self.label[node_idx]
+    #     logit = pred[gt_label_node]
+    #     pred_loss =  -torch.log(logit) * grid_coeff["pred"]
 
-    #     logit = pred[gt_label_node] #pred is the prediction made by the current model
+    #     #Size loss (as defined in the paper + budget)
+    #     #size_loss_1 = -size * torch.relu((torch.sum(self.mask)- budget)  )  #size * torch.sum(mask)
 
-    #     pred_loss = -torch.log(logit) #this is basically taking the cross entropy loss
-    #     print(pred_loss) #compare how big compared to other losses 
+    #     #Size loss to maximize the mask variance
+    #     #size_loss_2 = size * self.size_var_loss(mask)
+    #     mask_without_small = mask[mask > 0.5]
+    #     if len(mask_without_small) < len(mask):
+    #         size_loss_2 = 1000* size*  torch.var(mask_without_small)
+    #     else:    
+    #         size_loss_2 =  size *torch.var(mask_without_small)
 
-    #     # MASK SIZE EDGE LOSS
-        
-    #     mask = self.edge_mask
-    #     #print('gradient of the mask:', mask)
-    #     mask = torch.sigmoid(self.edge_mask)
-       
+    #     #Size loss using budget
+    #     size_loss_3 = size * self.variance_loss(mask)
 
-    #     size_loss = 10 * torch.sum(mask)
+    #     #Size loss to minimize the number of edges
+    #     print("num_high", self.num_high)
+    #     size_num_loss = size_num * self.num_high/len(mask)
+    #     #size_num_loss = size_num * (len(mask) - self.num_high / 2) ** 2
+    #     #size_num_loss = - size_num_loss * num_high
+
+    #     loss_reg = lambda_reg * torch.norm(mask, p=1)
 
 
 
-    #     # EDGE MASK ENTROPY LOSS
+
+
+    #     # entropy edge mask 
     #     mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
-    #     mask_ent_loss = 5 * torch.mean(mask_ent)
-        
+    #     mask_ent_loss = grid_coeff["ent"] * torch.mean(mask_ent)
+    #     # scale=0.99
+    #     # mask = self.mask*(2*scale-1.0)+(1.0-scale)
+    #     # mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
+    #     # mask_ent_loss = grid_coeff["ent"] * torch.mean(mask_ent)
 
-    #     # D = torch.diag(torch.sum(self.masked_ver[0], 0))
-    #     # m_adj = self.masked_ver
+
+    #     # laplacian loss
+    #     # D = torch.diag(torch.sum(self.masked_adj[0], 0))
+    #     # m_adj = self.masked_adj
     #     # L = D - m_adj
 
     #     # pred_label_t = torch.tensor(pred_label, dtype=torch.float)
 
-    #     # lap_loss = (1 * (pred_label_t @ L @ pred_label_t) / self.masked_ver.numel())
+    #     # lap_loss = (self.coeffs["lap"] * (pred_label_t @ L @ pred_label_t) / self.masked_adj())
 
-    #     loss = pred_loss + size_loss  + mask_ent_loss #+ lap_loss # + feat_size_loss + lap_loss
+    #     #loss = pred_loss + size_loss + size_num_loss + size_loss_2 #+ mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
+    #     loss = pred_loss  +  size_loss_2 + size_loss_3 + size_num_loss + loss_reg 
+    #     print('pred_loss', pred_loss)
+    #     print('size_loss',  size_loss_2, size_loss_3)
+    #     print('size_num_loss', size_num_loss)
+    #     print('loss_reg', loss_reg)
+
 
     #     return loss
     
-
     def loss_fc(self, pred, pred_label, node_idx, epoch, grid_coeff, size, size_num):
         """
         Args:
@@ -313,13 +348,18 @@ class Explain(nn.Module):
         if len(mask_without_small) < len(mask):
 
             size_loss = 1000* size * torch.var(mask_without_small)
+            loss_reg = 0.5 * torch.norm(mask_without_small, p=1)
+            size_loss = size_loss + loss_reg
         else:    
-            size_loss = size * torch.var(mask_without_small)
+            size_loss = size * torch.var(mask_without_small) + 0.1 * torch.norm(mask_without_small, p=1)
+
         #size_loss = self.size_loss_f(mask, self.coeffs)
 
         num_high = len([i for i in mask if i > 0.5])
+        print('num_high', num_high)
         #size_num_loss = self.coeffs["size_num"] * num_high #(num_high - self.num_nodes / 2) ** 2
-        size_num_loss = size_num * (len(mask) - num_high / 2) ** 2
+        #size_num_loss = size_num * (len(mask) - num_high / 2) ** 2
+        size_num_loss = size_num * num_high/len(mask)
 
 
 
@@ -366,6 +406,26 @@ class Explain(nn.Module):
     def return_stuff(self):
         return self.neighbors,self.n_hops, self.node_idx
 
+
+
+import torch.nn.functional as F
+
+class SparseBinaryCrossEntropyLoss(torch.nn.Module):
+    def __init__(self, lambda_reg):
+        super(SparseBinaryCrossEntropyLoss, self).__init__()
+        self.lambda_reg = lambda_reg
+
+    def forward(self, input, target):
+        # Compute binary cross-entropy loss
+        loss_ce = F.binary_cross_entropy(input, target, reduction='mean')
+
+        # Compute L1 regularization loss
+        loss_reg = self.lambda_reg * torch.norm(input, p=1)
+
+        # Combine the two loss terms
+        loss = loss_ce + loss_reg
+
+        return loss
 
 #def main(node_idx, n_hops, threshold, train):
 def main(n_hops, threshold, train,name,prune):
@@ -460,7 +520,7 @@ def main(n_hops, threshold, train,name,prune):
 
 
 
-def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = False):
+def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = False, grid_search = False):
     #name = 'aifb'
     if name in ['aifb', 'mutag', 'bgs', 'am']:
         data = kg.load(name, torch=True, final=False)
@@ -482,16 +542,22 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
     d_classes(data)
     #breakpoint()
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
-    #print(len(d.keys()))
-    #node_idx = 5724 #d[0][0]# 5678 #5757 #d[0][3]
+    node_idx = d[0][0]
+
+
     if pyg_torch:
         model = torch.load(f'chk/{name}_chk/model_{name}_torch')
     else:
         model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
+
+    hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+    y_full = model.forward2(hor_graph, ver_graph)
+    node_pred_full = y_full[node_idx, :]
+    res_full = nn.Softmax(dim=0)(node_pred_full)    
     if train:
         print('train modality')
 
-        #model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
+
         hyperparameter_grid = {
             "pred": 1,
             "size": [-100,-10,-1],
@@ -503,13 +569,38 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
             "size_num": [0.005, 0.05, 0.5],
             "lr": [0.05, 0.1, 0.5]
         }
-        wandb.init(project='RGCNExpl-gridsearch', config=hyperparameter_grid)
+
+        params = {
+            "pred": 1,
+            "size": -10,
+            "feat_size": 1.0,
+            "ent": 1,
+            "feat_ent": 0.1,
+            "grad": 1,
+            "lap": 1.0, 
+            "size_num": 1,
+            "lr": 0.5
+        }
+        if grid_search:
+            wandb.init(project='RGCNExpl-gridsearch', config=hyperparameter_grid)
+        else:
+            wandb.init(project='RGCNExpl', config=params)    
 
         # Set the hyperparameters for this run based on the current sweep configuration
         config = wandb.config
-        for size, size_num, lr in product(
-        config.size, config.size_num, config.lr):
-
+        if grid_search:
+            for size, size_num, lr in product(
+            config.size, config.size_num, config.lr):
+                explainer = Explain(model = model, data = data, node_idx = node_idx, name = name, n_hops = n_hops)
+                optimizer = torch.optim.Adam(explainer.parameters(), lr=lr)
+                print('start training')
+                model.eval()
+                explainer.train()
+                    
+        else:
+            size = config.size
+            size_num = config.size_num
+            lr = config.lr
             explainer = Explain(model = model, data = data, node_idx = node_idx, name = name, n_hops = n_hops)
             optimizer = torch.optim.Adam(explainer.parameters(), lr=lr)
             print('start training')
@@ -518,11 +609,13 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
 
 
 
+
+
         # Initialize Wandb
 
 
 
-            for epoch in tqdm(range(2)):
+            for epoch in tqdm(range(10)):
                 explainer.zero_grad()
                 optimizer.zero_grad()
                 ypred, masked_hor, masked_ver = explainer.forward()
@@ -531,6 +624,8 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
                     ypred = nn.Softmax(dim=0)(model.forward(masked_hor.coalesce().indices(), masked_hor.coalesce().values())[node_idx, :])
                 else:
                     ypred = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
+                #criterion = SparseBinaryCrossEntropyLoss(lambda_reg=0.01)
+                #loss = criterion(ypred, res_full)
                 loss = explainer.criterion(epoch,hyperparameter_grid , size, size_num)
                 neighbors,n_hops, node_idx = explainer.return_stuff()
 
@@ -543,7 +638,7 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
             
 
 
-                if epoch % 10 == 0:
+                if epoch % 2 == 0:
 
                     print(
                     "epoch: ",
@@ -554,7 +649,7 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
                     "; pred: ",
                     ypred )
                 wandb.log({'loss': loss, 'size': size,
-               'size_num': size_num, 'lr': lr})    
+               'size_num': size_num, 'lr': lr, "len mask > 0.5": len([i for i in masked_ver.coalesce().values() if i > 0.5])})    
 
             if epoch ==49:
                 print('masked_ver', masked_ver)
@@ -562,17 +657,7 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
                     os.makedirs(f'chk/{name}_chk/masked_adj') 
             torch.save(masked_ver, f'chk/{name}_chk/masked_adj/masked_ver{node_idx}')
             torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}')    
-            # if epoch == 49:  
-            #     v = torch.load(f'{name}_chk/masked_adj/masked_ver{node_idx}')
-            #     h = torch.load(f'{name}_chk/masked_adj/masked_hor{node_idx}')    
-            #                     # compare the indices of the sparse tensors
-            #     if torch.equal(v.coalesce().indices(), masked_ver.coalesce().indices()):
-            #         print('same indices')
-            #     if torch.equal(v.coalesce().values(), masked_ver.coalesce().values()):
-            #         print('same values')                     
-
-
-                #     masked_hor = torch.load(f'{name}_chk/masked_adj/masked_hor{node_idx}')     
+   
   
                 
 
@@ -629,10 +714,10 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
 
 
     #Prediciction with full graph 
-    hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
-    y_full = model.forward2(hor_graph, ver_graph)
-    node_pred_full = y_full[node_idx, :]
-    res_full = nn.Softmax(dim=0)(node_pred_full)
+    # hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+    # y_full = model.forward2(hor_graph, ver_graph)
+    # node_pred_full = y_full[node_idx, :]
+    # res_full = nn.Softmax(dim=0)(node_pred_full)
     print('ypred full', res_full)
 
 
