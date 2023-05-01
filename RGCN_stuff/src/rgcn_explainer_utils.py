@@ -318,14 +318,14 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=F
         nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=8,font_color='red')
         res = Counter(rel.values())
     if result_weights:
-        if not os.path.exists(f'{name}_chk/graphs'):
-            os.makedirs(f'{name}_chk/graphs')  
-        plt.savefig(f'{name}_chk/graphs/Explanation_{node_idx}_{n_hop}_weights.png')
+        if not os.path.exists(f'chk/{name}_chk/graphs'):
+            os.makedirs(f'chk/{name}_chk/graphs')  
+        plt.savefig(f'chk/{name}_chk/graphs/Explanation_{node_idx}_{n_hop}_weights.png')
         plt.show()
     else:
-        if not os.path.exists(f'{name}_chk/graphs'):
-            os.makedirs(f'{name}_chk/graphs')  
-        plt.savefig(f'{name}_chk/graphs/Explanation_{node_idx}_{n_hop}_relations.png')    
+        if not os.path.exists(f'chk/{name}_chk/graphs'):
+            os.makedirs(f'chk/{name}_chk/graphs')  
+        plt.savefig(f'chk/{name}_chk/graphs/Explanation_{node_idx}_{n_hop}_relations.png')    
         plt.show()
         return res
     

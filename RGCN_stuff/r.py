@@ -11,7 +11,8 @@ import kgbench as kg
 import fire, sys
 import math
 import os
-
+import wandb
+from itertools import product
 from kgbench import load, tic, toc, d
 
 
@@ -19,6 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+from tqdm import tqdm
 
 
 #
@@ -106,7 +108,7 @@ class Explain(nn.Module):
 
         self.num_nodes = self.sub_hor_graph.coalesce().values().shape[0]   
         print(self.num_nodes)
-        self.edge_mask = self.construct_edge_mask(self.num_nodes)
+        self.mask = self.construct_edge_mask(self.num_nodes)
 
     
     def _masked_adj(self, sub_graph):
@@ -117,8 +119,8 @@ class Explain(nn.Module):
         adj = sub_graph.coalesce().values()
         indices = sub_graph.coalesce().indices()
         size = sub_graph.coalesce().size()
-        sym_mask = self.edge_mask
-        sym_mask = torch.sigmoid(self.edge_mask)
+        sym_mask = self.mask
+        sym_mask = torch.sigmoid(self.mask)
         
         sym_mask = (sym_mask + sym_mask.t()) / 2
         adj = torch.tensor(adj)
@@ -154,6 +156,37 @@ class Explain(nn.Module):
         return mask #torch.tensor(mask)
         #
         #return torch.tensor(mask)
+
+
+        def construct_edge_mask(self, num_nodes, init_strategy="normal", const_val=1.0, prior=None):
+            """
+            Construct edge mask
+            input;
+                num_nodes: number of nodes in the neighborhood
+                init_strategy: initialization strategy for the mask
+                const_val: constant value for the mask
+                prior: prior information about certain relations
+            output:
+                mask: edge mask    
+            """
+            torch.manual_seed(42)
+
+            mask = nn.Parameter(torch.FloatTensor(num_nodes))  #initialize the mask
+            if init_strategy == "normal":
+                std = nn.init.calculate_gain("relu") * math.sqrt(
+                    2.0 / (num_nodes + num_nodes)
+                )
+                with torch.no_grad():
+                    mask.normal_(1.0, std)
+            elif init_strategy == "const":
+                nn.init.constant_(mask, const_val)
+            if prior is not None:
+                # Apply prior knowledge to the mask initialization
+                for i in range(num_nodes):
+                    if prior[i] == 1:
+                        mask.data[i] = const_val
+            return mask
+
     
     def softmax(self, pred):
         """Compute softmax values for each sets of scores in x."""
@@ -198,50 +231,124 @@ class Explain(nn.Module):
   
         return res, self.masked_hor, self.masked_ver
     
-    def loss_fc(self, pred, pred_label, node_idx, epoch, print=False):
-        """
-        Args:
-            pred: y_e :  prediction made by current model
-            pred_label: y_hat : the label predicted by the original model.
-        """
+    # def loss_fc(self, pred, pred_label, node_idx, epoch, grid_coeff):
+    #     """
+    #     Args:
+    #         pred: y_e :  prediction made by current model
+    #         pred_label: y_hat : the label predicted by the original model.
+    #     """
+    #     size_num = grid_coeff['size_num']
+    #     size = grid_coeff['size']
+
+    #     #PRED LOSS
+    #     #pred_label_node = pred_label[node_idx] #pred label is the prediction made by the original model
+    #     gt_label_node = self.label[node_idx]
+
+    #     logit = pred[gt_label_node] #pred is the prediction made by the current model
+
+    #     pred_loss = -torch.log(logit) #this is basically taking the cross entropy loss
+    #     print(pred_loss) #compare how big compared to other losses 
+
+    #     # MASK SIZE EDGE LOSS
         
-        #PRED LOSS
-        #pred_label_node = pred_label[node_idx] #pred label is the prediction made by the original model
-        gt_label_node = self.label[node_idx]
-
-        logit = pred[gt_label_node] #pred is the prediction made by the current model
-
-        pred_loss = -torch.log(logit) #this is basically taking the cross entropy loss
-
-        # MASK SIZE EDGE LOSS
-        
-        mask = self.edge_mask
-        #print('gradient of the mask:', mask)
-        mask = torch.sigmoid(self.edge_mask)
+    #     mask = self.edge_mask
+    #     #print('gradient of the mask:', mask)
+    #     mask = torch.sigmoid(self.edge_mask)
        
 
-        size_loss = 0.5 * torch.sum(mask)
+    #     size_loss = 10 * torch.sum(mask)
 
 
 
-        # EDGE MASK ENTROPY LOSS
-        mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
-        mask_ent_loss = 5 * torch.mean(mask_ent)
+    #     # EDGE MASK ENTROPY LOSS
+    #     mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
+    #     mask_ent_loss = 5 * torch.mean(mask_ent)
         
 
-        # D = torch.diag(torch.sum(self.masked_ver[0], 0))
-        # m_adj = self.masked_ver
+    #     # D = torch.diag(torch.sum(self.masked_ver[0], 0))
+    #     # m_adj = self.masked_ver
+    #     # L = D - m_adj
+
+    #     # pred_label_t = torch.tensor(pred_label, dtype=torch.float)
+
+    #     # lap_loss = (1 * (pred_label_t @ L @ pred_label_t) / self.masked_ver.numel())
+
+    #     loss = pred_loss + size_loss  + mask_ent_loss #+ lap_loss # + feat_size_loss + lap_loss
+
+    #     return loss
+    
+
+    def loss_fc(self, pred, pred_label, node_idx, epoch, grid_coeff, size, size_num):
+        """
+        Args:
+            pred: prediction made by current model
+            pred_label: the label predicted by the original model.
+        """
+
+        # prediction loss
+        #pred_label_node = pred_label[node_idx]
+
+        #pred_label_node = pred_label
+
+
+        #print('label', self.label)
+        
+        gt_label_node = self.label[node_idx]
+        print('gt_label_node', gt_label_node)
+        print('gt_label_node', type(gt_label_node))
+        logit = pred[gt_label_node]
+        print('logit', logit)
+        pred_loss =  -torch.log(logit) * grid_coeff["pred"]
+
+        # size loss
+        mask = self.mask
+        # print('mask', mask)
+        #print('gradient of the mask:', mask.grad)  # None at the beginning
+
+        mask = torch.sigmoid(self.mask)  # sigmoid of the mask
+
+        #size_loss = self.coeffs["size"] * torch.sum(mask)
+        mask_without_small = mask[mask > 0.5]
+        print('mask_without_small', mask_without_small)
+        if len(mask_without_small) < len(mask):
+
+            size_loss = 1000* size * torch.var(mask_without_small)
+        else:    
+            size_loss = size * torch.var(mask_without_small)
+        #size_loss = self.size_loss_f(mask, self.coeffs)
+
+        num_high = len([i for i in mask if i > 0.5])
+        #size_num_loss = self.coeffs["size_num"] * num_high #(num_high - self.num_nodes / 2) ** 2
+        size_num_loss = size_num * (len(mask) - num_high / 2) ** 2
+
+
+
+
+
+        # entropy edge mask 
+        mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
+        mask_ent_loss = grid_coeff["ent"] * torch.mean(mask_ent)
+        
+
+
+        # laplacian loss
+        # D = torch.diag(torch.sum(self.masked_adj[0], 0))
+        # m_adj = self.masked_adj
         # L = D - m_adj
 
         # pred_label_t = torch.tensor(pred_label, dtype=torch.float)
 
-        # lap_loss = (1 * (pred_label_t @ L @ pred_label_t) / self.masked_ver.numel())
+        # lap_loss = (self.coeffs["lap"] * (pred_label_t @ L @ pred_label_t) / self.masked_adj())
 
-        loss = pred_loss + size_loss  + mask_ent_loss #+ lap_loss # + feat_size_loss + lap_loss
+        loss = pred_loss + size_loss + size_num_loss# + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
+        print('pred_loss', pred_loss)
+        print('size_loss', size_loss)
+        print('size_num_loss', size_num_loss)
+
 
         return loss
     
-    def criterion(self, epoch):
+    def criterion(self, epoch, grid_coeff, size, size_num):
         """
         Computes the loss of the current model
         """
@@ -250,7 +357,7 @@ class Explain(nn.Module):
 
 
         self.new_node_idx = self.new_index()
-        loss_val = self.loss_fc( pred, self.pred_label, self.new_node_idx, epoch, print=False)
+        loss_val = self.loss_fc( pred, self.pred_label, self.new_node_idx, epoch, grid_coeff, size, size_num)
         #loss_val = loss_fc(self.masked_adj,  pred, self.pred_label,self.label, self.new_node_idx, epoch, print=False)
 
         return loss_val 
@@ -385,50 +492,76 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
         print('train modality')
 
         #model = torch.load('/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/aifb_chk/model_aifb')
+        hyperparameter_grid = {
+            "pred": 1,
+            "size": [-100,-10,-1],
+            "feat_size": 1.0,
+            "ent": 1,
+            "feat_ent": 0.1,
+            "grad": 1,
+            "lap": 1.0, 
+            "size_num": [0.005, 0.05, 0.5],
+            "lr": [0.05, 0.1, 0.5]
+        }
+        wandb.init(project='RGCNExpl-gridsearch', config=hyperparameter_grid)
 
-        explainer = Explain(model = model, data = data, node_idx = node_idx, name = name, n_hops = n_hops)
-        optimizer = torch.optim.Adam(explainer.parameters(), lr=0.01)
-        print('start training')
-        model.eval()
-        explainer.train()
-        for epoch in range(3):
-            explainer.zero_grad()
-            optimizer.zero_grad()
-            ypred, masked_hor, masked_ver = explainer.forward()
-            print('masked_hor:', masked_hor)
-            if pyg_torch:
-                ypred = nn.Softmax(dim=0)(model.forward(masked_hor.coalesce().indices(), masked_hor.coalesce().values())[node_idx, :])
-            else:
-                ypred = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
-            loss = explainer.criterion(epoch)
-            neighbors,n_hops, node_idx = explainer.return_stuff()
+        # Set the hyperparameters for this run based on the current sweep configuration
+        config = wandb.config
+        for size, size_num, lr in product(
+        config.size, config.size_num, config.lr):
 
+            explainer = Explain(model = model, data = data, node_idx = node_idx, name = name, n_hops = n_hops)
+            optimizer = torch.optim.Adam(explainer.parameters(), lr=lr)
+            print('start training')
+            model.eval()
+            explainer.train()
+
+
+
+        # Initialize Wandb
+
+
+
+            for epoch in tqdm(range(2)):
+                explainer.zero_grad()
+                optimizer.zero_grad()
+                ypred, masked_hor, masked_ver = explainer.forward()
+                print('masked_hor:', masked_hor)
+                if pyg_torch:
+                    ypred = nn.Softmax(dim=0)(model.forward(masked_hor.coalesce().indices(), masked_hor.coalesce().values())[node_idx, :])
+                else:
+                    ypred = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
+                loss = explainer.criterion(epoch,hyperparameter_grid , size, size_num)
+                neighbors,n_hops, node_idx = explainer.return_stuff()
+
+                
+
+
+
+                loss.backward()
+                optimizer.step()
             
 
 
+                if epoch % 10 == 0:
 
-            loss.backward()
-            optimizer.step()
-        
+                    print(
+                    "epoch: ",
+                    epoch,
+                    "; loss: ",
+                    loss.item(),
 
-
-            if epoch % 10 == 0:
-
-                print(
-                "epoch: ",
-                epoch,
-                "; loss: ",
-                loss.item(),
-
-                "; pred: ",
-                ypred )
+                    "; pred: ",
+                    ypred )
+                wandb.log({'loss': loss, 'size': size,
+               'size_num': size_num, 'lr': lr})    
 
             if epoch ==49:
                 print('masked_ver', masked_ver)
-            if not os.path.exists(f'{name}_chk/masked_adj'):
-                    os.makedirs(f'{name}_chk/masked_adj') 
-            torch.save(masked_ver, f'{name}_chk/masked_adj/masked_ver{node_idx}')
-            torch.save(masked_hor, f'{name}_chk/masked_adj/masked_hor{node_idx}')    
+            if not os.path.exists(f'chk/{name}_chk/masked_adj'):
+                    os.makedirs(f'chk/{name}_chk/masked_adj') 
+            torch.save(masked_ver, f'chk/{name}_chk/masked_adj/masked_ver{node_idx}')
+            torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}')    
             # if epoch == 49:  
             #     v = torch.load(f'{name}_chk/masked_adj/masked_ver{node_idx}')
             #     h = torch.load(f'{name}_chk/masked_adj/masked_hor{node_idx}')    
@@ -446,10 +579,10 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
     else:
         masked_ver = torch.load(f'chk/{name}_chk/masked_adj/masked_ver{node_idx}')
         masked_hor = torch.load(f'chk/{name}_chk/masked_adj/masked_hor{node_idx}') 
-    print('masked_ver', masked_ver)
+    #print('masked_ver', masked_ver)
     h = visualize(node_idx, n_hops, data, masked_ver,threshold, name = name, result_weights=False, low_threshold=False)
     h = selected(masked_ver, threshold,data, low_threshold=False)
-    print('most important relations: ', h)
+    #print('most important relations: ', h)
 
     sel_masked_ver1 = sub_sparse_tensor(masked_ver, 0.5, data, low_threshold=False)
     sel_masked_hor1 = sub_sparse_tensor(masked_hor, 0.5, data, low_threshold=False)
@@ -489,8 +622,8 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
     res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
     print('ypred explain', res)
    
-    res_sel = nn.Softmax(dim=0)(model.forward2(sel_masked_hor1, sel_masked_ver1)[node_idx, :])
-    print('ypred explain sel', res_sel)
+    # res_sel = nn.Softmax(dim=0)(model.forward2(sel_masked_hor1, sel_masked_ver1)[node_idx, :])
+    # print('ypred explain sel', res_sel)
 
 
 
@@ -532,7 +665,7 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
 
 
 if __name__ == "__main__":
-    main2(name = 'aifb', node_idx = 5678, n_hops = 0,threshold = 0.5, train= False)
+    main2(name = 'aifb', node_idx = 5757, n_hops = 0,threshold = 0.5, train= True)
 
     #main(n_hops = 2,threshold = 0.5, train=True, name='IMDb_us_onegenre', prune = True)
 

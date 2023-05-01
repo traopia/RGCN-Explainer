@@ -26,7 +26,7 @@ import networkx as nx
 
 
 #rgcn 
-from src.rgcn_model import adj, enrich, sum_sparse, RGCN
+from rgcn_model import adj, enrich, sum_sparse, RGCN
 from src.rgcn_explainer_utils import *
 #Get adjacency matrix: in this context this is hor / ver graph
 def hor_ver_graph(triples, n, r):
@@ -72,7 +72,7 @@ class Explainer:
         self.edge_index = edge_index_oneadj(self.triples)
        
         self.label = {int(k):int(v) for k,v in zip(data.withheld[:, 0], data.withheld[:, 1])} #self.data.withheld[:, 1]
-        self.pred_label = torch.load(f'{self.name}_chk/prediction_{self.name}_prune_{prune}')
+        self.pred_label = torch.load(f'chk/{self.name}_chk/prediction_{self.name}_prune_{prune}')
         self.node_idx = node_idx
         self.n_hops = n_hops
         #self.hor_graph, self.ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
@@ -117,6 +117,17 @@ class Explainer:
             label
         )
 
+
+        run = wandb.init(
+        # Set the project where this run will be logged
+        project="RGCN-Explainer",
+        # Track hyperparameters and run metadata
+        config={
+            "learning_rate": 0.01,
+            "epochs": 5,
+        })
+        wandb.login()
+
         self.model.eval()
         explainer.train()  # set the explainer model to training mode
         for epoch in range(30):
@@ -139,7 +150,7 @@ class Explainer:
                 "; pred: ",
                 ypred,
             )
-
+            wandb.log({"len mask > 0.5": len([i for i in masked_ver.coalesce().values() if i > 0.5]), "loss": loss})
         print('Finished Training')
 
         masked_hor_values = (masked_hor.coalesce().values() * hor_graph.coalesce().values())
@@ -168,16 +179,18 @@ class ExplainModule(nn.Module):
         
         params = [self.mask]
         self.diag_mask = torch.ones(num_nodes, num_nodes) - torch.eye(num_nodes)
-        self.optimizer = torch.optim.Adam(params, lr=0.01)
+        #self.optimizer = torch.optim.Adam(params, lr=0.5, weight_decay=0.001)
+        self.optimizer = torch.optim.Adam(params, lr=0.1, weight_decay=0.1)
 
         self.coeffs = {
             "pred": 1,
-            "size": 0.9,  # 0.005,
+            "size": -100,  # 0.005,
             "feat_size": 1.0,
-            "ent": 2.0,
+            "ent": 1,
             "feat_ent": 0.1,
-            "grad": 0,
-            "lap": 1.0, }
+            "grad": 1,
+            "lap": 1.0, 
+            "size_num": 0.005}
 
 
 
@@ -258,6 +271,18 @@ class ExplainModule(nn.Module):
         print('res:', res)
         return res,   self.masked_hor, self.masked_ver
 
+    def size_loss_f(self,mask, coeffs):
+        center_weight = coeffs.get("center_weight", 10)
+        edge_weight = coeffs.get("edge_weight", 1.0)
+        mask_center = mask.mean()
+        weight = torch.exp(-(torch.arange(mask.numel()) - mask.numel() / 2.0).pow(2) / (2.0 * (mask.numel() / 4.0) ** 2))
+        weight /= weight.mean()
+        weight = torch.where(torch.isnan(weight), torch.zeros_like(weight), weight)
+        weight = torch.where(torch.isinf(weight), torch.ones_like(weight), weight)
+        weight = torch.where(torch.abs(weight) < 0.01, torch.zeros_like(weight), weight)
+        weight = (center_weight - edge_weight) * (weight - weight.min()) / (weight.max() - weight.min()) + edge_weight
+        size_loss = (mask - mask_center).pow(2) * weight
+        return coeffs.get("size", 1.0) * size_loss.sum()
 
 
     def loss(self, pred, pred_label, node_idx, epoch):
@@ -285,13 +310,28 @@ class ExplainModule(nn.Module):
 
         mask = torch.sigmoid(self.mask)  # sigmoid of the mask
 
-        size_loss = self.coeffs["size"] * torch.sum(mask)
+        #size_loss = self.coeffs["size"] * torch.sum(mask)
+        mask_without_small = mask[mask > 0.5]
+        print('mask_without_small', mask_without_small)
+        if len(mask_without_small) < len(mask):
+
+            size_loss = 1000* self.coeffs["size"] * torch.var(mask_without_small)
+        else:    
+            size_loss = self.coeffs["size"] * torch.var(mask_without_small)
+        #size_loss = self.size_loss_f(mask, self.coeffs)
+
+        num_high = len([i for i in mask if i > 0.5])
+        #size_num_loss = self.coeffs["size_num"] * num_high #(num_high - self.num_nodes / 2) ** 2
+        size_num_loss = self.coeffs["size_num"] * (len(mask) - num_high / 2) ** 2
+
+
 
 
 
         # entropy edge mask 
         mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
         mask_ent_loss = self.coeffs["ent"] * torch.mean(mask_ent)
+        
 
 
         # laplacian loss
@@ -303,7 +343,11 @@ class ExplainModule(nn.Module):
 
         # lap_loss = (self.coeffs["lap"] * (pred_label_t @ L @ pred_label_t) / self.masked_adj())
 
-        loss = pred_loss + size_loss +  + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
+        loss = pred_loss + size_loss + size_num_loss# + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
+        print('pred_loss', pred_loss)
+        print('size_loss', size_loss)
+        print('size_num_loss', size_num_loss)
+
 
         return loss
 
@@ -312,9 +356,12 @@ class ExplainModule(nn.Module):
 
 
 
-
+import wandb
 
 def main(name,prune=True):
+
+
+
     n_hops = 0 if prune else 2
     if name in ['aifb', 'mutag', 'bgs', 'am']:
         data = kg.load(name, torch=True, final=False)
@@ -337,15 +384,15 @@ def main(name,prune=True):
     #breakpoint()
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
     #print(len(d.keys()))
-    node_idx = 5678 #d[0][0]
+    node_idx = 5757 #d[0][0]
     print('node_idx', node_idx)
-    model = torch.load(f'{name}_chk/model_{name}_prune_{prune}')
+    model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
     explainer = Explainer(model, data,name,  node_idx, n_hops, prune)
     masked_hor, masked_ver = explainer.explain(node_idx)
-    if not os.path.exists(f'{name}_chk/masked_adj'):
-            os.makedirs(f'{name}_chk/masked_adj') 
-    torch.save(masked_ver, f'{name}_chk/masked_adj/masked_ver{node_idx}_new')
-    torch.save(masked_hor, f'{name}_chk/masked_adj/masked_hor{node_idx}_new') 
+    if not os.path.exists(f'chk/{name}_chk/masked_adj'):
+            os.makedirs(f'chk/{name}_chk/masked_adj') 
+    torch.save(masked_ver, f'chk/{name}_chk/masked_adj/masked_ver{node_idx}_new')
+    torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}_new') 
     print('masked_ver', masked_ver)
     h = visualize(node_idx, n_hops, data, masked_ver,threshold=0.5, name = name, result_weights=False, low_threshold=False)
     h = selected(masked_ver, threshold=0.5,data=data, low_threshold=False)

@@ -8,16 +8,16 @@ import math
 import os
 from kgbench import load, tic, toc, d, Data
 from rgcn_model import RGCN
-from gpu_functions import *
+from src.gpu_functions import *
 
 
 import numpy as np
 
-from rgcn_explainer_utils import prunee
+from src.rgcn_explainer_utils import prunee
 
-def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
+def go(name='mdgenre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
 
-    include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre')
+    include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre')
     # -- For these datasets, the validation is added to the training for the final eval.
 
     

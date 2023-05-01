@@ -1,0 +1,54 @@
+node_idx 5757
+masked_adj tensor([0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311,
+        0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311,
+        0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311],
+       grad_fn=<MulBackward0>)
+masked_hor tensor(indices=tensor([[  5757,   5757,   5757,   5757,   5757,   5757,   5757,
+                          5757,   5757,   5757,   5757,   5757,   5757,   5757,
+                          6860,   6874,   6920,   6976,   7731,   7837,   7857,
+                          7905,   7933,   7973],
+                       [ 83758, 192782, 224697, 255410, 255424, 255470, 255526,
+                        256281, 256387, 256407, 256455, 256483, 256523, 328345,
+                         22327,  22327,  22327,  22327,  22327,  22327,  22327,
+                         22327,  22327,  22327]]),
+       values=tensor([0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311,
+                      0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311,
+                      0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311,
+                      0.7311, 0.7311, 0.7311]),
+       size=(8285, 753935), nnz=24, layout=torch.sparse_coo,
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
+ypred tensor([[ 0.1214, -0.0644,  0.0171, -0.1028],
+        [ 0.1214, -0.0644,  0.0171, -0.1028],
+        [ 0.1214, -0.0644,  0.0171, -0.1028],
+        ...,
+        [ 0.1214, -0.0644,  0.0171, -0.1028],
+        [ 0.1214, -0.0644,  0.0171, -0.1028],
+        [ 0.1214, -0.0644,  0.0171, -0.1028]], grad_fn=<AddBackward0>)
+res: tensor([0.0609, 0.1418, 0.6873, 0.1100], grad_fn=<SoftmaxBackward0>)
+label tensor([2])
+logit tensor([0.6873], grad_fn=<IndexBackward0>)
+mask_without_small tensor([0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311,
+        0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311,
+        0.7311, 0.7311, 0.7311, 0.7311, 0.7311, 0.7311],
+       grad_fn=<IndexBackward0>)
+pred_loss tensor([0.3750], grad_fn=<MulBackward0>)
+size_loss tensor(-3.7072e-13, grad_fn=<MulBackward0>)
+size_num_loss 0.72
+loss: tensor([1.0950], grad_fn=<AddBackward0>)
+[34m[1mwandb[39m[22m: [33mWARNING[39m Calling wandb.login() after wandb.init() has no effect.
+/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r_exp.py:221: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  adj = torch.tensor(adj)
+/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r_exp.py:247: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  adj = torch.tensor(adj)
+0
+epoch:  0 ; loss:  1.095016360282898 ; pred:  tensor([0.0609, 0.1418, 0.6873, 0.1100], grad_fn=<SoftmaxBackward0>)
+Traceback (most recent call last):
+  File "/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r_exp.py", line 404, in <module>
+    main('aifb',prune= True)
+  File "/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r_exp.py", line 386, in main
+    masked_hor, masked_ver = explainer.explain(node_idx)
+  File "/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r_exp.py", line 153, in explain
+    wandb.log({"len mask > 0.5": len([i for i in masked_ver if i > 0.5]), "loss": loss})
+  File "/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r_exp.py", line 153, in <listcomp>
+    wandb.log({"len mask > 0.5": len([i for i in masked_ver if i > 0.5]), "loss": loss})
+RuntimeError: unsupported tensor layout: Sparse
