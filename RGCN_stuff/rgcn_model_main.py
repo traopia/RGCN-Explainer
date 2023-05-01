@@ -14,7 +14,7 @@ from src.gpu_functions import *
 import numpy as np
 
 from src.rgcn_explainer_utils import prunee
-torch.cuda.set_per_process_memory_fraction(0.5, device=None, size=None, max_split_size=256)
+torch.cuda.set_per_process_memory_fraction(0.5, device=None)
 
 def go(name='mdgenre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
 
