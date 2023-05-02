@@ -379,8 +379,10 @@ class Explain(nn.Module):
         # pred_label_t = torch.tensor(pred_label, dtype=torch.float)
 
         # lap_loss = (self.coeffs["lap"] * (pred_label_t @ L @ pred_label_t) / self.masked_adj())
-
-        loss = pred_loss + size_loss + size_num_loss# + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
+        if len(mask_without_small) <=3:
+            loss = pred_loss
+        else:
+            loss = pred_loss + size_loss + size_num_loss# + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
         print('pred_loss', pred_loss)
         print('size_loss', size_loss)
         print('size_num_loss', size_num_loss)
@@ -428,20 +430,25 @@ class SparseBinaryCrossEntropyLoss(torch.nn.Module):
         return loss
 
 #def main(node_idx, n_hops, threshold, train):
-def main(n_hops, threshold, train,name,prune):
-    #data = kg.load('aifb', torch=True, final=True)
-    data = torch.load(f'data/IMDB/finals/{name}.pt')
+def main(n_hops, threshold, train,name,prune, grid_search=False):
+    if name in ['aifb', 'mutag', 'bgs', 'am']:
+        data = kg.load(name, torch=True, final=False)
+    else:     
+        data = torch.load(f'data/IMDB/finals/{name}.pt')
     if prune:
         data = prunee(data, 2)
         data.triples = torch.tensor(data.triples)
         data.withheld = torch.tensor(data.withheld)
         data.training = torch.tensor(data.training)
+
+          
     print(f'Number of entities: {data.num_entities}') #data.i2e
     print(f'Number of classes: {data.num_classes}')
     print(f'Types of relations: {data.num_relations}') #data.i2r
     data.entities = np.append(data.triples[:,0].detach().numpy(),(data.triples[:,2].detach().numpy()))
     get_relations(data)
     d_classes(data)
+
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
     high = []
     low = []
@@ -452,69 +459,135 @@ def main(n_hops, threshold, train,name,prune):
     for target_label in range(len(d.keys())):
         for node_idx in d[target_label]:
             if train:
+                print('train modality')
+
+
+                hyperparameter_grid = {
+                    "pred": 1,
+                    "size": [-100,-10,-1],
+                    "feat_size": 1.0,
+                    "ent": 1,
+                    "feat_ent": 0.1,
+                    "grad": 1,
+                    "lap": 1.0, 
+                    "size_num": [0.005, 0.05, 0.5],
+                    "lr": [0.05, 0.1, 0.5]
+                }
+
+                params = {
+                    "pred": 1,
+                    "size": -10,
+                    "feat_size": 1.0,
+                    "ent": 1,
+                    "feat_ent": 0.1,
+                    "grad": 1,
+                    "lap": 1.0, 
+                    "size_num": 1,
+                    "lr": 0.5
+                }
+                if grid_search:
+                    wandb.init(project='RGCNExpl-gridsearch', config=hyperparameter_grid)
+                else:
+                    wandb.init(project='RGCNExpl', config=params)  
+
+
                 print('node_idx:', node_idx, 'belonging to ', target_label)
-                explainer = Explain(model = model, data = data, node_idx = node_idx, name=name,  n_hops = n_hops)
-                optimizer = torch.optim.Adam(explainer.parameters(), lr=0.5)
-                print('start training')
-                explainer.train()
-                for epoch in range(50):
-                    explainer.zero_grad()
-                    optimizer.zero_grad()
-                    ypred, masked_hor, masked_ver = explainer.forward()
-                    print('masked_hor:', masked_hor)
-                    loss = explainer.criterion(epoch)
-                    neighbors,n_hops, node_idx = explainer.return_stuff()
-                    #pred_label, original_label, neighbors, sub_label, sub_feat, num_hops = explainer.return_stuff()
-                    
+
+                config = wandb.config
+                if grid_search:
+                    for size, size_num, lr in product(
+                    config.size, config.size_num, config.lr):
+                        explainer = Explain(model = model, data = data, node_idx = node_idx, name = name, n_hops = n_hops)
+                        optimizer = torch.optim.Adam(explainer.parameters(), lr=lr)
+                        print('start training')
+                        model.eval()
+                        explainer.train()
+                            
+                else:
+                    size = config.size
+                    size_num = config.size_num
+                    lr = config.lr
+                    explainer = Explain(model = model, data = data, node_idx = node_idx, name = name, n_hops = n_hops)
+                    optimizer = torch.optim.Adam(explainer.parameters(), lr=lr)
+                    print('start training')
+                    model.eval()
+                    explainer.train()
 
 
 
-                    loss.backward()
-                    optimizer.step()
-                
 
 
-                    if epoch % 10 == 0:
+        # Initialize Wandb
 
-                        print(
-                        "epoch: ",
-                        epoch,
-                        "; loss: ",
-                        loss.item(),
 
-                        "; pred: ",
-                        ypred )
 
-                if not os.path.exists(f'chk/{name}_chk/masked_adj'):
-                    os.makedirs(f'chk/{name}_chk/masked_adj') 
-                if epoch == 49:           
+                    for epoch in tqdm(range(10)):
+                        explainer.zero_grad()
+                        optimizer.zero_grad()
+                        ypred, masked_hor, masked_ver = explainer.forward()
+                        print('masked_hor:', masked_hor)
+                        ypred = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
+                        loss = explainer.criterion(epoch,hyperparameter_grid , size, size_num)
+                        neighbors,n_hops, node_idx = explainer.return_stuff()
+
+                        
+
+
+
+                        loss.backward()
+                        optimizer.step()
+
+                            
+                        
+
+
+                        if epoch % 2 == 0:
+
+                            print(
+                            "epoch: ",
+                            epoch,
+                            "; loss: ",
+                            loss.item(),
+
+                            "; pred: ",
+                            ypred )
+                        wandb.log({'loss': loss, 'size': size,
+                    'size_num': size_num, 'lr': lr, "len mask > 0.5": len([i for i in masked_ver.coalesce().values() if i > 0.5])})    
+
+                    if epoch ==49:
+                        print('masked_ver', masked_ver)
+                    if not os.path.exists(f'chk/{name}_chk/masked_adj'):
+                            os.makedirs(f'chk/{name}_chk/masked_adj') 
                     torch.save(masked_ver, f'chk/{name}_chk/masked_adj/masked_ver{node_idx}')
-                    torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}') 
+                    torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}')    
+   
+  
+                
 
             else:
                 masked_ver = torch.load(f'chk/{name}_chk/masked_adj/masked_ver{node_idx}')
                 masked_hor = torch.load(f'chk/{name}_chk/masked_adj/masked_hor{node_idx}') 
-            #h = visualize(node_idx, n_hops, data, masked_ver,threshold, name= name, result_weights=False, low_threshold=False)
-            h = selected(masked_ver, threshold,data, low_threshold=False)
-            print(f'most important relations {node_idx}: ', h)
-            high.append(h)
-            print('high:', high)
+                #h = visualize(node_idx, n_hops, data, masked_ver,threshold, name= name, result_weights=False, low_threshold=False)
+        h = selected(masked_ver, threshold,data, low_threshold=False)
+        print(f'most important relations {node_idx}: ', h)
+        high.append(h)
+        print('high:', high)
 
 
-            # l =  visualize(node_idx, n_hops, data, masked_ver,threshold,name = name, result_weights=False, low_threshold=True)
-            if len(h) < len(masked_ver.coalesce().values()):
-                l = selected(masked_ver, threshold,data, low_threshold=True)
-                print(f'least important relations: {node_idx}', l)
-                low.append(l)
-            # relations = [data.i2rel[i][0] for i in range(len(data.i2rel))]
+        # l =  visualize(node_idx, n_hops, data, masked_ver,threshold,name = name, result_weights=False, low_threshold=True)
+        if len(h) < len(masked_ver.coalesce().values()):
+            l = selected(masked_ver, threshold,data, low_threshold=True)
+            print(f'least important relations: {node_idx}', l)
+            low.append(l)
+        # relations = [data.i2rel[i][0] for i in range(len(data.i2rel))]
 
-            # relations = ['label', 'node_idx'] + relations
-            #df = pd.DataFrame(columns=relations)
-            h = dict(h)
-            
-            info = {'label': target_label, 'node_idx': str(node_idx)}
-            h.update(info)
-            df.loc[str(node_idx)] = h
+        # relations = ['label', 'node_idx'] + relations
+        #df = pd.DataFrame(columns=relations)
+        h = dict(h)
+        
+        info = {'label': target_label, 'node_idx': str(node_idx)}
+        h.update(info)
+        df.loc[str(node_idx)] = h
 
     df.to_csv('RGCN_stuff/Relations_Important_all.csv', index=False)    
 
@@ -542,7 +615,7 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
     d_classes(data)
     #breakpoint()
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
-    node_idx = d[0][0]
+    node_idx = d[0][1]
 
 
     if pyg_torch:
@@ -750,9 +823,9 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
 
 
 if __name__ == "__main__":
-    main2(name = 'aifb', node_idx = 5757, n_hops = 0,threshold = 0.5, train= True)
+    #main2(name = 'aifb', node_idx = 5757, n_hops = 0,threshold = 0.5, train= True)
 
-    #main(n_hops = 2,threshold = 0.5, train=True, name='IMDb_us_onegenre', prune = True)
+    main(n_hops = 2,threshold = 0.5, train=True, name='aifb', prune = True)
 
 
 
