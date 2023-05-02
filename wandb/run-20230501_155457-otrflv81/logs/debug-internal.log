@@ -1,0 +1,95 @@
+2023-05-01 15:54:57,851 INFO    StreamThr :40930 [internal.py:wandb_internal():86] W&B internal server running at pid: 40930, started at: 2023-05-01 15:54:57.850730
+2023-05-01 15:54:57,852 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status
+2023-05-01 15:54:57,853 INFO    WriterThread:40930 [datastore.py:open_for_write():85] open: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/run-otrflv81.wandb
+2023-05-01 15:54:57,855 DEBUG   SenderThread:40930 [sender.py:send():375] send: header
+2023-05-01 15:54:57,893 DEBUG   SenderThread:40930 [sender.py:send():375] send: run
+2023-05-01 15:54:58,250 INFO    SenderThread:40930 [dir_watcher.py:__init__():219] watching files in: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files
+2023-05-01 15:54:58,250 INFO    SenderThread:40930 [sender.py:_start_run_threads():1124] run started: otrflv81 with start time 1682949297.850681
+2023-05-01 15:54:58,250 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: summary_record
+2023-05-01 15:54:58,250 INFO    SenderThread:40930 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-05-01 15:54:58,256 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: check_version
+2023-05-01 15:54:58,256 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: check_version
+2023-05-01 15:54:58,307 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: run_start
+2023-05-01 15:54:58,318 DEBUG   HandlerThread:40930 [system_info.py:__init__():31] System info init
+2023-05-01 15:54:58,318 DEBUG   HandlerThread:40930 [system_info.py:__init__():46] System info init done
+2023-05-01 15:54:58,318 INFO    HandlerThread:40930 [system_monitor.py:start():181] Starting system monitor
+2023-05-01 15:54:58,319 INFO    SystemMonitor:40930 [system_monitor.py:_start():145] Starting system asset monitoring threads
+2023-05-01 15:54:58,319 INFO    HandlerThread:40930 [system_monitor.py:probe():201] Collecting system info
+2023-05-01 15:54:58,320 DEBUG   HandlerThread:40930 [system_info.py:probe():195] Probing system
+2023-05-01 15:54:58,321 INFO    SystemMonitor:40930 [interfaces.py:start():190] Started cpu monitoring
+2023-05-01 15:54:58,324 INFO    SystemMonitor:40930 [interfaces.py:start():190] Started disk monitoring
+2023-05-01 15:54:58,326 INFO    SystemMonitor:40930 [interfaces.py:start():190] Started memory monitoring
+2023-05-01 15:54:58,327 INFO    SystemMonitor:40930 [interfaces.py:start():190] Started network monitoring
+2023-05-01 15:54:58,331 DEBUG   HandlerThread:40930 [system_info.py:_probe_git():180] Probing git
+2023-05-01 15:54:58,379 DEBUG   HandlerThread:40930 [system_info.py:_probe_git():188] Probing git done
+2023-05-01 15:54:58,380 DEBUG   HandlerThread:40930 [system_info.py:probe():240] Probing system done
+2023-05-01 15:54:58,380 DEBUG   HandlerThread:40930 [system_monitor.py:probe():210] {'os': 'macOS-10.16-x86_64-i386-64bit', 'python': '3.9.12', 'heartbeatAt': '2023-05-01T13:54:58.320284', 'startedAt': '2023-05-01T13:54:57.840553', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r.py', 'codePath': 'RGCN_stuff/r.py', 'git': {'remote': 'https://github.com/traopia/RGCN-Explainer.git', 'commit': '24bba20821f5a56cf8a1c4aae98674ba536dbc11'}, 'email': 'terryliberatore@gmail.com', 'root': '/Users/macoftraopia/Documents/GitHub/RGCN-Explainer', 'host': 'feweb60068.feweb.vu.nl', 'username': 'macoftraopia', 'executable': '/usr/local/Caskroom/miniconda/base/bin/python', 'cpu_count': 4, 'cpu_count_logical': 8, 'cpu_freq': {'current': 2700, 'min': 2700, 'max': 2700}, 'cpu_freq_per_core': [{'current': 2700, 'min': 2700, 'max': 2700}], 'disk': {'total': 1863.3869895935059, 'used': 203.54802322387695}, 'memory': {'total': 16.0}}
+2023-05-01 15:54:58,380 INFO    HandlerThread:40930 [system_monitor.py:probe():211] Finished collecting system info
+2023-05-01 15:54:58,380 INFO    HandlerThread:40930 [system_monitor.py:probe():214] Publishing system info
+2023-05-01 15:54:58,380 DEBUG   HandlerThread:40930 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-05-01 15:54:58,381 DEBUG   HandlerThread:40930 [system_info.py:_save_pip():67] Saving pip packages done
+2023-05-01 15:54:58,382 DEBUG   HandlerThread:40930 [system_info.py:_save_conda():74] Saving list of conda packages installed into the current environment
+2023-05-01 15:54:59,253 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/requirements.txt
+2023-05-01 15:54:59,254 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/wandb-summary.json
+2023-05-01 15:54:59,254 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/conda-environment.yaml
+2023-05-01 15:55:06,895 DEBUG   HandlerThread:40930 [system_info.py:_save_conda():86] Saving conda packages done
+2023-05-01 15:55:06,896 INFO    HandlerThread:40930 [system_monitor.py:probe():216] Finished publishing system info
+2023-05-01 15:55:06,913 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:06,913 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: keepalive
+2023-05-01 15:55:06,914 DEBUG   SenderThread:40930 [sender.py:send():375] send: files
+2023-05-01 15:55:06,914 INFO    SenderThread:40930 [sender.py:_save_file():1378] saving file wandb-metadata.json with policy now
+2023-05-01 15:55:06,923 DEBUG   SenderThread:40930 [sender.py:send():375] send: telemetry
+2023-05-01 15:55:06,925 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: stop_status
+2023-05-01 15:55:06,925 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: stop_status
+2023-05-01 15:55:07,270 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/conda-environment.yaml
+2023-05-01 15:55:07,270 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/wandb-metadata.json
+2023-05-01 15:55:07,485 INFO    wandb-upload_0:40930 [upload_job.py:push():137] Uploaded file /var/folders/ww/33zq_rh50tx94n81lb4thx0w0000gn/T/tmpoyg74d63wandb/dvjtdt2v-wandb-metadata.json
+2023-05-01 15:55:09,128 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:14,141 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:19,159 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:21,939 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: stop_status
+2023-05-01 15:55:21,940 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: stop_status
+2023-05-01 15:55:25,087 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:30,101 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:30,326 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/config.yaml
+2023-05-01 15:55:35,287 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:37,035 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: stop_status
+2023-05-01 15:55:37,036 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: stop_status
+2023-05-01 15:55:37,344 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/output.log
+2023-05-01 15:55:39,371 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/output.log
+2023-05-01 15:55:40,353 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:45,354 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:50,362 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:52,053 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: stop_status
+2023-05-01 15:55:52,054 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: stop_status
+2023-05-01 15:55:56,266 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:55:58,339 DEBUG   SystemMonitor:40930 [system_monitor.py:_start():159] Starting system metrics aggregation loop
+2023-05-01 15:55:58,380 DEBUG   SenderThread:40930 [sender.py:send():375] send: stats
+2023-05-01 15:56:01,400 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:56:02,511 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: partial_history
+2023-05-01 15:56:02,517 DEBUG   SenderThread:40930 [sender.py:send():375] send: history
+2023-05-01 15:56:02,519 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: summary_record
+2023-05-01 15:56:02,521 INFO    SenderThread:40930 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-05-01 15:56:03,406 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/wandb-summary.json
+2023-05-01 15:56:03,406 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/output.log
+2023-05-01 15:56:06,625 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:56:07,074 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: stop_status
+2023-05-01 15:56:07,075 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: stop_status
+2023-05-01 15:56:12,276 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:56:17,288 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:56:22,071 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: stop_status
+2023-05-01 15:56:22,072 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: stop_status
+2023-05-01 15:56:23,240 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:56:25,473 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: partial_history
+2023-05-01 15:56:25,478 DEBUG   SenderThread:40930 [sender.py:send():375] send: history
+2023-05-01 15:56:25,478 DEBUG   SenderThread:40930 [sender.py:send_request():402] send_request: summary_record
+2023-05-01 15:56:25,481 INFO    SenderThread:40930 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-05-01 15:56:26,441 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/wandb-summary.json
+2023-05-01 15:56:27,443 INFO    Thread-12 :40930 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230501_155457-otrflv81/files/output.log
+2023-05-01 15:56:28,375 DEBUG   SenderThread:40930 [sender.py:send():375] send: stats
+2023-05-01 15:56:28,378 DEBUG   HandlerThread:40930 [handler.py:handle_request():144] handle_request: status_report
+2023-05-01 15:56:30,437 INFO    memory    :40930 [interfaces.py:monitor():140] Process proc.memory.rssMB has exited.
+2023-05-01 15:56:30,438 DEBUG   SystemMonitor:40930 [system_monitor.py:_start():166] Finished system metrics aggregation loop
+2023-05-01 15:56:30,439 DEBUG   SystemMonitor:40930 [system_monitor.py:_start():170] Publishing last batch of metrics
+2023-05-01 15:56:30,441 DEBUG   SenderThread:40930 [sender.py:send():375] send: stats
+2023-05-01 15:56:30,564 INFO    MainThread:40930 [internal.py:handle_exit():76] Internal process exited

@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 from tqdm import tqdm
-
+wandb.login()
 
 #
 from torch_geometric.utils import to_networkx
@@ -347,7 +347,8 @@ class Explain(nn.Module):
         print('mask_without_small', mask_without_small)
         if len(mask_without_small) < len(mask):
 
-            size_loss = 1000* size * torch.var(mask_without_small)
+            #size_loss = 1000* size * torch.var(mask_without_small)
+            size_loss = size * torch.var(mask_without_small)
             loss_reg = 0.5 * torch.norm(mask_without_small, p=1)
             size_loss = size_loss + loss_reg
         else:    
@@ -356,7 +357,7 @@ class Explain(nn.Module):
         #size_loss = self.size_loss_f(mask, self.coeffs)
 
         num_high = len([i for i in mask if i > 0.5])
-        print('num_high', num_high)
+        print('num_high', num_high, 'original num_nodes', len(mask))
         #size_num_loss = self.coeffs["size_num"] * num_high #(num_high - self.num_nodes / 2) ** 2
         #size_num_loss = size_num * (len(mask) - num_high / 2) ** 2
         size_num_loss = size_num * num_high/len(mask)
@@ -823,9 +824,9 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
 
 
 if __name__ == "__main__":
-    #main2(name = 'aifb', node_idx = 5757, n_hops = 0,threshold = 0.5, train= True)
+    main2(name = 'aifb', node_idx = 5731, n_hops = 0,threshold = 0.5, train= True)
 
-    main(n_hops = 2,threshold = 0.5, train=True, name='aifb', prune = True)
+    #main(n_hops = 2,threshold = 0.5, train=True, name='aifb', prune = True)
 
 
 

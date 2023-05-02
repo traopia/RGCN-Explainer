@@ -130,6 +130,7 @@ class Explainer:
 
         self.model.eval()
         explainer.train()  # set the explainer model to training mode
+
         for epoch in range(30):
             explainer.zero_grad()  # zero the gradient buffers of all parameters
             explainer.optimizer.zero_grad()
@@ -180,7 +181,7 @@ class ExplainModule(nn.Module):
         params = [self.mask]
         self.diag_mask = torch.ones(num_nodes, num_nodes) - torch.eye(num_nodes)
         #self.optimizer = torch.optim.Adam(params, lr=0.5, weight_decay=0.001)
-        self.optimizer = torch.optim.Adam(params, lr=0.1, weight_decay=0.1)
+        self.optimizer = torch.optim.Adam(params, lr=self.coeffs["lr"], weight_decay=0.1)
 
         self.coeffs = {
             "pred": 1,
@@ -190,7 +191,19 @@ class ExplainModule(nn.Module):
             "feat_ent": 0.1,
             "grad": 1,
             "lap": 1.0, 
-            "size_num": 0.005}
+            "size_num": 0.005,
+            "lr": 0.1}
+        
+        self.coeffs_grid = {
+            "pred": 1,
+            "size": [-100,-10,-1],
+            "feat_size": 1.0,
+            "ent": 1,
+            "feat_ent": 0.1,
+            "grad": 1,
+            "lap": 1.0, 
+            "size_num": [0.005, 0.05, 0.5],
+            "lr": [0.05, 0.1, 0.5]}
 
 
 
