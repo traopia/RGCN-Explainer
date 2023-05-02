@@ -102,7 +102,8 @@ class Explain(nn.Module):
         if pyg_torch: 
             self.pred_label = torch.load(f'chk/{name}_chk/prediction_{name}_torch')
         self.sub_edges, self.neighbors, self.sub_edges_tensor = find_n_hop_neighbors(self.edge_index, n=self.n_hops, node=self.node_idx)
-        self.sub_triples = match_to_triples(self.sub_edges_tensor.t(),self.triples)
+        self.sub_triples = match_to_triples(self.sub_edges_tensor.t(),self.triples, sparse=False)
+
         self.sub_hor_graph, self.sub_ver_graph = hor_ver_graph(self.sub_triples, self.n, self.r)
 
 
@@ -327,12 +328,12 @@ class Explain(nn.Module):
 
 
         #print('label', self.label)
-        
+        lambda_reg = 0.1
         gt_label_node = self.label[node_idx]
         print('gt_label_node', gt_label_node)
-        print('gt_label_node', type(gt_label_node))
+        #print('gt_label_node', type(gt_label_node))
         logit = pred[gt_label_node]
-        print('logit', logit)
+        #print('logit', logit)
         pred_loss =  -torch.log(logit) * grid_coeff["pred"]
 
         # size loss
@@ -349,10 +350,10 @@ class Explain(nn.Module):
 
             #size_loss = 1000* size * torch.var(mask_without_small)
             size_loss = size * torch.var(mask_without_small)
-            loss_reg = 0.5 * torch.norm(mask_without_small, p=1)
+            loss_reg = lambda_reg * torch.norm(mask_without_small, p=1)
             size_loss = size_loss + loss_reg
         else:    
-            size_loss = size * torch.var(mask_without_small) + 0.1 * torch.norm(mask_without_small, p=1)
+            size_loss = size * torch.var(mask_without_small) + lambda_reg * torch.norm(mask_without_small, p=1)
 
         #size_loss = self.size_loss_f(mask, self.coeffs)
 
@@ -595,11 +596,9 @@ def main(n_hops, threshold, train,name,prune, grid_search=False):
 
 
 def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = False, grid_search = False):
-    #name = 'aifb'
     if name in ['aifb', 'mutag', 'bgs', 'am']:
         data = kg.load(name, torch=True, final=False)
-    else:    
-    #data = kg.load(name, torch=True)  
+    else:     
         data = torch.load(f'data/IMDB/finals/{name}.pt')
     if prune:
         data = prunee(data, 2)
@@ -614,10 +613,7 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
     data.entities = np.append(data.triples[:,0].detach().numpy(),(data.triples[:,2].detach().numpy()))
     get_relations(data)
     d_classes(data)
-    #breakpoint()
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
-    node_idx = d[0][1]
-
 
     if pyg_torch:
         model = torch.load(f'chk/{name}_chk/model_{name}_torch')
@@ -738,7 +734,6 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
     else:
         masked_ver = torch.load(f'chk/{name}_chk/masked_adj/masked_ver{node_idx}')
         masked_hor = torch.load(f'chk/{name}_chk/masked_adj/masked_hor{node_idx}') 
-    #print('masked_ver', masked_ver)
     h = visualize(node_idx, n_hops, data, masked_ver,threshold, name = name, result_weights=False, low_threshold=False)
     h = selected(masked_ver, threshold,data, low_threshold=False)
     #print('most important relations: ', h)
@@ -824,7 +819,7 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
 
 
 if __name__ == "__main__":
-    main2(name = 'aifb', node_idx = 5731, n_hops = 0,threshold = 0.5, train= True)
+    main2(name = 'aifb', node_idx = 5905, n_hops = 0,threshold = 0.5, train= True)
 
     #main(n_hops = 2,threshold = 0.5, train=True, name='aifb', prune = True)
 

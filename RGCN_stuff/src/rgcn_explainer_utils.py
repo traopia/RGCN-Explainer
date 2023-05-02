@@ -155,19 +155,44 @@ def match_to_classes(tensor1, tensor2):
 
 
 #match triples 
-def match_to_triples(tensor1, tensor2):
-    """
-    tensor1: sub_edge tensor: edges of the neighborhood - transpose!!
-    tensor2: data.triples: all edges
-    """
-    matching = []
-    for i,i2 in zip(tensor1[:,0],tensor1[:,1]):
-        for j,j1,j2, index in zip(tensor2[:,0],tensor2[:,1],  tensor2[:,2], range(len(tensor2[:,0]))):
-            if i == j and i2 == j2:
-                matching.append(tensor2[index])
+# def match_to_triples(tensor1, tensor2):
+#     """
+#     tensor1: sub_edge tensor: edges of the neighborhood - transpose!!
+#     tensor2: data.triples: all edges
+#     """
+#     matching = []
+#     for i,i2 in zip(tensor1[:,0],tensor1[:,1]):
+#         for j,j1,j2, index in zip(tensor2[:,0],tensor2[:,1],  tensor2[:,2], range(len(tensor2[:,0]))):
+#             if i == j and i2 == j2:
+#                 matching.append(tensor2[index])
                 
 
-    result = torch.stack(matching)
+#     result = torch.stack(matching)
+#     return result
+
+# def match_to_triples(v, data):
+#     p,_ = v.coalesce().indices()//data.num_entities
+#     s,o = v.coalesce().indices()%data.num_entities
+#     result = torch.stack([s,p,o], dim=1)
+#     return result
+
+
+
+def match_to_triples(v, data, sparse=True):
+    if sparse:
+        p,_ = v.coalesce().indices()//data.num_entities
+        s,o = v.coalesce().indices()%data.num_entities
+        result = torch.stack([s,p,o], dim=1)
+    else:
+        matching = []
+        for i,i2 in zip(v[:,0],v[:,1]):
+            for j,j1,j2, index in zip(data[:,0],data[:,1],  data[:,2], range(len(data[:,0]))):
+                if i == j and i2 == j2:
+                    matching.append(data[index])
+                    
+
+        result = torch.stack(matching)
+    
     return result
 
 #edge index
@@ -221,9 +246,10 @@ def encode_dict(dict_index):
 
 def selected(masked_ver, threshold,data, low_threshold):
     sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
-    indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
-    new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) 
-    triples_matched = match_to_triples(np.array(new_index), data.triples)
+    #indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
+    #new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) 
+    #triples_matched = match_to_triples(np.array(new_index), data.triples)
+    triples_matched = match_to_triples(sel_masked_ver, data)
     #print(triples_matched)
     l = []
     for i in triples_matched[:,1]:
@@ -235,7 +261,7 @@ def selected(masked_ver, threshold,data, low_threshold):
 
     
 
-def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=False, low_threshold=False ):
+def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=True, low_threshold=False ):
     """ 
     Visualize important nodes for node idx prediction
     """
@@ -257,7 +283,8 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=F
 
     else:
         #get triples to get relations 
-        triples_matched = match_to_triples(np.array(new_index), data.triples)
+        #triples_matched = match_to_triples(np.array(new_index), data.triples)
+        triples_matched = match_to_triples(sel_masked_ver, data)
         l = []
         for i in triples_matched[:,1]:
             l.append(data.i2rel[int(i)][0])

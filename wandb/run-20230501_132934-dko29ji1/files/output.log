@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r.py", line 672, in <module>
-    main2(name = 'aifb', node_idx = 5757, n_hops = 0,threshold = 0.5, train= True)
-  File "/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r.py", line 514, in main2
-    for size, size_num, lr in product(
-TypeError: 'int' object is not iterable
