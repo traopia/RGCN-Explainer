@@ -819,9 +819,9 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
 
 
 if __name__ == "__main__":
-    main2(name = 'aifb', node_idx = 5905, n_hops = 0,threshold = 0.5, train= True)
+    #main2(name = 'aifb', node_idx = 5905, n_hops = 0,threshold = 0.5, train= True)
 
-    #main(n_hops = 2,threshold = 0.5, train=True, name='aifb', prune = True)
+    main(n_hops = 2,threshold = 0.5, train=True, name='aifb', prune = True)
 
 
 
