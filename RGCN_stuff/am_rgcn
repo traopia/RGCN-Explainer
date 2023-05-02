@@ -1,0 +1,30 @@
+rgcn_model_main.py:48: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  data.triples = torch.tensor(data.triples, dtype=torch.int32)
+rgcn_model_main.py:49: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  data.training = torch.tensor(data.training, dtype=torch.int32)
+rgcn_model_main.py:50: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  data.withheld = torch.tensor(data.withheld, dtype=torch.int32)
+loaded data mdgenre (68.07s).
+1252247 triples 
+349344 entities
+154 relations
+4863 training triples
+500 validation triples
+Using cuda.
+construct: 66.617s
+Traceback (most recent call last):
+  File "rgcn_model_main.py", line 157, in <module>
+    fire.Fire(go)
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/fire/core.py", line 475, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/fire/core.py", line 691, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "rgcn_model_main.py", line 76, in go
+    out = rgcn()
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/tliberatore/RGCN-Explainer/RGCN_stuff/rgcn_model.py", line 251, in forward
+    h = torch.mm(self.ver_graph, h) # sparse mm
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 6.44 GiB (GPU 0; 23.65 GiB total capacity; 6.56 GiB already allocated; 16.90 GiB free; 11.83 GiB allowed; 6.57 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF

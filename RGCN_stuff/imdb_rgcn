@@ -1,0 +1,2 @@
+/var/spool/slurm/slurmd/job11574916/slurm_script: line 11: 17260 Killed                  python3 rgcn_model_main.py
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=11574916.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.
