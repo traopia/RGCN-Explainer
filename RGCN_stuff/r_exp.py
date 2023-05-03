@@ -1,4 +1,4 @@
-from pickle import FALSE
+from pickle import FALSE, TRUE
 from responses import FalseBool
 import torch 
 import torch.nn as nn
@@ -511,4 +511,4 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
 
 
 if __name__ == "__main__":
-    main('aifb',node_idx= 5791, prune= True, explain_all =False, train=True)    
+    main('aifb',node_idx= 5791, prune= True, explain_all =True, train=True)    
