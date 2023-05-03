@@ -1,0 +1,42 @@
+{
+    "os": "macOS-10.16-x86_64-i386-64bit",
+    "python": "3.9.12",
+    "heartbeatAt": "2023-05-03T15:55:12.329541",
+    "startedAt": "2023-05-03T15:55:12.252208",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/macoftraopia/Documents/GitHub/RGCN-Explainer/RGCN_stuff/r_exp.py",
+    "codePath": "RGCN_stuff/r_exp.py",
+    "git": {
+        "remote": "https://github.com/traopia/RGCN-Explainer.git",
+        "commit": "670614b743fcf883100e7eb5c1f958deb4fddd67"
+    },
+    "email": "terryliberatore@gmail.com",
+    "root": "/Users/macoftraopia/Documents/GitHub/RGCN-Explainer",
+    "host": "MacBook-Pro-di-Teresa.local",
+    "username": "macoftraopia",
+    "executable": "/usr/local/Caskroom/miniconda/base/bin/python",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 2700,
+        "min": 2700,
+        "max": 2700
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2700,
+            "min": 2700,
+            "max": 2700
+        }
+    ],
+    "disk": {
+        "total": 1863.3869895935059,
+        "used": 189.57938385009766
+    },
+    "memory": {
+        "total": 16.0
+    }
+}

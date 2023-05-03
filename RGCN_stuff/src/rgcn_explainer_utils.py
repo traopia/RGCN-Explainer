@@ -251,18 +251,29 @@ def encode_dict(dict_index):
     return encoded_dict
 
 
-def selected(masked_ver, threshold,data, low_threshold):
+def selected(masked_ver, threshold,data, low_threshold, float=False):
     sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
     indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) 
     triples_matched = match_to_triples(np.array(new_index), data.triples)
     #triples_matched = match_to_triples(sel_masked_ver, data)
     #print(triples_matched)
-    l = []
-    for i in triples_matched[:,1]:
-        l.append(data.i2rel[int(i)][0])
+    if float:
+            l = {}
+            for i,j in zip(triples_matched[:,1],sel_masked_ver.coalesce().values()):
 
-    return Counter(l)
+                if data.i2rel[int(i)][0] in l.keys():
+                    l[data.i2rel[int(i)][0]] += np.float(j)
+                else:
+                    l[data.i2rel[int(i)][0]] = np.float(j)
+            return l
+
+    else:
+        l = []
+        for i in triples_matched[:,1]:
+            l.append(data.i2rel[int(i)][0])
+
+        return Counter(l)
 
 
 def selected_float(masked_ver, threshold,data, low_threshold):
