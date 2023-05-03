@@ -309,6 +309,8 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
     
     #select only nodes with a certain threshold
     sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
+    if len(sel_masked_ver)==0:
+        sel_masked_ver=sub_sparse_tensor(masked_ver, 0,data, low_threshold)
     print('sel masked ver',sel_masked_ver)
     indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) #original edge indexes

@@ -459,3 +459,4 @@ sel masked ver tensor(indices=tensor([[6937, 7021, 7104, 5504, 5449, 7015, 8035,
 Counter({'projectInfo': 5, 'isAbout': 5, 'publication': 4, 'author': 3, 'publishes': 2, 'hasProject': 2, 'isWorkedOnBy': 1, 'dealtWithIn': 1, 'carriesOut': 1})
 dict index: {}
 /usr/local/Caskroom/miniconda/base/lib/python3.9/site-packages/networkx/drawing/nx_pylab.py:433: UserWarning: No data for colormapping provided via 'c'. Parameters 'cmap' will be ignored
+  node_collection = ax.scatter(

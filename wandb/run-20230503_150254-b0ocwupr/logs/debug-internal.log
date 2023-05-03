@@ -442,3 +442,20 @@ requests.exceptions.ConnectionError: HTTPSConnectionPool(host='api.wandb.ai', po
 2023-05-03 17:29:12,237 INFO    HandlerThread:23796 [interfaces.py:finish():202] Joined memory monitor
 2023-05-03 17:29:12,237 INFO    HandlerThread:23796 [interfaces.py:finish():202] Joined network monitor
 2023-05-03 17:29:12,320 INFO    WriterThread:23796 [datastore.py:close():298] close: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/run-b0ocwupr.wandb
+2023-05-03 19:47:34,363 INFO    SenderThread:23796 [sender.py:finish():1550] shutting down sender
+2023-05-03 19:47:38,243 INFO    SenderThread:23796 [dir_watcher.py:finish():365] shutting down directory watcher
+2023-05-03 19:47:38,672 INFO    Thread-12 :23796 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/output.log
+2023-05-03 19:47:38,673 INFO    SenderThread:23796 [dir_watcher.py:finish():395] scan: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files
+2023-05-03 19:47:38,673 INFO    SenderThread:23796 [dir_watcher.py:finish():409] scan save: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/requirements.txt requirements.txt
+2023-05-03 19:47:38,674 INFO    SenderThread:23796 [dir_watcher.py:finish():409] scan save: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/output.log output.log
+2023-05-03 19:47:38,674 INFO    SenderThread:23796 [dir_watcher.py:finish():409] scan save: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/config.yaml config.yaml
+2023-05-03 19:47:38,678 INFO    SenderThread:23796 [dir_watcher.py:finish():409] scan save: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/wandb-summary.json wandb-summary.json
+2023-05-03 19:47:38,683 INFO    SenderThread:23796 [dir_watcher.py:finish():409] scan save: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/conda-environment.yaml conda-environment.yaml
+2023-05-03 19:47:38,685 INFO    SenderThread:23796 [dir_watcher.py:finish():409] scan save: /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/wandb-metadata.json wandb-metadata.json
+2023-05-03 19:47:38,685 INFO    SenderThread:23796 [file_pusher.py:finish():167] shutting down file pusher
+2023-05-03 19:47:38,685 INFO    SenderThread:23796 [file_pusher.py:join():172] waiting for file pusher
+2023-05-03 19:47:39,700 INFO    wandb-upload_3:23796 [upload_job.py:push():137] Uploaded file /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/wandb-summary.json
+2023-05-03 19:47:39,793 INFO    wandb-upload_2:23796 [upload_job.py:push():137] Uploaded file /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/config.yaml
+2023-05-03 19:47:39,910 INFO    wandb-upload_0:23796 [upload_job.py:push():137] Uploaded file /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/requirements.txt
+2023-05-03 19:47:39,984 INFO    wandb-upload_4:23796 [upload_job.py:push():137] Uploaded file /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/conda-environment.yaml
+2023-05-03 19:47:40,109 INFO    wandb-upload_1:23796 [upload_job.py:push():137] Uploaded file /Users/macoftraopia/Documents/GitHub/RGCN-Explainer/wandb/run-20230503_150254-b0ocwupr/files/output.log
