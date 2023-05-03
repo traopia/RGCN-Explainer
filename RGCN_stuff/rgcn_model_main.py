@@ -14,15 +14,15 @@ from src.gpu_functions import *
 import numpy as np
 
 from src.rgcn_explainer_utils import prunee
-torch.cuda.set_per_process_memory_fraction(0.5, device=None)
+#torch.cuda.set_per_process_memory_fraction(0.5, device=None)
 
-def go(name='mdgenre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
+def go(name='IMDB_most_genre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
 
-    include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre')
+    include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre', 'IMDB_most_genre')
     # -- For these datasets, the validation is added to the training for the final eval.
 
     
-    if 'IMDb' in name:
+    if 'IMDb' or 'IMDB' in name:
         
         data = torch.load(f'data/IMDB/finals/{name}.pt')
         # data.training = data.training_people
@@ -74,7 +74,7 @@ def go(name='mdgenre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimize
         tic()
         opt.zero_grad()
         out = rgcn()
-        print('pred', nn.Softmax(dim=0)(out[5757][0 :]))
+        #print('pred', nn.Softmax(dim=0)(out[5757][0 :]))
         #print('out',nn.Softmax(dim=0)(out[0][0 :]) )
 
         idxt, clst = data.training[:, 0], data.training[:, 1]
@@ -143,9 +143,9 @@ def go(name='mdgenre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimize
         if not os.path.exists(f'{name}_chk'):
             os.makedirs(f'{name}_chk')
         
-        torch.save(out[idxw, :], f'{name}_chk/prediction_{name}_prune_{prune}')
+        torch.save(out[idxw, :], f'chk/{name}_chk/prediction_{name}_prune_{prune}')
         #torch.save(rgcn,'aifb_chk/model_aifb')
-        torch.save(rgcn, f'{name}_chk/model_{name}_prune_{prune}')
+        torch.save(rgcn, f'chk/{name}_chk/model_{name}_prune_{prune}')
         print(f'epoch {e:02}: loss {loss:.2}, train acc {training_acc:.2}, \t withheld acc {withheld_acc:.2} \t ({toc():.5}s)')
 
 
