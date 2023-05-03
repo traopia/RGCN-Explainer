@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 from tqdm import tqdm
-wandb.login()
+#wandb.login()
 
 #
 from torch_geometric.utils import to_networkx
@@ -94,6 +94,7 @@ class Explain(nn.Module):
 
         self.epoch = 1
         self.hor_graph, self.ver_graph = hor_ver_graph(self.triples, self.n, self.r)
+        #self.ver_graph = self.hor_graph.t()
 
 
         
@@ -124,7 +125,7 @@ class Explain(nn.Module):
         sym_mask = torch.sigmoid(self.mask)
         
         sym_mask = (sym_mask + sym_mask.t()) / 2
-        adj = torch.tensor(adj)
+        adj = adj.clone().detach()
 
         masked_adj = adj * sym_mask
 
@@ -154,8 +155,7 @@ class Explain(nn.Module):
         elif init_strategy == "const":
             nn.init.constant_(mask, const_val)
         return mask #torch.tensor(mask)
-        #
-        #return torch.tensor(mask)
+
 
 
         def construct_edge_mask(self, num_nodes, init_strategy="normal", const_val=1.0, prior=None):
@@ -209,14 +209,13 @@ class Explain(nn.Module):
         """
         self.masked_hor = self._masked_adj(self.sub_hor_graph)
         self.masked_ver = self._masked_adj(self.sub_ver_graph)
+        
         if self.pyg_torch:
             ypred = self.model.forward(self.masked_hor.coalesce().indices(), self.masked_hor.coalesce().values())
         ypred = self.model.forward2(self.masked_hor, self.masked_ver)
-        
-        name = self.name
         node_pred = ypred[self.node_idx, :]
         res = nn.Softmax(dim=0)(node_pred)
-
+        print('res forward', res)
   
         return res, self.masked_hor, self.masked_ver
 
@@ -328,21 +327,22 @@ class Explain(nn.Module):
 
 
         #print('label', self.label)
-        lambda_reg = 0.1
+        lambda_reg = 0.01
         gt_label_node = self.label[node_idx]
         print('gt_label_node', gt_label_node)
         #print('gt_label_node', type(gt_label_node))
         logit = pred[gt_label_node]
-        #print('logit', logit)
+        print('pred', pred)
+        print('logit', logit)
         pred_loss =  -torch.log(logit) * grid_coeff["pred"]
 
         # size loss
-        mask = self.mask
-        # print('mask', mask)
+        mask = self.masked_hor.coalesce().values()
+        print('mask', mask)
         #print('gradient of the mask:', mask.grad)  # None at the beginning
 
-        mask = torch.sigmoid(self.mask)  # sigmoid of the mask
-
+        #mask = torch.sigmoid(mask)  # sigmoid of the mask
+        #print('sigmoid mask', mask)
         #size_loss = self.coeffs["size"] * torch.sum(mask)
         mask_without_small = mask[mask > 0.5]
         print('mask_without_small', mask_without_small)
@@ -384,7 +384,7 @@ class Explain(nn.Module):
         if len(mask_without_small) <=3:
             loss = pred_loss
         else:
-            loss = pred_loss + size_loss + size_num_loss# + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
+            loss = pred_loss + size_loss + size_num_loss + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
         print('pred_loss', pred_loss)
         print('size_loss', size_loss)
         print('size_num_loss', size_num_loss)
@@ -398,6 +398,7 @@ class Explain(nn.Module):
         """
         #prediction of explanation model
         pred, masked_hor, masked_ver = self.forward()
+        print('pred at criterion', pred)
 
 
         self.new_node_idx = self.new_index()
@@ -439,9 +440,9 @@ def main(n_hops, threshold, train,name,prune, grid_search=False):
         data = torch.load(f'data/IMDB/finals/{name}.pt')
     if prune:
         data = prunee(data, 2)
-        data.triples = torch.tensor(data.triples)
-        data.withheld = torch.tensor(data.withheld)
-        data.training = torch.tensor(data.training)
+        data.triples = data.triples.clone().detach()
+        data.withheld = data.withheld.clone().detach()
+        data.training = data.training.clone().detach()
 
           
     print(f'Number of entities: {data.num_entities}') #data.i2e
@@ -478,14 +479,14 @@ def main(n_hops, threshold, train,name,prune, grid_search=False):
 
                 params = {
                     "pred": 1,
-                    "size": -10,
+                    "size": -1 ,#-10,
                     "feat_size": 1.0,
                     "ent": 1,
                     "feat_ent": 0.1,
                     "grad": 1,
                     "lap": 1.0, 
                     "size_num": 1,
-                    "lr": 0.5
+                    "lr": 0.05 #0.5
                 }
                 if grid_search:
                     wandb.init(project='RGCNExpl-gridsearch', config=hyperparameter_grid)
@@ -523,7 +524,7 @@ def main(n_hops, threshold, train,name,prune, grid_search=False):
 
 
 
-                    for epoch in tqdm(range(10)):
+                    for epoch in tqdm(range(3)):
                         explainer.zero_grad()
                         optimizer.zero_grad()
                         ypred, masked_hor, masked_ver = explainer.forward()
@@ -591,7 +592,7 @@ def main(n_hops, threshold, train,name,prune, grid_search=False):
         h.update(info)
         df.loc[str(node_idx)] = h
 
-    df.to_csv('RGCN_stuff/Relations_Important_all.csv', index=False)    
+    df.to_csv('Relations_Important_all.csv', index=False)    
 
 
 
@@ -602,9 +603,9 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
         data = torch.load(f'data/IMDB/finals/{name}.pt')
     if prune:
         data = prunee(data, 2)
-        data.triples = torch.tensor(data.triples)
-        data.withheld = torch.tensor(data.withheld)
-        data.training = torch.tensor(data.training)
+        data.triples = data.triples.clone().detach()
+        data.withheld = data.withheld.clone().detach()
+        data.training = data.training.clone().detach()
 
           
     print(f'Number of entities: {data.num_entities}') #data.i2e
@@ -614,7 +615,9 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
     get_relations(data)
     d_classes(data)
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
-
+    if name != 'aifb':
+        node_idx = d[0][0]
+    print('node_idx:', node_idx)
     if pyg_torch:
         model = torch.load(f'chk/{name}_chk/model_{name}_torch')
     else:
@@ -819,9 +822,9 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
 
 
 if __name__ == "__main__":
-    #main2(name = 'aifb', node_idx = 5905, n_hops = 0,threshold = 0.5, train= True)
+    main2(name = 'aifb', node_idx = 5757, n_hops = 0,threshold = 0.5, train= True)
 
-    main(n_hops = 2,threshold = 0.5, train=True, name='aifb', prune = True)
+    #main(n_hops = 2,threshold = 0.5, train=True, name='aifb', prune = True)
 
 
 

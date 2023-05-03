@@ -78,7 +78,7 @@ class Explainer:
         #self.hor_graph, self.ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
         #self.n_hops = 0 if prune else 2 # number layers to propagate (in the paper it is 2)
         self.sub_edges, self.neighbors, self.sub_edges_tensor = find_n_hop_neighbors(self.edge_index, n=self.n_hops, node=self.node_idx)
-        self.sub_triples = match_to_triples(self.sub_edges_tensor.t(),self.triples)
+        self.sub_triples = match_to_triples(self.sub_edges_tensor.t(),self.triples, sparse=False)
 
     def new_index(self):
         idxw, clsw = self.data.withheld[:, 0], self.data.withheld[:, 1]
@@ -95,7 +95,7 @@ class Explainer:
         #print("o: ", sub_label)
         sub_hor_graph, sub_ver_graph = hor_ver_graph(self.sub_triples, self.n, self.r)
         #node_idx_new, sub_adj, sub_feat, sub_label, neighbors = self.extract_neighborhood()
-        print("neigh graph idx: ", self, node_idx, node_idx_new)
+        #print("neigh graph idx: ", self, node_idx, node_idx_new)
 
         #sub_hor_graph = np.expand_dims(sub_hor_graph, axis=0)
         #sub_ver_graph = np.expand_dims(sub_ver_graph, axis=0)
@@ -104,7 +104,7 @@ class Explainer:
         #label = torch.tensor(sub_label, dtype=torch.long)
         label = torch.tensor([self.label[node_idx]], dtype=torch.long)
         pred_label = torch.argmax(self.pred_label[node_idx_new])
-        print("Node predicted label: ", pred_label)
+        #print("Node predicted label: ", pred_label)
 
         # Explainer model whose parameters are to be learned
         # print(ver_graph.size(), hor_graph.size())
@@ -131,7 +131,7 @@ class Explainer:
         self.model.eval()
         explainer.train()  # set the explainer model to training mode
 
-        for epoch in range(30):
+        for epoch in range(10):
             explainer.zero_grad()  # zero the gradient buffers of all parameters
             explainer.optimizer.zero_grad()
             ypred, masked_hor, masked_ver = explainer(self.node_idx)  # forward pass of the explainer
@@ -176,23 +176,23 @@ class ExplainModule(nn.Module):
 
         num_nodes = self.hor_graph.coalesce().indices().size()[1] #self.hor_graph.size()[0]#self.hor_graph.coalesce().values().shape[0]
         self.mask = self.construct_edge_mask(num_nodes)
-        print(self.mask.size())
+        #print(self.mask.size())
         
         params = [self.mask]
         self.diag_mask = torch.ones(num_nodes, num_nodes) - torch.eye(num_nodes)
         #self.optimizer = torch.optim.Adam(params, lr=0.5, weight_decay=0.001)
-        self.optimizer = torch.optim.Adam(params, lr=self.coeffs["lr"], weight_decay=0.1)
+        
 
         self.coeffs = {
             "pred": 1,
-            "size": -100,  # 0.005,
+            "size": -10,  # 0.005,
             "feat_size": 1.0,
             "ent": 1,
             "feat_ent": 0.1,
             "grad": 1,
             "lap": 1.0, 
-            "size_num": 0.005,
-            "lr": 0.1}
+            "size_num": 1,
+            "lr": 0.5}
         
         self.coeffs_grid = {
             "pred": 1,
@@ -204,10 +204,10 @@ class ExplainModule(nn.Module):
             "lap": 1.0, 
             "size_num": [0.005, 0.05, 0.5],
             "lr": [0.05, 0.1, 0.5]}
+        self.optimizer = torch.optim.Adam(params, lr=self.coeffs["lr"], weight_decay=0.1)
 
 
-
-    def construct_edge_mask(self, num_nodes, init_strategy="const", const_val=1.0):
+    def construct_edge_mask(self, num_nodes, init_strategy="normal", const_val=1.0):
         """
         Construct edge mask
         """
@@ -232,17 +232,8 @@ class ExplainModule(nn.Module):
         sym_mask = (sym_mask + sym_mask.t()) / 2
 
         adj = self.ver_graph.coalesce().values()
-        adj = torch.tensor(adj)
+        adj = adj.clone().detach()
 
-        #adj = adj.unsqueeze(0)
-        # print('size ')
-        # print(adj.size())
-        # print(sym_mask.size())
-        # #adj = adj.to_dense()
-        # print(adj, adj.size())
-        # #sym_mask = sym_mask.to_sparse()
-        # print(adj, adj.shape)
-        # print(sym_mask, sym_mask.shape)
 
         masked_adj = adj * sym_mask
 
@@ -258,7 +249,7 @@ class ExplainModule(nn.Module):
 
         sym_mask = (sym_mask + sym_mask.t()) / 2
         adj = self.hor_graph.coalesce().values()
-        adj = torch.tensor(adj)
+        adj = adj.clone().detach()
         masked_adj = adj * sym_mask
         print('masked_adj', masked_adj)
 
@@ -270,16 +261,17 @@ class ExplainModule(nn.Module):
     
 
     def forward(self, node_idx):
-        print('node_idx', node_idx)
+        #print('node_idx', node_idx)
         self.masked_ver = self._masked_adj_ver()  # masked adj is the adj matrix with the mask applied
         self.masked_hor = self._masked_adj_hor()  # masked adj is the adj matrix with the mask applied
-        print('masked_hor', self.masked_hor)
+        #print('masked_hor', self.masked_hor)
 
         #ypred = self.model(self.masked_hor, self.masked_ver)
         ypred = self.model.forward2(self.masked_hor, self.masked_ver)
-        print('ypred', ypred)
+        #print('ypred', ypred)
         node_pred = ypred[node_idx,:]
         res = nn.Softmax(dim=0)(node_pred[0:])
+        
 
         print('res:', res)
         return res,   self.masked_hor, self.masked_ver
@@ -306,14 +298,11 @@ class ExplainModule(nn.Module):
         """
 
         # prediction loss
-        #pred_label_node = pred_label[node_idx]
-
-        #pred_label_node = pred_label
-        print('label', self.label)
+        lambda_reg = 0.5
+        #print('label', self.label)
         
         gt_label_node = self.label#[node_idx]
         logit = pred[gt_label_node]
-        print('logit', logit)
         pred_loss =  -torch.log(logit) * self.coeffs["pred"]
 
         # size loss
@@ -328,14 +317,17 @@ class ExplainModule(nn.Module):
         print('mask_without_small', mask_without_small)
         if len(mask_without_small) < len(mask):
 
-            size_loss = 1000* self.coeffs["size"] * torch.var(mask_without_small)
+            size_loss =  100*self.coeffs["size"] * torch.var(mask_without_small)
         else:    
-            size_loss = self.coeffs["size"] * torch.var(mask_without_small)
+            size_loss = self.coeffs["size"] * torch.var(mask_without_small)+ lambda_reg * torch.norm(mask_without_small, p=1)
         #size_loss = self.size_loss_f(mask, self.coeffs)
 
         num_high = len([i for i in mask if i > 0.5])
+        print('num_high', num_high,'len(mask)', len(mask))
         #size_num_loss = self.coeffs["size_num"] * num_high #(num_high - self.num_nodes / 2) ** 2
-        size_num_loss = self.coeffs["size_num"] * (len(mask) - num_high / 2) ** 2
+        #size_num_loss = self.coeffs["size_num"] * (len(mask) - num_high / 2) ** 2
+        #size_num_loss = self.coeffs["size_num"] * (num_high+0.0001)/len(mask) 
+        size_num_loss = self.coeffs["size_num"] * (num_high+0.0001)/len(mask) 
 
 
 
@@ -344,8 +336,12 @@ class ExplainModule(nn.Module):
         # entropy edge mask 
         mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
         mask_ent_loss = self.coeffs["ent"] * torch.mean(mask_ent)
-        
 
+        
+        if len(mask_without_small) <=3:
+            loss = pred_loss
+        else:
+            loss = pred_loss + size_loss + size_num_loss + mask_ent_loss
 
         # laplacian loss
         # D = torch.diag(torch.sum(self.masked_adj[0], 0))
@@ -356,7 +352,7 @@ class ExplainModule(nn.Module):
 
         # lap_loss = (self.coeffs["lap"] * (pred_label_t @ L @ pred_label_t) / self.masked_adj())
 
-        loss = pred_loss + size_loss + size_num_loss# + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
+        #loss = pred_loss + size_loss + size_num_loss# + mask_ent_loss #+ lap_loss  # feat_mask_ent_loss 
         print('pred_loss', pred_loss)
         print('size_loss', size_loss)
         print('size_num_loss', size_num_loss)
@@ -371,7 +367,7 @@ class ExplainModule(nn.Module):
 
 import wandb
 
-def main(name,prune=True):
+def main(name,node_idx, prune=True, explain_all = False):
 
 
 
@@ -383,9 +379,9 @@ def main(name,prune=True):
         data = torch.load(f'data/IMDB/finals/{name}.pt')
     if prune:
         data = prunee(data, 2)
-        data.triples = torch.tensor(data.triples)
-        data.withheld = torch.tensor(data.withheld)
-        data.training = torch.tensor(data.training)
+        data.triples = data.triples.clone().detach()
+        data.withheld = data.withheld.clone().detach()
+        data.training = data.training.clone().detach()
 
           
     print(f'Number of entities: {data.num_entities}') #data.i2e
@@ -396,27 +392,108 @@ def main(name,prune=True):
     d_classes(data)
     #breakpoint()
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
-    #print(len(d.keys()))
-    node_idx = 5757 #d[0][0]
-    print('node_idx', node_idx)
-    model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
-    explainer = Explainer(model, data,name,  node_idx, n_hops, prune)
-    masked_hor, masked_ver = explainer.explain(node_idx)
-    if not os.path.exists(f'chk/{name}_chk/masked_adj'):
-            os.makedirs(f'chk/{name}_chk/masked_adj') 
-    torch.save(masked_ver, f'chk/{name}_chk/masked_adj/masked_ver{node_idx}_new')
-    torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}_new') 
-    print('masked_ver', masked_ver)
-    h = visualize(node_idx, n_hops, data, masked_ver,threshold=0.5, name = name, result_weights=False, low_threshold=False)
-    h = selected(masked_ver, threshold=0.5,data=data, low_threshold=False)
-    res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
-    print('ypred explain', res)
 
-    hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
-    y_full = model.forward2(hor_graph, ver_graph)
-    node_pred_full = y_full[node_idx, :]
-    res_full = nn.Softmax(dim=0)(node_pred_full)
-    print('ypred full', res_full)
+
+    model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
+    high = []
+    high_floats = []
+    low = []
+    relations = [data.i2rel[i][0] for i in range(len(data.i2rel))]
+    model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
+    relations = ['label', 'node_idx'] + relations
+    df = pd.DataFrame(columns=relations)
+    df_floats = pd.DataFrame(columns=relations)
+    if explain_all == True:
+        for target_label in range(len(d.keys())):
+            for node_idx in d[target_label]:
+                
+                explainer = Explainer(model, data,name,  node_idx, n_hops, prune)
+                masked_hor, masked_ver = explainer.explain(node_idx)
+                if not os.path.exists(f'chk/{name}_chk/masked_adj'):
+                        os.makedirs(f'chk/{name}_chk/masked_adj') 
+                torch.save(masked_ver, f'chk/{name}_chk/masked_adj/masked_ver{node_idx}_new')
+                torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}_new') 
+                #print('masked_ver', masked_ver)
+                h = visualize(node_idx, n_hops, data, masked_ver,threshold=0.5, name = name, result_weights=False, low_threshold=False)
+                h = selected(masked_ver, threshold=0.5,data=data, low_threshold=False)
+                res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
+                #print('ypred explain', res)
+
+                hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+                y_full = model.forward2(hor_graph, ver_graph)
+                node_pred_full = y_full[node_idx, :]
+                res_full = nn.Softmax(dim=0)(node_pred_full)
+                #print('ypred full', res_full)
+
+                high.append(h)
+                h = dict(h)
+                info = {'label': target_label, 'node_idx': str(node_idx)}
+                h.update(info)
+                df.loc[str(node_idx)] = h
+
+                # h_floats = selected_float(masked_ver, threshold=0.5,data=data, low_threshold=False)
+                # high_floats.append(h_floats)
+                # h_floats = dict(h_floats)
+                # h_floats.update(info)
+                # df_floats.loc[str(node_idx)] = h_floats
+
+                print('node_idx', node_idx, 
+                    '\n node original label',[k for k, v in d.items() if node_idx in v],
+                    '\n node predicted label explain', torch.argmax(res).item(),
+                    '\n node prediction probability explain', res,
+                        '\n node predicted label full', torch.argmax(res_full).item(),
+                        'most important relations ', h,
+                        '\n final masks and lenght', masked_ver, len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>0.5]),
+                        '---------------------------------------------------------------')
+        if not os.path.exists(f'Relation_Importance_{name}'):
+            os.makedirs(f'Relation_Importance_{name}') 
+        df.to_csv(f'Relation_Importance_{name}/Relations_Important_all_{name}.csv', index=False) 
+        #df_floats.to_csv(f'Relation_Importance_{name}/Relations_Important_all_{name}_{node_idx}_floats.csv', index=False) 
+                
+    else:
+        explainer = Explainer(model, data,name,  node_idx, n_hops, prune)
+        masked_hor, masked_ver = explainer.explain(node_idx)
+        if not os.path.exists(f'chk/{name}_chk/masked_adj'):
+                os.makedirs(f'chk/{name}_chk/masked_adj') 
+        torch.save(masked_ver, f'chk/{name}_chk/masked_adj/masked_ver{node_idx}_new')
+        torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}_new') 
+        #print('masked_ver', masked_ver)
+        h = visualize(node_idx, n_hops, data, masked_ver,threshold=0.5, name = name, result_weights=False, low_threshold=False)
+        h = selected(masked_ver, threshold=0.5,data=data, low_threshold=False)
+        res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
+        #print('ypred explain', res)
+
+        hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+        y_full = model.forward2(hor_graph, ver_graph)
+        node_pred_full = y_full[node_idx, :]
+        res_full = nn.Softmax(dim=0)(node_pred_full)
+        #print('ypred full', res_full)
+        high.append(h)
+        h = dict(h)
+
+        h_floats = selected_float(masked_ver, threshold=0.5,data=data, low_threshold=False)
+        high_floats.append(h_floats)
+        h_floats = dict(h_floats)
+
+        target_label = str([k for k, v in d.items() if node_idx in v])
+        info = {'label': target_label, 'node_idx': str(node_idx)}
+        h.update(info)
+        h_floats.update(info)
+        df.loc[str(node_idx)] = h
+        df_floats.loc[str(node_idx)] = h_floats
+
+
+        print('node_idx', node_idx, 
+            '\n node original label',target_label,
+            '\n node predicted label explain', torch.argmax(res).item(),
+            '\n node prediction probability explain', res,
+            '\n node predicted label full', torch.argmax(res_full).item(),
+            '\n final masks and lenght', masked_ver, len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>0.5]))
+        if not os.path.exists(f'Relation_Importance_{name}'):
+            os.makedirs(f'Relation_Importance_{name}') 
+        df.to_csv(f'Relation_Importance_{name}/Relations_Important_{name}_{node_idx}.csv', index=False)
+        df_floats.to_csv(f'Relation_Importance_{name}/Relations_Important_{name}_{node_idx}_floats.csv', index=False)
+
 
 if __name__ == "__main__":
-    main('aifb',prune= True)    
+    main('aifb',node_idx= 5731, prune= True, explain_all = False)    
