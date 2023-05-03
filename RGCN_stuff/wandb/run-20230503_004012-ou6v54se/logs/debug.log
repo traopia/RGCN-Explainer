@@ -1,0 +1,89 @@
+2023-05-03 00:40:12,694 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Configure stats pid to 31140
+2023-05-03 00:40:12,697 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/.config/wandb/settings
+2023-05-03 00:40:12,698 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/settings
+2023-05-03 00:40:12,698 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-05-03 00:40:12,698 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'RGCN_stuff/r.py', 'program': 'r.py'}
+2023-05-03 00:40:12,699 INFO    MainThread:31140 [wandb_init.py:_log_setup():507] Logging user logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004012-ou6v54se/logs/debug.log
+2023-05-03 00:40:12,699 INFO    MainThread:31140 [wandb_init.py:_log_setup():508] Logging internal logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004012-ou6v54se/logs/debug-internal.log
+2023-05-03 00:40:12,699 INFO    MainThread:31140 [wandb_init.py:init():547] calling init triggers
+2023-05-03 00:40:12,700 INFO    MainThread:31140 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'pred': 1, 'size': -10, 'feat_size': 1.0, 'ent': 1, 'feat_ent': 0.1, 'grad': 1, 'lap': 1.0, 'size_num': 1, 'lr': 0.5}
+2023-05-03 00:40:12,700 INFO    MainThread:31140 [wandb_init.py:init():590] wandb.init() called when a run is still active
+2023-05-03 00:40:57,954 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Configure stats pid to 31140
+2023-05-03 00:40:57,958 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/.config/wandb/settings
+2023-05-03 00:40:57,958 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/settings
+2023-05-03 00:40:57,959 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-05-03 00:40:57,959 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'RGCN_stuff/r.py', 'program': 'r.py'}
+2023-05-03 00:40:57,960 INFO    MainThread:31140 [wandb_init.py:_log_setup():507] Logging user logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004057-m99zcbj0/logs/debug.log
+2023-05-03 00:40:57,961 INFO    MainThread:31140 [wandb_init.py:_log_setup():508] Logging internal logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004057-m99zcbj0/logs/debug-internal.log
+2023-05-03 00:40:57,961 INFO    MainThread:31140 [wandb_init.py:init():547] calling init triggers
+2023-05-03 00:40:57,962 INFO    MainThread:31140 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'pred': 1, 'size': -10, 'feat_size': 1.0, 'ent': 1, 'feat_ent': 0.1, 'grad': 1, 'lap': 1.0, 'size_num': 1, 'lr': 0.5}
+2023-05-03 00:40:57,962 INFO    MainThread:31140 [wandb_init.py:init():590] wandb.init() called when a run is still active
+2023-05-03 00:42:42,547 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Configure stats pid to 31140
+2023-05-03 00:42:42,550 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/.config/wandb/settings
+2023-05-03 00:42:42,551 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/settings
+2023-05-03 00:42:42,551 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-05-03 00:42:42,551 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'RGCN_stuff/r.py', 'program': 'r.py'}
+2023-05-03 00:42:42,552 INFO    MainThread:31140 [wandb_init.py:_log_setup():507] Logging user logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004242-1smc72nj/logs/debug.log
+2023-05-03 00:42:42,552 INFO    MainThread:31140 [wandb_init.py:_log_setup():508] Logging internal logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004242-1smc72nj/logs/debug-internal.log
+2023-05-03 00:42:42,553 INFO    MainThread:31140 [wandb_init.py:init():547] calling init triggers
+2023-05-03 00:42:42,553 INFO    MainThread:31140 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'pred': 1, 'size': -10, 'feat_size': 1.0, 'ent': 1, 'feat_ent': 0.1, 'grad': 1, 'lap': 1.0, 'size_num': 1, 'lr': 0.5}
+2023-05-03 00:42:42,554 INFO    MainThread:31140 [wandb_init.py:init():590] wandb.init() called when a run is still active
+2023-05-03 00:43:35,399 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Configure stats pid to 31140
+2023-05-03 00:43:35,401 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/.config/wandb/settings
+2023-05-03 00:43:35,402 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/settings
+2023-05-03 00:43:35,402 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-05-03 00:43:35,402 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'RGCN_stuff/r.py', 'program': 'r.py'}
+2023-05-03 00:43:35,403 INFO    MainThread:31140 [wandb_init.py:_log_setup():507] Logging user logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004335-pk8j2cpe/logs/debug.log
+2023-05-03 00:43:35,403 INFO    MainThread:31140 [wandb_init.py:_log_setup():508] Logging internal logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004335-pk8j2cpe/logs/debug-internal.log
+2023-05-03 00:43:35,403 INFO    MainThread:31140 [wandb_init.py:init():547] calling init triggers
+2023-05-03 00:43:35,404 INFO    MainThread:31140 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'pred': 1, 'size': -10, 'feat_size': 1.0, 'ent': 1, 'feat_ent': 0.1, 'grad': 1, 'lap': 1.0, 'size_num': 1, 'lr': 0.5}
+2023-05-03 00:43:35,404 INFO    MainThread:31140 [wandb_init.py:init():590] wandb.init() called when a run is still active
+2023-05-03 00:44:34,204 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Configure stats pid to 31140
+2023-05-03 00:44:34,208 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/.config/wandb/settings
+2023-05-03 00:44:34,208 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/settings
+2023-05-03 00:44:34,209 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-05-03 00:44:34,209 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'RGCN_stuff/r.py', 'program': 'r.py'}
+2023-05-03 00:44:34,209 INFO    MainThread:31140 [wandb_init.py:_log_setup():507] Logging user logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004434-gbxq7i5b/logs/debug.log
+2023-05-03 00:44:34,210 INFO    MainThread:31140 [wandb_init.py:_log_setup():508] Logging internal logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004434-gbxq7i5b/logs/debug-internal.log
+2023-05-03 00:44:34,210 INFO    MainThread:31140 [wandb_init.py:init():547] calling init triggers
+2023-05-03 00:44:34,211 INFO    MainThread:31140 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'pred': 1, 'size': -10, 'feat_size': 1.0, 'ent': 1, 'feat_ent': 0.1, 'grad': 1, 'lap': 1.0, 'size_num': 1, 'lr': 0.5}
+2023-05-03 00:44:34,211 INFO    MainThread:31140 [wandb_init.py:init():590] wandb.init() called when a run is still active
+2023-05-03 00:45:24,267 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Configure stats pid to 31140
+2023-05-03 00:45:24,270 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/.config/wandb/settings
+2023-05-03 00:45:24,271 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/settings
+2023-05-03 00:45:24,271 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-05-03 00:45:24,271 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'RGCN_stuff/r.py', 'program': 'r.py'}
+2023-05-03 00:45:24,272 INFO    MainThread:31140 [wandb_init.py:_log_setup():507] Logging user logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004524-qcjgl1yt/logs/debug.log
+2023-05-03 00:45:24,272 INFO    MainThread:31140 [wandb_init.py:_log_setup():508] Logging internal logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004524-qcjgl1yt/logs/debug-internal.log
+2023-05-03 00:45:24,273 INFO    MainThread:31140 [wandb_init.py:init():547] calling init triggers
+2023-05-03 00:45:24,273 INFO    MainThread:31140 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'pred': 1, 'size': -10, 'feat_size': 1.0, 'ent': 1, 'feat_ent': 0.1, 'grad': 1, 'lap': 1.0, 'size_num': 1, 'lr': 0.5}
+2023-05-03 00:45:24,273 INFO    MainThread:31140 [wandb_init.py:init():590] wandb.init() called when a run is still active
+2023-05-03 00:46:11,982 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Configure stats pid to 31140
+2023-05-03 00:46:11,986 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/.config/wandb/settings
+2023-05-03 00:46:11,987 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/settings
+2023-05-03 00:46:11,987 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-05-03 00:46:11,988 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'RGCN_stuff/r.py', 'program': 'r.py'}
+2023-05-03 00:46:11,988 INFO    MainThread:31140 [wandb_init.py:_log_setup():507] Logging user logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004611-cgtt2u37/logs/debug.log
+2023-05-03 00:46:11,989 INFO    MainThread:31140 [wandb_init.py:_log_setup():508] Logging internal logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004611-cgtt2u37/logs/debug-internal.log
+2023-05-03 00:46:11,989 INFO    MainThread:31140 [wandb_init.py:init():547] calling init triggers
+2023-05-03 00:46:11,990 INFO    MainThread:31140 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'pred': 1, 'size': -10, 'feat_size': 1.0, 'ent': 1, 'feat_ent': 0.1, 'grad': 1, 'lap': 1.0, 'size_num': 1, 'lr': 0.5}
+2023-05-03 00:46:11,990 INFO    MainThread:31140 [wandb_init.py:init():590] wandb.init() called when a run is still active
+2023-05-03 00:46:55,787 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Configure stats pid to 31140
+2023-05-03 00:46:55,792 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/.config/wandb/settings
+2023-05-03 00:46:55,793 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/settings
+2023-05-03 00:46:55,794 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-05-03 00:46:55,795 INFO    MainThread:31140 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'RGCN_stuff/r.py', 'program': 'r.py'}
+2023-05-03 00:46:55,796 INFO    MainThread:31140 [wandb_init.py:_log_setup():507] Logging user logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004655-j0evjl3h/logs/debug.log
+2023-05-03 00:46:55,797 INFO    MainThread:31140 [wandb_init.py:_log_setup():508] Logging internal logs to /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230503_004655-j0evjl3h/logs/debug-internal.log
+2023-05-03 00:46:55,798 INFO    MainThread:31140 [wandb_init.py:init():547] calling init triggers
+2023-05-03 00:46:55,798 INFO    MainThread:31140 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'pred': 1, 'size': -10, 'feat_size': 1.0, 'ent': 1, 'feat_ent': 0.1, 'grad': 1, 'lap': 1.0, 'size_num': 1, 'lr': 0.5}
+2023-05-03 00:46:55,799 INFO    MainThread:31140 [wandb_init.py:init():590] wandb.init() called when a run is still active
+2023-05-03 00:48:04,196 WARNING MsgRouterThr:31140 [router.py:message_loop():77] message_loop has been closed
