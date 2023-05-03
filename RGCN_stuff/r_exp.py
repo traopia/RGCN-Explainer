@@ -496,4 +496,4 @@ def main(name,node_idx, prune=True, explain_all = False):
 
 
 if __name__ == "__main__":
-    main('aifb',node_idx= 5731, prune= True, explain_all = False)    
+    main('aifb',node_idx= 5731, prune= True, explain_all = True)    
