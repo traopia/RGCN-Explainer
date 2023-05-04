@@ -131,11 +131,11 @@ class Explainer:
         self.model.eval()
         explainer.train()  # set the explainer model to training mode
 
-        for epoch in range(10):
+        for epoch in range(20):
             explainer.zero_grad()  # zero the gradient buffers of all parameters
             explainer.optimizer.zero_grad()
             ypred, masked_hor, masked_ver = explainer(self.node_idx)  # forward pass of the explainer
-            loss = explainer.loss(ypred, pred_label, self.node_idx, epoch)  # loss function
+            loss, pred_loss, size_loss, size_num_loss, mask_ent_loss, reg_loss = explainer.loss(ypred, pred_label, self.node_idx, epoch)  # loss function
             print('loss:', loss)
 
             loss.backward()
@@ -151,7 +151,10 @@ class Explainer:
                 "; pred: ",
                 ypred,
             )
-            wandb.log({"len mask > 0.5": len([i for i in masked_ver.coalesce().values() if i > 0.5]), "loss": loss})
+            wandb.log({"len mask > 0.5": len([i for i in masked_ver.coalesce().values() if i > 0.5]), "loss": loss,
+                       "pred_loss": pred_loss, "size_loss": size_loss, "size_num_loss": size_num_loss,
+                       "mask_ent_loss": mask_ent_loss, "reg_loss": reg_loss})
+            
         print('Finished Training')
 
         masked_hor_values = (masked_hor.coalesce().values() * hor_graph.coalesce().values())
@@ -184,7 +187,7 @@ class ExplainModule(nn.Module):
         
 
         self.coeffs = {
-            "pred": 1,
+            "pred": 10,
             "size": -100,  # 0.005,
             "feat_size": 1.0,
             "ent": 1,
@@ -192,7 +195,8 @@ class ExplainModule(nn.Module):
             "grad": 1,
             "lap": 1.0, 
             "size_num": 0.1,
-            "lr": 0.5}
+            "lr": 0.1,
+            "lambda_reg": 0.1}
         
         self.coeffs_grid = {
             "pred": 1,
@@ -203,7 +207,8 @@ class ExplainModule(nn.Module):
             "grad": 1,
             "lap": 1.0, 
             "size_num": [0.005, 0.05, 0.5],
-            "lr": [0.05, 0.1, 0.5]}
+            "lr": [0.05, 0.1, 0.5],
+            "lambda_reg": 0.1}
         self.optimizer = torch.optim.Adam(params, lr=self.coeffs["lr"], weight_decay=0.1)
 
 
@@ -232,7 +237,7 @@ class ExplainModule(nn.Module):
         sym_mask = (sym_mask + sym_mask.t()) / 2
 
         adj = self.ver_graph.coalesce().values()
-        adj = adj.clone().detach()
+        adj = torch.Tensor(adj)#adj.clone().detach()
 
 
         masked_adj = adj * sym_mask
@@ -249,9 +254,9 @@ class ExplainModule(nn.Module):
 
         sym_mask = (sym_mask + sym_mask.t()) / 2
         adj = self.hor_graph.coalesce().values()
-        adj = adj.clone().detach()
+        adj = torch.Tensor(adj)#adj.clone().detach()
         masked_adj = adj * sym_mask
-        print('masked_adj', masked_adj)
+        #print('masked_adj', masked_adj)
 
         #return masked_adj * self.diag_mask
 
@@ -273,7 +278,7 @@ class ExplainModule(nn.Module):
         res = nn.Softmax(dim=0)(node_pred[0:])
         
 
-        print('res:', res)
+        #print('res:', res)
         return res,   self.masked_hor, self.masked_ver
 
     def size_loss_f(self,mask, coeffs):
@@ -298,10 +303,7 @@ class ExplainModule(nn.Module):
         """
 
         # prediction loss
-        lambda_reg = 0.01
-
-
-        #print('label', self.label)
+        lambda_reg = self.coeffs["lambda_reg"]
         
         gt_label_node = self.label#[node_idx]
         logit = pred[gt_label_node]
@@ -324,12 +326,10 @@ class ExplainModule(nn.Module):
         if len(mask_without_small) < len(mask):
 
             size_loss =  100*self.coeffs["size"] * torch.std(mask_without_small)
-
-
-        # elif len(mask_without_small) < len(mask)/5:
-        #     size_loss =  1000*self.coeffs["size"] * torch.var(mask_without_small) 
-        else:    
-            size_loss = self.coeffs["size"] * torch.std(mask) + lambda_reg * torch.norm(mask_without_small, p=1)
+            reg_loss = 0.1 * lambda_reg * torch.norm(mask_without_small, p=1)
+        else:   
+            reg_loss =  lambda_reg * torch.norm(mask_without_small, p=1)
+            size_loss = self.coeffs["size"] * torch.std(mask) 
         #size_loss = self.size_loss_f(mask, self.coeffs)
 
 
@@ -350,7 +350,7 @@ class ExplainModule(nn.Module):
         if len(mask_without_small) <=3:
             loss = pred_loss
         else:
-            loss = pred_loss + size_loss + size_num_loss + mask_ent_loss
+            loss = pred_loss + size_loss + size_num_loss + mask_ent_loss + reg_loss
 
         # laplacian loss
         # D = torch.diag(torch.sum(self.masked_adj[0], 0))
@@ -367,7 +367,7 @@ class ExplainModule(nn.Module):
         print('size_num_loss', size_num_loss)
 
 
-        return loss
+        return loss, pred_loss, size_loss, size_num_loss, mask_ent_loss, reg_loss
 
 
 
@@ -381,6 +381,7 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
 
 
     n_hops = 0 if prune else 2
+    #n_hops = 2
     if name in ['aifb', 'mutag', 'bgs', 'am']:
         data = kg.load(name, torch=True, final=False)
     else:    
@@ -388,9 +389,9 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         data = torch.load(f'data/IMDB/finals/{name}.pt')
     if prune:
         data = prunee(data, 2)
-        data.triples = data.triples.clone().detach()
-        data.withheld = data.withheld.clone().detach()
-        data.training = data.training.clone().detach()
+        data.triples = torch.Tensor(data.triples).to(int)#data.triples.clone().detach()
+        data.withheld = torch.Tensor(data.withheld).to(int)#data.withheld.clone().detach()
+        data.training = torch.Tensor(data.training).to(int)#data.training.clone().detach()
 
           
     print(f'Number of entities: {data.num_entities}') #data.i2e
@@ -440,11 +441,11 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
                 h.update(info)
                 df.loc[str(node_idx)] = h
 
-                h_floats = selected(masked_ver, threshold=0.5,data=data, low_threshold=False,float=True)
-                high_floats.append(h_floats)
-                h_floats = dict(h_floats)
-                h_floats.update(info)
-                df_floats.loc[str(node_idx)] = h_floats
+                # h_floats = selected(masked_ver, threshold=0.5,data=data, low_threshold=False,float=True)
+                # high_floats.append(h_floats)
+                # h_floats = dict(h_floats)
+                # h_floats.update(info)
+                # df_floats.loc[str(node_idx)] = h_floats
                 if not os.path.exists(f'Relation_Importance_{name}'):
                     os.makedirs(f'Relation_Importance_{name}') 
                     df.to_csv(f'Relation_Importance_{name}/Relations_Important_{name}_{node_idx}.csv', index=False)
@@ -460,9 +461,11 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         if not os.path.exists(f'Relation_Importance_{name}'):
             os.makedirs(f'Relation_Importance_{name}') 
         df.to_csv(f'Relation_Importance_{name}/Relations_Important_all_{name}.csv', index=False) 
-        df_floats.to_csv(f'Relation_Importance_{name}/Relations_Important_all_{name}_{node_idx}_floats.csv', index=False) 
+        #df_floats.to_csv(f'Relation_Importance_{name}/Relations_Important_all_{name}_{node_idx}_floats.csv', index=False) 
                 
     else:
+        if name != 'aifb':
+            node_idx = d[0][0]
         if train:
             explainer = Explainer(model, data,name,  node_idx, n_hops, prune)
             masked_hor, masked_ver = explainer.explain(node_idx)
@@ -486,16 +489,19 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         high.append(h)
         h = dict(h)
 
-        h_floats = selected(masked_ver, threshold=0.5,data=data, low_threshold=False,float=True)
-        high_floats.append(h_floats)
-        h_floats = dict(h_floats)
+
 
         target_label = str([k for k, v in d.items() if node_idx in v])
         info = {'label': str(target_label), 'node_idx': str(node_idx)}
         h.update(info)
-        h_floats.update(info)
+        
         df.loc[str(node_idx)] = h
-        df_floats.loc[str(node_idx)] = h_floats
+
+        # h_floats = selected(masked_ver, threshold=0.5,data=data, low_threshold=False,float=True)
+        # high_floats.append(h_floats)
+        # h_floats = dict(h_floats)
+        # h_floats.update(info)
+        # df_floats.loc[str(node_idx)] = h_floats
 
 
         print('node_idx', node_idx, 
@@ -503,12 +509,14 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
             '\n node predicted label explain', torch.argmax(res).item(),
             '\n node prediction probability explain', res,
             '\n node predicted label full', torch.argmax(res_full).item(),
+            '\n node prediction probability full', res_full,
             '\n final masks and lenght', masked_ver, len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>0.5]))
         if not os.path.exists(f'Relation_Importance_{name}'):
             os.makedirs(f'Relation_Importance_{name}') 
         df.to_csv(f'Relation_Importance_{name}/Relations_Important_{name}_{node_idx}.csv', index=False)
-        df_floats.to_csv(f'Relation_Importance_{name}/Relations_Important_{name}_{node_idx}_floats.csv', index=False)
+        #df_floats.to_csv(f'Relation_Importance_{name}/Relations_Important_{name}_{node_idx}_floats.csv', index=False)
 
 
 if __name__ == "__main__":
     main('aifb',node_idx= 5791, prune= True, explain_all =True, train=True)    
+    #main('aifb',node_idx= 5791, prune= True, explain_all =False, train=True)    
