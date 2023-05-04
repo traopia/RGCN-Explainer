@@ -310,7 +310,7 @@ class ExplainModule(nn.Module):
         # size loss
         mask = self.mask
         num_high = len([i for i in mask if i > 0.5])
-        if len(num_high)>300:
+        if num_high>300:
             lambda_reg = 0.5
         print('num_high', num_high,'len(mask)', len(mask))
         # print('mask', mask)
