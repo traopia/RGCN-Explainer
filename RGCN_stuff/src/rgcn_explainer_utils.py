@@ -263,9 +263,9 @@ def selected(masked_ver, threshold,data, low_threshold, float=False):
             for i,j in zip(triples_matched[:,1],sel_masked_ver.coalesce().values()):
 
                 if data.i2rel[int(i)][0] in l.keys():
-                    l[data.i2rel[int(i)][0]] += np.float(j)
+                    l[data.i2rel[int(i)][0]] += j
                 else:
-                    l[data.i2rel[int(i)][0]] = np.float(j)
+                    l[data.i2rel[int(i)][0]] = j
             return l
 
     else:
