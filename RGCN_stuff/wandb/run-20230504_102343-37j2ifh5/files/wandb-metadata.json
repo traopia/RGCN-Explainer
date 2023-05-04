@@ -1,0 +1,177 @@
+{
+    "os": "Linux-4.19.0-23-amd64-x86_64-with-glibc2.10",
+    "python": "3.8.8",
+    "heartbeatAt": "2023-05-04T08:23:44.219772",
+    "startedAt": "2023-05-04T08:23:43.575424",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "r_exp.py",
+    "codePath": "RGCN_stuff/r_exp.py",
+    "git": {
+        "remote": "git@github.com:traopia/RGCN-Explainer.git",
+        "commit": "ebb9192077c1574c3dcebb0be97371514d1ffb4d"
+    },
+    "email": null,
+    "root": "/home/tliberatore/RGCN-Explainer",
+    "host": "r35n3.lisa.surfsara.nl",
+    "username": "tliberatore",
+    "executable": "/sw/arch/Debian10/EB_production/2021/software/Anaconda3/2021.05/bin/python3",
+    "cpu_count": 24,
+    "cpu_count_logical": 24,
+    "cpu_freq": {
+        "current": 1012.951125,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1000.065,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.185,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.259,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.377,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.047,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.238,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.081,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.031,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.203,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.639,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.278,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.405,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.666,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 999.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.23,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.552,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.487,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.362,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.113,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.117,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.302,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1304.11,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.508,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 1000.574,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "total": 914.0612754821777,
+        "used": 35.543357849121094
+    },
+    "gpu": "NVIDIA TITAN RTX",
+    "gpu_count": 4,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA TITAN RTX",
+            "memory_total": 25769803776
+        },
+        {
+            "name": "NVIDIA TITAN RTX",
+            "memory_total": 25769803776
+        },
+        {
+            "name": "NVIDIA TITAN RTX",
+            "memory_total": 25769803776
+        },
+        {
+            "name": "NVIDIA TITAN RTX",
+            "memory_total": 25769803776
+        }
+    ],
+    "memory": {
+        "total": 187.55839157104492
+    }
+}

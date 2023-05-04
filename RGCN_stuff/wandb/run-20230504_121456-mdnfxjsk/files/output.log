@@ -1,124 +1,5 @@
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: Currently logged in as: t-liberatore. Use `wandb login --relogin` to force relogin
-wandb: wandb version 0.15.1 is available!  To upgrade, please run:
-wandb:  $ pip install wandb --upgrade
-wandb: Tracking run with wandb version 0.15.0
-wandb: Run data is saved locally in /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230504_121456-mdnfxjsk
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run dark-trooper-36
-wandb:  View project at https://wandb.ai/t-liberatore/RGCN-Explainer
-wandb:  View run at https://wandb.ai/t-liberatore/RGCN-Explainer/runs/mdnfxjsk
+
 wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
-  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
-wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
-loaded data aifb (0.1364s).
-Number of entities: 8285
-Number of classes: 4
-Types of relations: 45
-['abstract', 'address', 'author', 'booktitle', 'carriedOutBy', 'carriesOut', 'chapter', 'dealtWithIn', 'edition', 'editor', 'fax', 'financedBy', 'finances', 'hasProject', 'head', 'homepage', 'howpublished', 'isAbout', 'isWorkedOnBy', 'isbn', 'journal', 'member', 'month', 'name', 'note', 'number', 'pages', 'phone', 'photo', 'projectInfo', 'publication', 'publishes', 'series', 'title', 'type', 'volume', 'worksAtProject', 'year', 'type', 'type', 'range', 'subClassOf', 'allValuesFrom', 'inverseOf', 'onProperty']
-node label: 0
-33
 num_high 119 len(mask) 119
 mask_without_small tensor([0.7773, 0.7672, 0.7534, 0.6742, 0.7480, 0.6985, 0.7300, 0.6883, 0.7115,
         0.7710, 0.7209, 0.6938, 0.7121, 0.7166, 0.7110, 0.7500, 0.7708, 0.7270,
@@ -472,11 +353,11 @@ sel masked ver tensor(indices=tensor([[6881, 6888, 6981, 7911, 5937, 5408, 5431,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isWorkedOnBy': 4, 'dealtWithIn': 4, 'author': 4, 'publishes': 3, 'isAbout': 3, 'publication': 2, 'hasProject': 2, 'member': 1, 'fax': 1, 'photo': 1, 'carriedOutBy': 1})
 dict index: {}
-node_idx 5678 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.9040, 0.0413, 0.0194, 0.0353], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'isWorkedOnBy': 4, 'dealtWithIn': 4, 'member': 1, 'publishes': 3, 'fax': 1, 'photo': 1, 'publication': 2, 'carriedOutBy': 1, 'isAbout': 3, 'author': 4, 'hasProject': 2, 'label': 0, 'node_idx': '5678'} 
+node_idx 5678
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.9040, 0.0413, 0.0194, 0.0353], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'isWorkedOnBy': 4, 'dealtWithIn': 4, 'member': 1, 'publishes': 3, 'fax': 1, 'photo': 1, 'publication': 2, 'carriedOutBy': 1, 'isAbout': 3, 'author': 4, 'hasProject': 2, 'label': 0, 'node_idx': '5678'}
  final masks and lenght tensor(indices=tensor([[ 23451,  23458,  23551,  23567,  23615,  23638,  23670,
                          23963,  24431,  24481,  24538,  24580,  24582,  24583,
                          24584,  24585,  39077,  39079,  46927,  46927,  63352,
@@ -529,8 +410,11 @@ node_idx 5678
                       0.4083, 0.9048, 0.3940, 0.4008, 0.4046, 0.3872, 0.4057,
                       0.3872, 0.4003, 0.3900, 0.3895, 0.4042, 0.3877, 0.4118]),
        size=(753935, 8285), nnz=119, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 26 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 26
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 5
 num_high 6 len(mask) 7
@@ -712,17 +596,20 @@ sel masked ver tensor(indices=tensor([[7327, 5724, 5724, 5724, 5724],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1, 'homepage': 1, 'type': 1, 'author': 1})
 dict index: {}
-node_idx 5724 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.4025, 0.2226, 0.2418, 0.1331], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'homepage': 1, 'type': 1, 'author': 1, 'label': 0, 'node_idx': '5724'} 
+node_idx 5724
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.4025, 0.2226, 0.2418, 0.1331], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'homepage': 1, 'type': 1, 'author': 1, 'label': 0, 'node_idx': '5724'}
  final masks and lenght tensor(indices=tensor([[ 23897,  88574, 129999, 196279, 229419, 254274, 328839],
                        [  5724,      0,   3162,   4552,      0,   7327,   5230]]),
        values=tensor([0.9416, 1.5369, 0.9387, 0.3910, 1.3630, 0.3668, 0.9768]),
        size=(753935, 8285), nnz=7, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 5 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 5
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 4
 num_high 4 len(mask) 5
@@ -738,6 +625,7 @@ mask_without_small tensor([0.7880, 0.7652, 0.7770, 0.7766, 0.5473], grad_fn=<Ind
 pred_loss tensor([10.1078], grad_fn=<MulBackward0>)
 size_loss tensor(-10.2895, grad_fn=<MulBackward0>)
 size_num_loss 0.4
+
 loss: tensor([1.1461], grad_fn=<AddBackward0>)
 1
 epoch:  1 ; loss:  1.1460683345794678 ; pred:  tensor([0.3639, 0.2503, 0.2663, 0.1195], grad_fn=<SoftmaxBackward0>)
@@ -893,19 +781,22 @@ sel masked ver tensor(indices=tensor([[5699, 5699, 5699],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1, 'name': 1})
 dict index: {}
-node_idx 5699 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.3631, 0.2871, 0.2776, 0.0723], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'label': 0, 'node_idx': '5699'} 
+node_idx 5699
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.3631, 0.2871, 0.2776, 0.0723], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'label': 0, 'node_idx': '5699'}
  final masks and lenght tensor(indices=tensor([[ 88549, 129974, 196254, 229394, 328814],
                        [     0,   3162,   3153,      0,   5230]]),
        values=tensor([3.7802, 0.4735, 0.9457, 2.0274, 0.3617]),
        size=(753935, 8285), nnz=5, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3
  ---------------------------------------------------------------
 node label: 0
 3
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 num_high 4 len(mask) 4
 mask_without_small tensor([0.7752, 0.7486, 0.7624, 0.7619], grad_fn=<IndexBackward0>)
 pred_loss tensor([11.5813], grad_fn=<MulBackward0>)
@@ -1074,16 +965,16 @@ sel masked ver tensor(indices=tensor([[5688, 5688],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1})
 dict index: {}
-node_idx 5688 
- node original label [0] 
- node predicted label explain 1 
- node prediction probability explain tensor([0.3590, 0.4067, 0.1501, 0.0843], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'label': 0, 'node_idx': '5688'} 
+node_idx 5688
+ node original label [0]
+ node predicted label explain 1
+ node prediction probability explain tensor([0.3590, 0.4067, 0.1501, 0.0843], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'label': 0, 'node_idx': '5688'}
  final masks and lenght tensor(indices=tensor([[ 88538, 196243, 229383, 328803],
                        [     0,   1579,      0,   5230]]),
        values=tensor([3.7488, 0.3670, 3.7410, 0.3982]),
        size=(753935, 8285), nnz=4, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 2 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 2
  ---------------------------------------------------------------
 node label: 0
 4
@@ -1094,6 +985,9 @@ pred_loss tensor([12.1878], grad_fn=<MulBackward0>)
 size_loss tensor(-6.8377, grad_fn=<MulBackward0>)
 size_num_loss 0.5
 loss: tensor([6.8657], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  6.865707874298096 ; pred:  tensor([0.2956, 0.3296, 0.2312, 0.1436], grad_fn=<SoftmaxBackward0>)
 num_high 5 len(mask) 6
@@ -1259,17 +1153,20 @@ sel masked ver tensor(indices=tensor([[7996, 5702, 5702, 5702],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1, 'name': 1, 'author': 1})
 dict index: {}
-node_idx 5702 
- node original label [0] 
- node predicted label explain 1 
- node prediction probability explain tensor([0.3227, 0.4347, 0.1644, 0.0783], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'author': 1, 'label': 0, 'node_idx': '5702'} 
+node_idx 5702
+ node original label [0]
+ node predicted label explain 1
+ node prediction probability explain tensor([0.3227, 0.4347, 0.1644, 0.0783], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'author': 1, 'label': 0, 'node_idx': '5702'}
  final masks and lenght tensor(indices=tensor([[ 24566,  88552, 196257, 229397, 254252, 328817],
                        [  5702,      0,   3466,      0,   7996,   5230]]),
        values=tensor([0.9491, 3.3334, 0.9422, 3.7647, 0.3308, 0.3642]),
        size=(753935, 8285), nnz=6, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 4 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 4
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 3
 num_high 4 len(mask) 4
@@ -1440,17 +1337,20 @@ sel masked ver tensor(indices=tensor([[5714, 5714],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1})
 dict index: {}
-node_idx 5714 
- node original label [0] 
- node predicted label explain 1 
- node prediction probability explain tensor([0.3590, 0.4067, 0.1501, 0.0843], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'label': 0, 'node_idx': '5714'} 
+node_idx 5714
+ node original label [0]
+ node predicted label explain 1
+ node prediction probability explain tensor([0.3590, 0.4067, 0.1501, 0.0843], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'label': 0, 'node_idx': '5714'}
  final masks and lenght tensor(indices=tensor([[ 88564, 196269, 229409, 328829],
                        [     0,   4560,      0,   5230]]),
        values=tensor([3.7488, 0.3670, 3.7410, 0.3982]),
        size=(753935, 8285), nnz=4, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 2 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 2
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 4
 num_high 4 len(mask) 5
@@ -1621,17 +1521,20 @@ sel masked ver tensor(indices=tensor([[5708, 5708, 5708],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1, 'name': 1})
 dict index: {}
-node_idx 5708 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.3631, 0.2871, 0.2776, 0.0723], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'label': 0, 'node_idx': '5708'} 
+node_idx 5708
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.3631, 0.2871, 0.2776, 0.0723], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'label': 0, 'node_idx': '5708'}
  final masks and lenght tensor(indices=tensor([[ 88558, 129983, 196263, 229403, 328823],
                        [     0,   3162,   4855,      0,   5230]]),
        values=tensor([3.7802, 0.4735, 0.9457, 2.0274, 0.3617]),
        size=(753935, 8285), nnz=5, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 18
 num_high 48 len(mask) 48
@@ -1881,11 +1784,11 @@ sel masked ver tensor(indices=tensor([[7250, 7384, 7632, 7930, 5486, 5843, 7688,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isAbout': 6, 'author': 4, 'isWorkedOnBy': 3, 'publication': 2, 'hasProject': 2, 'dealtWithIn': 1, 'fax': 1, 'phone': 1, 'name': 1, 'homepage': 1, 'worksAtProject': 1, 'projectInfo': 1})
 dict index: {}
-node_idx 5843 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.6448, 0.2206, 0.0661, 0.0685], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'isWorkedOnBy': 3, 'dealtWithIn': 1, 'fax': 1, 'phone': 1, 'name': 1, 'homepage': 1, 'worksAtProject': 1, 'publication': 2, 'isAbout': 6, 'projectInfo': 1, 'author': 4, 'hasProject': 2, 'label': 0, 'node_idx': '5843'} 
+node_idx 5843
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.6448, 0.2206, 0.0661, 0.0685], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'isWorkedOnBy': 3, 'dealtWithIn': 1, 'fax': 1, 'phone': 1, 'name': 1, 'homepage': 1, 'worksAtProject': 1, 'publication': 2, 'isAbout': 6, 'projectInfo': 1, 'author': 4, 'hasProject': 2, 'label': 0, 'node_idx': '5843'}
  final masks and lenght tensor(indices=tensor([[ 23820,  23954,  24202,  24258,  24500,  63345,  63451,
                          63480,  63481,  63481,  63488,  63488,  88693, 115089,
                         115337, 115393, 115393, 130118, 146768, 146768, 146768,
@@ -1908,8 +1811,11 @@ node_idx 5843
                       0.9551, 3.5091, 0.3767, 0.8756, 0.3756, 0.3913, 0.9435,
                       0.3706, 0.3847, 0.3771, 0.9587, 0.7814, 0.3725]),
        size=(753935, 8285), nnz=48, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 24 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 24
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 5
 num_high 4 len(mask) 5
@@ -2080,16 +1986,16 @@ sel masked ver tensor(indices=tensor([[5873, 5873, 5873],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'phone': 1, 'fax': 1, 'photo': 1})
 dict index: {}
-node_idx 5873 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.3170, 0.2750, 0.2392, 0.1688], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'phone': 1, 'fax': 1, 'photo': 1, 'label': 0, 'node_idx': '5873'} 
+node_idx 5873
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.3170, 0.2750, 0.2392, 0.1688], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'phone': 1, 'fax': 1, 'photo': 1, 'label': 0, 'node_idx': '5873'}
  final masks and lenght tensor(indices=tensor([[ 88723, 196428, 229568, 237853, 328988],
                        [    81,   2258,     34,   5648,   5230]]),
        values=tensor([0.9451, 0.4734, 0.9457, 0.5056, 0.3609]),
        size=(753935, 8285), nnz=5, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3
  ---------------------------------------------------------------
 node label: 0
 4
@@ -2099,6 +2005,9 @@ pred_loss tensor([10.1398], grad_fn=<MulBackward0>)
 size_loss tensor(-8.4024, grad_fn=<MulBackward0>)
 size_num_loss 0.4
 loss: tensor([3.0764], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  3.0763533115386963 ; pred:  tensor([0.3628, 0.2503, 0.2652, 0.1217], grad_fn=<SoftmaxBackward0>)
 num_high 4 len(mask) 5
@@ -2261,17 +2170,20 @@ sel masked ver tensor(indices=tensor([[5697, 5697, 5697],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1, 'name': 1})
 dict index: {}
-node_idx 5697 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.3631, 0.2871, 0.2776, 0.0723], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'label': 0, 'node_idx': '5697'} 
+node_idx 5697
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.3631, 0.2871, 0.2776, 0.0723], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'label': 0, 'node_idx': '5697'}
  final masks and lenght tensor(indices=tensor([[ 88547, 129972, 196252, 229392, 328812],
                        [     0,   3162,   4568,      0,   5230]]),
        values=tensor([3.7802, 0.4735, 0.9457, 2.0274, 0.3617]),
        size=(753935, 8285), nnz=5, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 12
 num_high 14 len(mask) 16
@@ -2467,11 +2379,11 @@ sel masked ver tensor(indices=tensor([[6841, 7733, 7734, 5783, 5414, 5783, 5783]
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'author': 3, 'isWorkedOnBy': 1, 'fax': 1, 'phone': 1, 'type': 1})
 dict index: {}
-node_idx 5783 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.3348, 0.2719, 0.2090, 0.1843], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'isWorkedOnBy': 1, 'fax': 1, 'phone': 1, 'type': 1, 'author': 3, 'label': 0, 'node_idx': '5783'} 
+node_idx 5783
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.3348, 0.2719, 0.2090, 0.1843], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'isWorkedOnBy': 1, 'fax': 1, 'phone': 1, 'type': 1, 'author': 3, 'label': 0, 'node_idx': '5783'}
  final masks and lenght tensor(indices=tensor([[ 23411,  24303,  24304,  24306,  88633, 154486, 154544,
                         154562, 196338, 229478, 237763, 254333, 254333, 254333,
                         254333, 328898],
@@ -2482,8 +2394,11 @@ node_idx 5783
                       0.3852, 0.3524, 0.9646, 0.3695, 0.3700, 0.3559, 0.3657,
                       0.3526, 0.9266]),
        size=(753935, 8285), nnz=16, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 7 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 7
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 4
 num_high 4 len(mask) 5
@@ -2654,17 +2569,20 @@ sel masked ver tensor(indices=tensor([[5701, 5701, 5701],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1, 'name': 1})
 dict index: {}
-node_idx 5701 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.3631, 0.2871, 0.2776, 0.0723], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'label': 0, 'node_idx': '5701'} 
+node_idx 5701
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.3631, 0.2871, 0.2776, 0.0723], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'name': 1, 'label': 0, 'node_idx': '5701'}
  final masks and lenght tensor(indices=tensor([[ 88551, 129976, 196256, 229396, 328816],
                        [     0,   3162,   3957,      0,   5230]]),
        values=tensor([3.7802, 0.4735, 0.9457, 2.0274, 0.3617]),
        size=(753935, 8285), nnz=5, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 29
 num_high 111 len(mask) 111
@@ -3005,11 +2923,11 @@ sel masked ver tensor(indices=tensor([[7377, 7378, 7379, 7688, 5502, 5447, 5448,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'dealtWithIn': 6, 'isWorkedOnBy': 5, 'author': 4, 'publication': 3, 'isAbout': 3, 'publishes': 2, 'worksAtProject': 2, 'hasProject': 2, 'carriesOut': 1, 'member': 1})
 dict index: {}
-node_idx 5845 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.9264, 0.0291, 0.0062, 0.0382], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'isWorkedOnBy': 5, 'dealtWithIn': 6, 'carriesOut': 1, 'publishes': 2, 'worksAtProject': 2, 'publication': 3, 'isAbout': 3, 'member': 1, 'author': 4, 'hasProject': 2, 'label': 0, 'node_idx': '5845'} 
+node_idx 5845
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.9264, 0.0291, 0.0062, 0.0382], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'isWorkedOnBy': 5, 'dealtWithIn': 6, 'carriesOut': 1, 'publishes': 2, 'worksAtProject': 2, 'publication': 3, 'isAbout': 3, 'member': 1, 'author': 4, 'hasProject': 2, 'label': 0, 'node_idx': '5845'}
  final masks and lenght tensor(indices=tensor([[ 23947,  23948,  23949,  23954,  24148,  24181,  24183,
                          24184,  24202,  24258,  24523,  39063,  39081,  39130,
                          46927,  46927,  46927,  63345,  63405,  63405,  63405,
@@ -3059,8 +2977,11 @@ node_idx 5845
                       0.3853, 0.4046, 0.8816, 0.3931, 0.3911, 0.9353, 0.3898,
                       0.3979, 0.3951, 0.9106, 0.9465, 0.4040, 0.4191]),
        size=(753935, 8285), nnz=111, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 29 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 29
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 0
 13
 num_high 21 len(mask) 23
@@ -3264,11 +3185,11 @@ sel masked ver tensor(indices=tensor([[6843, 7452, 7477, 7479, 5778, 5502, 5778,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'author': 4, 'publication': 3, 'member': 1, 'publishes': 1, 'name': 1, 'homepage': 1, 'type': 1})
 dict index: {}
-node_idx 5778 
- node original label [0] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.4216, 0.1808, 0.2379, 0.1598], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'member': 1, 'publishes': 1, 'name': 1, 'homepage': 1, 'type': 1, 'publication': 3, 'author': 4, 'label': 0, 'node_idx': '5778'} 
+node_idx 5778
+ node original label [0]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.4216, 0.1808, 0.2379, 0.1598], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'member': 1, 'publishes': 1, 'name': 1, 'homepage': 1, 'type': 1, 'publication': 3, 'author': 4, 'label': 0, 'node_idx': '5778'}
  final masks and lenght tensor(indices=tensor([[ 23413,  24022,  24047,  24048,  24049,  88628, 130053,
                         179487, 196333, 229473, 237758, 254328, 254328, 254328,
                         254328, 254328, 262337, 262337, 262337, 262337, 262337,
@@ -3282,10 +3203,13 @@ node_idx 5778
                       0.3963, 0.9489, 0.3752, 0.3678, 0.9472, 0.3599, 0.3625,
                       0.8204, 0.3658]),
        size=(753935, 8285), nnz=23, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 12 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 12
  ---------------------------------------------------------------
 node label: 1
 30
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 num_high 61 len(mask) 61
 mask_without_small tensor([0.7940, 0.7806, 0.7619, 0.6499, 0.7545, 0.6849, 0.7295, 0.6703, 0.7035,
         0.7856, 0.7169, 0.6783, 0.7044, 0.7107, 0.7028, 0.7573, 0.7854, 0.7253,
@@ -3562,11 +3486,11 @@ sel masked ver tensor(indices=tensor([[6842, 6852, 6896, 7437, 7881, 5924, 6842,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isAbout': 9, 'publication': 7, 'author': 5, 'isWorkedOnBy': 2, 'type': 1, 'worksAtProject': 1, 'member': 1, 'projectInfo': 1})
 dict index: {}
-node_idx 5731 
- node original label [1] 
- node predicted label explain 1 
- node prediction probability explain tensor([0.0129, 0.9432, 0.0181, 0.0258], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 1 most important relations  {'isWorkedOnBy': 2, 'type': 1, 'worksAtProject': 1, 'publication': 7, 'isAbout': 9, 'member': 1, 'projectInfo': 1, 'author': 5, 'label': 1, 'node_idx': '5731'} 
+node_idx 5731
+ node original label [1]
+ node predicted label explain 1
+ node prediction probability explain tensor([0.0129, 0.9432, 0.0181, 0.0258], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 1 most important relations  {'isWorkedOnBy': 2, 'type': 1, 'worksAtProject': 1, 'publication': 7, 'isAbout': 9, 'member': 1, 'projectInfo': 1, 'author': 5, 'label': 1, 'node_idx': '5731'}
  final masks and lenght tensor(indices=tensor([[ 23412,  23422,  23466,  23931,  24007,  24036,  24126,
                          24444,  24449,  24451,  24472,  63450,  88581, 115261,
                         130006, 146769, 147687, 147697, 147741, 148311, 148311,
@@ -3595,7 +3519,7 @@ node_idx 5731
                       0.9343, 0.9547, 0.8780, 0.8606, 0.8904, 0.3800, 0.3863,
                       0.3927, 0.8795, 0.3962, 0.8701, 0.8820]),
        size=(753935, 8285), nnz=61, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 27 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 27
  ---------------------------------------------------------------
 node label: 1
 6
@@ -3606,6 +3530,9 @@ pred_loss tensor([11.1614], grad_fn=<MulBackward0>)
 size_loss tensor(-8.8219, grad_fn=<MulBackward0>)
 size_num_loss 0.6000000000000001
 loss: tensor([4.0094], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  4.009417533874512 ; pred:  tensor([0.2758, 0.3275, 0.2286, 0.1681], grad_fn=<SoftmaxBackward0>)
 num_high 6 len(mask) 7
@@ -3778,17 +3705,20 @@ sel masked ver tensor(indices=tensor([[7693, 5905, 5905, 5905],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'phone': 1, 'name': 1, 'type': 1, 'author': 1})
 dict index: {}
-node_idx 5905 
- node original label [1] 
- node predicted label explain 1 
- node prediction probability explain tensor([0.2794, 0.3205, 0.2262, 0.1740], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 1 most important relations  {'phone': 1, 'name': 1, 'type': 1, 'author': 1, 'label': 1, 'node_idx': '5905'} 
+node_idx 5905
+ node original label [1]
+ node predicted label explain 1
+ node prediction probability explain tensor([0.2794, 0.3205, 0.2262, 0.1740], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 1 most important relations  {'phone': 1, 'name': 1, 'type': 1, 'author': 1, 'label': 1, 'node_idx': '5905'}
  final masks and lenght tensor(indices=tensor([[ 24263,  88755, 196460, 229600, 237885, 254455, 329020],
                        [  5905,     27,   2259,     28,   5670,   7693,   5230]]),
        values=tensor([0.9249, 0.3768, 0.9075, 0.9082, 0.3387, 0.3630, 0.9798]),
        size=(753935, 8285), nnz=7, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 4 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 4
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 1
 13
 num_high 30 len(mask) 31
@@ -4003,11 +3933,11 @@ sel masked ver tensor(indices=tensor([[6927, 7069, 7081, 5503, 5808, 5808, 5808,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'author': 3, 'publication': 2, 'carriesOut': 1, 'publishes': 1, 'fax': 1, 'phone': 1, 'type': 1, 'worksAtProject': 1, 'photo': 1, 'homepage': 1, 'projectInfo': 1})
 dict index: {}
-node_idx 5808 
- node original label [1] 
- node predicted label explain 1 
- node prediction probability explain tensor([0.2708, 0.5224, 0.1072, 0.0996], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 1 most important relations  {'carriesOut': 1, 'publishes': 1, 'fax': 1, 'phone': 1, 'type': 1, 'worksAtProject': 1, 'publication': 2, 'photo': 1, 'homepage': 1, 'projectInfo': 1, 'author': 3, 'label': 1, 'node_idx': '5808'} 
+node_idx 5808
+ node original label [1]
+ node predicted label explain 1
+ node prediction probability explain tensor([0.2708, 0.5224, 0.1072, 0.0996], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 1 most important relations  {'carriesOut': 1, 'publishes': 1, 'fax': 1, 'phone': 1, 'type': 1, 'worksAtProject': 1, 'publication': 2, 'photo': 1, 'homepage': 1, 'projectInfo': 1, 'author': 3, 'label': 1, 'node_idx': '5808'}
  final masks and lenght tensor(indices=tensor([[ 23497,  23639,  23651,  39110,  46928,  63380,  88658,
                         114774, 114786, 130083, 146815, 147772, 147914, 147926,
                         154515, 179488, 179955, 196363, 229503, 237788, 246235,
@@ -4024,10 +3954,13 @@ node_idx 5808
                       0.3800, 0.9130, 0.9179, 0.3930, 0.9487, 0.3790, 0.3730,
                       0.7628, 0.9633, 0.3783]),
        size=(753935, 8285), nnz=31, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 14 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 14
  ---------------------------------------------------------------
 node label: 1
 20
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 num_high 55 len(mask) 55
 mask_without_small tensor([0.7970, 0.7831, 0.7635, 0.6453, 0.7557, 0.6823, 0.7294, 0.6669, 0.7019,
         0.7882, 0.7161, 0.6753, 0.7029, 0.7096, 0.7013, 0.7587, 0.7880, 0.7250,
@@ -4293,11 +4226,11 @@ sel masked ver tensor(indices=tensor([[6898, 6918, 6929, 6973, 5420, 7163, 5965,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isAbout': 5, 'publishes': 4, 'author': 4, 'isWorkedOnBy': 3, 'publication': 3, 'dealtWithIn': 1, 'type': 1, 'worksAtProject': 1, 'member': 1, 'projectInfo': 1, 'hasProject': 1})
 dict index: {}
-node_idx 5785 
- node original label [1] 
- node predicted label explain 1 
- node prediction probability explain tensor([0.0210, 0.9094, 0.0300, 0.0396], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 1 most important relations  {'isWorkedOnBy': 3, 'dealtWithIn': 1, 'publishes': 4, 'type': 1, 'worksAtProject': 1, 'publication': 3, 'isAbout': 5, 'member': 1, 'projectInfo': 1, 'author': 4, 'hasProject': 1, 'label': 1, 'node_idx': '5785'} 
+node_idx 5785
+ node original label [1]
+ node predicted label explain 1
+ node prediction probability explain tensor([0.0210, 0.9094, 0.0300, 0.0396], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 1 most important relations  {'isWorkedOnBy': 3, 'dealtWithIn': 1, 'publishes': 4, 'type': 1, 'worksAtProject': 1, 'publication': 3, 'isAbout': 5, 'member': 1, 'projectInfo': 1, 'author': 4, 'hasProject': 1, 'label': 1, 'node_idx': '5785'}
  final masks and lenght tensor(indices=tensor([[ 23468,  23488,  23499,  23542,  23543,  23690,  23733,
                          39105,  46928,  63415,  63441,  63472,  88635, 114603,
                         114623, 114868, 146810, 146810, 146810, 147763, 147763,
@@ -4323,7 +4256,7 @@ node_idx 5785
                       0.9539, 0.4034, 0.8693, 0.4040, 0.9505, 0.9504, 0.3931,
                       0.9043, 0.3985, 0.8794, 0.9493, 0.8761, 0.3788]),
        size=(753935, 8285), nnz=55, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 25 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 25
  ---------------------------------------------------------------
 node label: 2
 14
@@ -4336,6 +4269,9 @@ pred_loss tensor([4.1189], grad_fn=<MulBackward0>)
 size_loss tensor(-5.9990, grad_fn=<MulBackward0>)
 size_num_loss 2.2
 loss: tensor([2.6229], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  2.62287974357605 ; pred:  tensor([0.0677, 0.1524, 0.6624, 0.1175], grad_fn=<SoftmaxBackward0>)
 num_high 21 len(mask) 24
@@ -4532,11 +4468,11 @@ sel masked ver tensor(indices=tensor([[6860, 6874, 6920, 7731, 7857, 7933, 5757,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'publication': 6, 'author': 6, 'name': 1, 'type': 1})
 dict index: {}
-node_idx 5757 
- node original label [2] 
- node predicted label explain 2 
- node prediction probability explain tensor([0.0792, 0.1706, 0.6153, 0.1350], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'name': 1, 'type': 1, 'publication': 6, 'author': 6, 'label': 2, 'node_idx': '5757'} 
+node_idx 5757
+ node original label [2]
+ node predicted label explain 2
+ node prediction probability explain tensor([0.0792, 0.1706, 0.6153, 0.1350], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'name': 1, 'type': 1, 'publication': 6, 'author': 6, 'label': 2, 'node_idx': '5757'}
  final masks and lenght tensor(indices=tensor([[ 23430,  23444,  23490,  23546,  24301,  24407,  24427,
                          24475,  24503,  24543,  88607, 196312, 229452, 254307,
                         254307, 254307, 254307, 254307, 254307, 254307, 254307,
@@ -4550,8 +4486,11 @@ node_idx 5757
                       0.4561, 0.7915, 0.7751, 0.7612, 0.9516, 0.3686, 0.3720,
                       0.8276, 0.3681, 0.9343]),
        size=(753935, 8285), nnz=24, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 14 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 14
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 2
 41
 num_high 233 len(mask) 233
@@ -5124,12 +5063,12 @@ sel masked ver tensor(indices=tensor([[6868, 6872, 6936, 7075, 7931, 7934, 5948,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isAbout': 14, 'projectInfo': 8, 'publication': 7, 'hasProject': 7, 'author': 6, 'carriedOutBy': 5, 'member': 4, 'dealtWithIn': 3, 'worksAtProject': 3, 'isWorkedOnBy': 2, 'carriesOut': 2, 'publishes': 2, 'type': 1})
 dict index: {}
-node_idx 5797 
- node original label [2] 
- node predicted label explain 2 
+node_idx 5797
+ node original label [2]
+ node predicted label explain 2
  node prediction probability explain tensor([8.0660e-06, 6.9604e-04, 9.9896e-01, 3.3296e-04],
-       grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'isWorkedOnBy': 2, 'dealtWithIn': 3, 'member': 4, 'carriesOut': 2, 'publishes': 2, 'type': 1, 'worksAtProject': 3, 'publication': 7, 'carriedOutBy': 5, 'projectInfo': 8, 'isAbout': 14, 'author': 6, 'hasProject': 7, 'label': 2, 'node_idx': '5797'} 
+       grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'isWorkedOnBy': 2, 'dealtWithIn': 3, 'member': 4, 'carriesOut': 2, 'publishes': 2, 'type': 1, 'worksAtProject': 3, 'publication': 7, 'carriedOutBy': 5, 'projectInfo': 8, 'isAbout': 14, 'author': 6, 'hasProject': 7, 'label': 2, 'node_idx': '5797'}
  final masks and lenght tensor(indices=tensor([[ 23438,  23442,  23506,  23507,  23527,  23576,  23585,
                          23591,  23635,  23645,  23659,  23674,  23677,  24397,
                          24453,  24501,  24504,  24515,  24528,  24574,  24605,
@@ -5233,10 +5172,13 @@ node_idx 5797
                       0.3854, 0.9490, 0.5562, 0.6936, 0.4761, 0.4126, 0.4115,
                       0.4017, 0.6326]),
        size=(753935, 8285), nnz=233, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 64 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 64
  ---------------------------------------------------------------
 node label: 2
 66
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 num_high 410 len(mask) 410
 mask_without_small tensor([0.7567, 0.7510, 0.7432, 0.7012, 0.7403, 0.7138, 0.7305, 0.7085, 0.7206,
         0.7531, 0.7256, 0.7114, 0.7209, 0.7233, 0.7204, 0.7414, 0.7530, 0.7289,
@@ -6126,12 +6068,12 @@ sel masked ver tensor(indices=tensor([[6815, 6839, 6848, 6860, 6919, 7054, 7061,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isAbout': 45, 'author': 18, 'hasProject': 18, 'publication': 17, 'projectInfo': 16, 'isWorkedOnBy': 5, 'dealtWithIn': 1, 'homepage': 1, 'member': 1})
 dict index: {}
-node_idx 5900 
- node original label [2] 
- node predicted label explain 2 
+node_idx 5900
+ node original label [2]
+ node predicted label explain 2
  node prediction probability explain tensor([1.3900e-11, 8.0071e-08, 1.0000e+00, 1.1404e-08],
-       grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'isWorkedOnBy': 5, 'dealtWithIn': 1, 'publication': 17, 'homepage': 1, 'isAbout': 45, 'member': 1, 'projectInfo': 16, 'author': 18, 'hasProject': 18, 'label': 2, 'node_idx': '5900'} 
+       grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'isWorkedOnBy': 5, 'dealtWithIn': 1, 'publication': 17, 'homepage': 1, 'isAbout': 45, 'member': 1, 'projectInfo': 16, 'author': 18, 'hasProject': 18, 'label': 2, 'node_idx': '5900'}
  final masks and lenght tensor(indices=tensor([[ 23385,  23409,  23418,  23420,  23430,  23431,  23436,
                          23440,  23444,  23489,  23490,  23498,  23522,  23546,
                          23549,  23624,  23631,  23633,  23661,  23738,  23950,
@@ -6300,20 +6242,11 @@ node_idx 5900
                       0.5787, 0.4160, 0.4019, 0.4637, 0.4266, 0.4068, 0.4144,
                       0.7392, 0.4172, 0.7086, 0.4092, 0.4970, 0.4044, 0.4088,
                       0.4133, 0.5125, 0.7727, 0.4082, 0.7545, 0.7460, 0.4050,
-                      0.4070, 0.4121, 0.4028, 0.4509, 0.4146, 0.4243, 0.4124,
-                      0.4019, 0.4075, 0.7848, 0.7816, 0.7747, 0.4125, 0.4049,
-                      0.4152, 0.4045, 0.4107, 0.7811, 0.4034, 0.4167, 0.7907,
-                      0.7750, 0.4366, 0.5288, 0.4039, 0.5584, 0.4062, 0.4253,
-                      0.4236, 0.4671, 0.4067, 0.7339, 0.4087, 0.4115, 0.5435,
-                      0.4086, 0.4037, 0.4167, 0.7678, 0.4001, 0.4065, 0.4077,
-                      0.3993, 0.3739, 0.4718, 0.4590, 0.3699, 0.4063, 0.7654,
-                      0.4203, 0.5571, 0.4229, 0.7218, 0.6668, 0.4581, 0.7646,
-                      0.7655, 0.4038, 0.4088, 0.4038]),
-       size=(753935, 8285), nnz=410, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 122 
- ---------------------------------------------------------------
 node label: 2
 43
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 num_high 82 len(mask) 82
 mask_without_small tensor([0.7860, 0.7742, 0.7578, 0.6618, 0.7514, 0.6915, 0.7297, 0.6790, 0.7073,
         0.7786, 0.7188, 0.6859, 0.7081, 0.7135, 0.7068, 0.7538, 0.7784, 0.7261,
@@ -6632,11 +6565,11 @@ sel masked ver tensor(indices=tensor([[7146, 7188, 7268, 7275, 7336, 7525, 7526,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'author': 16, 'publication': 11, 'phone': 1, 'type': 1})
 dict index: {}
-node_idx 5677 
- node original label [2] 
- node predicted label explain 2 
- node prediction probability explain tensor([0.0018, 0.0181, 0.9578, 0.0224], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'phone': 1, 'type': 1, 'publication': 11, 'author': 16, 'label': 2, 'node_idx': '5677'} 
+node_idx 5677
+ node original label [2]
+ node predicted label explain 2
+ node prediction probability explain tensor([0.0018, 0.0181, 0.9578, 0.0224], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'phone': 1, 'type': 1, 'publication': 11, 'author': 16, 'label': 2, 'node_idx': '5677'}
  final masks and lenght tensor(indices=tensor([[ 23716,  23758,  23838,  23841,  23845,  23855,  23856,
                          23898,  23905,  23906,  23981,  24006,  24064,  24090,
                          24091,  24095,  24096,  24097,  24108,  24111,  24131,
@@ -6674,8 +6607,10 @@ node_idx 5677
                       0.9417, 0.3934, 0.9022, 0.3933, 0.3817, 0.8852, 0.4198,
                       0.3892, 0.9462, 0.4115, 0.3927, 0.9446]),
        size=(753935, 8285), nnz=82, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 29 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 29
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
 node label: 2
 202
 num_high 1676 len(mask) 1676
@@ -6685,6 +6620,7 @@ pred_loss tensor([-0.], grad_fn=<MulBackward0>)
 size_loss tensor(-0.6741, grad_fn=<MulBackward0>)
 size_num_loss 167.60000000000002
 loss: tensor([780.1035], grad_fn=<AddBackward0>)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  780.103515625 ; pred:  tensor([0., 0., 1., 0.], grad_fn=<SoftmaxBackward0>)
 num_high 1676 len(mask) 1676
@@ -7453,18 +7389,21 @@ sel masked ver tensor(indices=tensor([[6813, 6817, 6822, 6849, 6867, 6925, 6940,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isAbout': 116, 'projectInfo': 46, 'hasProject': 43, 'author': 35, 'publishes': 32, 'publication': 29, 'dealtWithIn': 16, 'member': 4, 'isWorkedOnBy': 3, 'carriesOut': 3, 'type': 2, 'worksAtProject': 2, 'carriedOutBy': 2, 'name': 1})
 dict index: {}
-node_idx 5791 
- node original label [2] 
- node predicted label explain 2 
+node_idx 5791
+ node original label [2]
+ node predicted label explain 2
  node prediction probability explain tensor([3.1537e-36, 2.1600e-21, 1.0000e+00, 5.2371e-25],
-       grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'dealtWithIn': 16, 'isWorkedOnBy': 3, 'carriesOut': 3, 'publishes': 32, 'name': 1, 'type': 2, 'worksAtProject': 2, 'publication': 29, 'isAbout': 116, 'member': 4, 'projectInfo': 46, 'carriedOutBy': 2, 'author': 35, 'hasProject': 43, 'label': 2, 'node_idx': '5791'} 
+       grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'dealtWithIn': 16, 'isWorkedOnBy': 3, 'carriesOut': 3, 'publishes': 32, 'name': 1, 'type': 2, 'worksAtProject': 2, 'publication': 29, 'isAbout': 116, 'member': 4, 'projectInfo': 46, 'carriedOutBy': 2, 'author': 35, 'hasProject': 43, 'label': 2, 'node_idx': '5791'}
  final masks and lenght tensor(indices=tensor([[ 23383,  23387,  23392,  ..., 304051, 328906, 328906],
                        [  5791,   5791,   5791,  ...,   5988,   5203,   5230]]),
        values=tensor([0.7055, 0.6996, 0.5645,  ..., 0.4099, 0.7009, 0.7048]),
        size=(753935, 8285), nnz=1676, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 334 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 334
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 2
 27
 num_high 98 len(mask) 98
@@ -7794,11 +7733,11 @@ sel masked ver tensor(indices=tensor([[6991, 7006, 7014, 7117, 5504, 5504, 5811,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'hasProject': 6, 'projectInfo': 5, 'author': 4, 'isAbout': 3, 'carriesOut': 2, 'publishes': 2, 'fax': 1, 'worksAtProject': 1, 'publication': 1, 'member': 1})
 dict index: {}
-node_idx 5811 
- node original label [2] 
- node predicted label explain 2 
- node prediction probability explain tensor([0.0136, 0.0747, 0.8709, 0.0408], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'carriesOut': 2, 'publishes': 2, 'fax': 1, 'worksAtProject': 1, 'publication': 1, 'member': 1, 'projectInfo': 5, 'author': 4, 'hasProject': 6, 'isAbout': 3, 'label': 2, 'node_idx': '5811'} 
+node_idx 5811
+ node original label [2]
+ node predicted label explain 2
+ node prediction probability explain tensor([0.0136, 0.0747, 0.8709, 0.0408], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'carriesOut': 2, 'publishes': 2, 'fax': 1, 'worksAtProject': 1, 'publication': 1, 'member': 1, 'projectInfo': 5, 'author': 4, 'hasProject': 6, 'isAbout': 3, 'label': 2, 'node_idx': '5811'}
  final masks and lenght tensor(indices=tensor([[ 23561,  23576,  23584,  23588,  23604,  23605,  23623,
                          23652,  23659,  23687,  39083,  39084,  39096,  39097,
                          39102,  46929,  46929,  46929,  46929,  46929,  63466,
@@ -7842,7 +7781,7 @@ node_idx 5811
                       0.4203, 0.4138, 0.9220, 0.3897, 0.4066, 0.4123, 0.4082,
                       0.3965, 0.4017, 0.9481, 0.3909, 0.3935, 0.3969, 0.3941]),
        size=(753935, 8285), nnz=98, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 26 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 26
  ---------------------------------------------------------------
 node label: 2
 17
@@ -7856,6 +7795,9 @@ pred_loss tensor([4.6335], grad_fn=<MulBackward0>)
 size_loss tensor(-5.4612, grad_fn=<MulBackward0>)
 size_num_loss 3.2
 loss: tensor([5.3404], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  5.340426921844482 ; pred:  tensor([0.1053, 0.1503, 0.6292, 0.1152], grad_fn=<SoftmaxBackward0>)
 num_high 32 len(mask) 33
@@ -8073,11 +8015,11 @@ sel masked ver tensor(indices=tensor([[7102, 7116, 7117, 5504, 7116, 5478, 5504,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'publication': 3, 'author': 3, 'isWorkedOnBy': 1, 'member': 1, 'carriesOut': 1, 'publishes': 1, 'phone': 1, 'name': 1, 'photo': 1, 'projectInfo': 1, 'isAbout': 1})
 dict index: {}
-node_idx 5831 
- node original label [2] 
- node predicted label explain 2 
- node prediction probability explain tensor([0.1296, 0.1780, 0.5646, 0.1279], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'isWorkedOnBy': 1, 'member': 1, 'carriesOut': 1, 'publishes': 1, 'phone': 1, 'name': 1, 'photo': 1, 'publication': 3, 'projectInfo': 1, 'author': 3, 'isAbout': 1, 'label': 2, 'node_idx': '5831'} 
+node_idx 5831
+ node original label [2]
+ node predicted label explain 2
+ node prediction probability explain tensor([0.1296, 0.1780, 0.5646, 0.1279], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'isWorkedOnBy': 1, 'member': 1, 'carriesOut': 1, 'publishes': 1, 'phone': 1, 'name': 1, 'photo': 1, 'publication': 3, 'projectInfo': 1, 'author': 3, 'isAbout': 1, 'label': 2, 'node_idx': '5831'}
  final masks and lenght tensor(indices=tensor([[ 23672,  23686,  23687,  39122,  46929,  88681, 114807,
                         114821, 114822, 147961, 154528, 154574, 154589, 154592,
                         154603, 154608, 179489, 179967, 196386, 229526, 237811,
@@ -8094,7 +8036,7 @@ node_idx 5831
                       0.3788, 0.8950, 0.3637, 0.8666, 0.9473, 0.7839, 0.3757,
                       0.3810, 0.9627, 0.3862, 0.3725, 0.3718]),
        size=(753935, 8285), nnz=33, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 15 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 15
  ---------------------------------------------------------------
 node label: 2
 9
@@ -8105,6 +8047,9 @@ pred_loss tensor([11.2098], grad_fn=<MulBackward0>)
 size_loss tensor(-6.7923, grad_fn=<MulBackward0>)
 size_num_loss 1.3
 loss: tensor([7.3155], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  7.315454959869385 ; pred:  tensor([0.2335, 0.2605, 0.3260, 0.1800], grad_fn=<SoftmaxBackward0>)
 num_high 12 len(mask) 14
@@ -8287,11 +8232,11 @@ sel masked ver tensor(indices=tensor([[7169, 5504, 5839, 5839, 5839, 5839, 5504,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'carriesOut': 1, 'publishes': 1, 'fax': 1, 'name': 1, 'type': 1, 'photo': 1, 'worksAtProject': 1, 'publication': 1, 'author': 1})
 dict index: {}
-node_idx 5839 
- node original label [2] 
- node predicted label explain 2 
- node prediction probability explain tensor([0.2075, 0.2397, 0.3823, 0.1705], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'carriesOut': 1, 'publishes': 1, 'fax': 1, 'name': 1, 'type': 1, 'photo': 1, 'worksAtProject': 1, 'publication': 1, 'author': 1, 'label': 2, 'node_idx': '5839'} 
+node_idx 5839
+ node original label [2]
+ node predicted label explain 2
+ node prediction probability explain tensor([0.2075, 0.2397, 0.3823, 0.1705], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'carriesOut': 1, 'publishes': 1, 'fax': 1, 'name': 1, 'type': 1, 'photo': 1, 'worksAtProject': 1, 'publication': 1, 'author': 1, 'label': 2, 'node_idx': '5839'}
  final masks and lenght tensor(indices=tensor([[ 23739,  39125,  46929,  88689, 179489, 179970, 196394,
                         229534, 237819, 254389, 262339, 304099, 328954, 328954],
                        [  5839,   5504,   5985,     67,   5839,   5839,   3896,
@@ -8299,7 +8244,7 @@ node_idx 5839
        values=tensor([0.9075, 0.3767, 0.8828, 0.8897, 0.3708, 0.3686, 0.9722,
                       0.3645, 0.9295, 0.8989, 0.9376, 0.9520, 0.9582, 0.3687]),
        size=(753935, 8285), nnz=14, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 9 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 9
  ---------------------------------------------------------------
 node label: 2
 36
@@ -8332,6 +8277,9 @@ pred_loss tensor([-0.], grad_fn=<MulBackward0>)
 size_loss tensor(-1.9098, grad_fn=<MulBackward0>)
 size_num_loss 20.700000000000003
 loss: tensor([34.5092], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  34.50920486450195 ; pred:  tensor([2.6632e-11, 5.8234e-08, 1.0000e+00, 5.5633e-09],
        grad_fn=<SoftmaxBackward0>)
@@ -8793,12 +8741,12 @@ sel masked ver tensor(indices=tensor([[6821, 6961, 7121, 7962, 8026, 5954, 5504,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'projectInfo': 7, 'hasProject': 7, 'author': 5, 'isAbout': 4, 'publication': 3, 'carriesOut': 2, 'dealtWithIn': 1, 'publishes': 1, 'worksAtProject': 1, 'carriedOutBy': 1})
 dict index: {}
-node_idx 5755 
- node original label [2] 
- node predicted label explain 2 
+node_idx 5755
+ node original label [2]
+ node predicted label explain 2
  node prediction probability explain tensor([7.2105e-05, 1.7748e-03, 9.9747e-01, 6.8346e-04],
-       grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'dealtWithIn': 1, 'carriesOut': 2, 'publishes': 1, 'worksAtProject': 1, 'publication': 3, 'projectInfo': 7, 'isAbout': 4, 'carriedOutBy': 1, 'author': 5, 'hasProject': 7, 'label': 2, 'node_idx': '5755'} 
+       grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'dealtWithIn': 1, 'carriesOut': 2, 'publishes': 1, 'worksAtProject': 1, 'publication': 3, 'projectInfo': 7, 'isAbout': 4, 'carriedOutBy': 1, 'author': 5, 'hasProject': 7, 'label': 2, 'node_idx': '5755'}
  final masks and lenght tensor(indices=tensor([[ 23391,  23531,  23532,  23534,  23607,  23621,  23625,
                          23658,  23672,  23691,  24323,  24347,  24348,  24349,
                          24474,  24520,  24532,  24539,  24579,  24586,  24587,
@@ -8890,7 +8838,7 @@ node_idx 5755
                       0.3989, 0.4079, 0.4001, 0.3933, 0.3948, 0.5006, 0.3905,
                       0.5644, 0.4037, 0.3927, 0.4921]),
        size=(753935, 8285), nnz=207, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 32 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 32
  ---------------------------------------------------------------
 node label: 2
 6
@@ -8901,6 +8849,9 @@ pred_loss tensor([10.5926], grad_fn=<MulBackward0>)
 size_loss tensor(-7.4292, grad_fn=<MulBackward0>)
 size_num_loss 0.8
 loss: tensor([5.1890], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  5.189043998718262 ; pred:  tensor([0.3554, 0.1763, 0.3467, 0.1216], grad_fn=<SoftmaxBackward0>)
 num_high 8 len(mask) 9
@@ -9075,11 +9026,11 @@ sel masked ver tensor(indices=tensor([[7650, 5844, 5844, 5844, 5844],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'homepage': 1, 'type': 1, 'publication': 1, 'author': 1})
 dict index: {}
-node_idx 5844 
- node original label [2] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.4532, 0.0575, 0.4435, 0.0458], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'fax': 1, 'homepage': 1, 'type': 1, 'publication': 1, 'author': 1, 'label': 2, 'node_idx': '5844'} 
+node_idx 5844
+ node original label [2]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.4532, 0.0575, 0.4435, 0.0458], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'fax': 1, 'homepage': 1, 'type': 1, 'publication': 1, 'author': 1, 'label': 2, 'node_idx': '5844'}
  final masks and lenght tensor(indices=tensor([[ 24220,  24244,  88694, 130119, 196399, 229539, 254394,
                         254394, 328959],
                        [  5844,   5844,      0,      0,   1415,    116,   7650,
@@ -9087,7 +9038,7 @@ node_idx 5844
        values=tensor([0.9195, 0.3887, 3.6092, 3.6135, 0.3792, 0.3682, 0.9775,
                       0.3829, 0.9367]),
        size=(753935, 8285), nnz=9, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 5 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 5
  ---------------------------------------------------------------
 node label: 2
 78
@@ -9125,6 +9076,9 @@ pred_loss tensor([-0.], grad_fn=<MulBackward0>)
 size_loss tensor(-1.7620, grad_fn=<MulBackward0>)
 size_num_loss 25.3
 loss: tensor([42.6216], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  42.62157440185547 ; pred:  tensor([2.5298e-13, 6.0589e-10, 1.0000e+00, 2.4002e-10],
        grad_fn=<SoftmaxBackward0>)
@@ -9706,12 +9660,12 @@ sel masked ver tensor(indices=tensor([[6813, 7011, 7019, 7076, 7187, 7224, 7225,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'author': 22, 'publication': 19, 'isAbout': 12, 'hasProject': 10, 'projectInfo': 8, 'isWorkedOnBy': 3, 'dealtWithIn': 1, 'phone': 1, 'fax': 1, 'name': 1, 'type': 1, 'member': 1, 'editor': 1})
 dict index: {}
-node_idx 5861 
- node original label [2] 
- node predicted label explain 2 
+node_idx 5861
+ node original label [2]
+ node predicted label explain 2
  node prediction probability explain tensor([7.5223e-07, 8.7530e-05, 9.9988e-01, 3.5704e-05],
-       grad_fn=<SoftmaxBackward0>) 
- node predicted label full 2 most important relations  {'isWorkedOnBy': 3, 'dealtWithIn': 1, 'phone': 1, 'fax': 1, 'name': 1, 'type': 1, 'publication': 19, 'projectInfo': 8, 'isAbout': 12, 'member': 1, 'author': 22, 'hasProject': 10, 'editor': 1, 'label': 2, 'node_idx': '5861'} 
+       grad_fn=<SoftmaxBackward0>)
+ node predicted label full 2 most important relations  {'isWorkedOnBy': 3, 'dealtWithIn': 1, 'phone': 1, 'fax': 1, 'name': 1, 'type': 1, 'publication': 19, 'projectInfo': 8, 'isAbout': 12, 'member': 1, 'author': 22, 'hasProject': 10, 'editor': 1, 'label': 2, 'node_idx': '5861'}
  final masks and lenght tensor(indices=tensor([[ 23383,  23581,  23589,  23626,  23646,  23675,  23748,
                          23753,  23755,  23757,  23758,  23759,  23764,  23792,
                          23793,  23794,  23795,  23797,  23798,  23799,  23801,
@@ -9824,7 +9778,7 @@ node_idx 5861
                       0.4868, 0.3915, 0.4098, 0.3960, 0.3996, 0.5375, 0.4046,
                       0.7572]),
        size=(753935, 8285), nnz=253, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 81 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 81
  ---------------------------------------------------------------
 node label: 3
 16
@@ -9839,6 +9793,9 @@ pred_loss tensor([6.6765], grad_fn=<MulBackward0>)
 size_loss tensor(-4.6849, grad_fn=<MulBackward0>)
 size_num_loss 4.3
 loss: tensor([10.0110], grad_fn=<AddBackward0>)
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 0
 epoch:  0 ; loss:  10.010978698730469 ; pred:  tensor([0.2839, 0.1458, 0.0573, 0.5129], grad_fn=<SoftmaxBackward0>)
 num_high 42 len(mask) 43
@@ -10072,11 +10029,11 @@ sel masked ver tensor(indices=tensor([[6894, 6949, 7140, 7258, 5505, 5857, 6949,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'author': 4, 'publication': 3, 'publishes': 2, 'member': 2, 'projectInfo': 2, 'carriesOut': 1, 'fax': 1, 'phone': 1, 'photo': 1, 'worksAtProject': 1, 'isAbout': 1, 'hasProject': 1})
 dict index: {}
-node_idx 5857 
- node original label [3] 
- node predicted label explain 3 
- node prediction probability explain tensor([0.2704, 0.2570, 0.0475, 0.4251], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 3 most important relations  {'carriesOut': 1, 'publishes': 2, 'fax': 1, 'phone': 1, 'photo': 1, 'worksAtProject': 1, 'publication': 3, 'member': 2, 'isAbout': 1, 'projectInfo': 2, 'author': 4, 'hasProject': 1, 'label': 3, 'node_idx': '5857'} 
+node_idx 5857
+ node original label [3]
+ node predicted label explain 3
+ node prediction probability explain tensor([0.2704, 0.2570, 0.0475, 0.4251], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 3 most important relations  {'carriesOut': 1, 'publishes': 2, 'fax': 1, 'phone': 1, 'photo': 1, 'worksAtProject': 1, 'publication': 3, 'member': 2, 'isAbout': 1, 'projectInfo': 2, 'author': 4, 'hasProject': 1, 'label': 3, 'node_idx': '5857'}
  final masks and lenght tensor(indices=tensor([[ 23464,  23519,  23710,  23712,  23828,  24462,  39057,
                          39075,  39107,  46930,  46930,  46930,  63383,  88707,
                         114599, 114654, 146780, 154518, 179490, 179902, 179920,
@@ -10099,8 +10056,11 @@ node_idx 5857
                       0.9593, 0.9476, 0.3743, 0.3977, 0.3747, 0.8287, 0.3984,
                       0.3876]),
        size=(753935, 8285), nnz=43, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 20 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 20
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 3
 23
 num_high 67 len(mask) 67
@@ -10380,11 +10340,11 @@ sel masked ver tensor(indices=tensor([[6912, 6915, 6916, 6996, 5917, 5466, 5470,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isAbout': 8, 'publication': 4, 'author': 4, 'publishes': 3, 'isWorkedOnBy': 2, 'dealtWithIn': 2, 'type': 1, 'worksAtProject': 1, 'carriedOutBy': 1, 'member': 1})
 dict index: {}
-node_idx 5752 
- node original label [3] 
- node predicted label explain 3 
- node prediction probability explain tensor([0.0673, 0.0629, 0.0488, 0.8210], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 3 most important relations  {'isWorkedOnBy': 2, 'dealtWithIn': 2, 'publishes': 3, 'type': 1, 'worksAtProject': 1, 'publication': 4, 'carriedOutBy': 1, 'isAbout': 8, 'member': 1, 'author': 4, 'label': 3, 'node_idx': '5752'} 
+node_idx 5752
+ node original label [3]
+ node predicted label explain 3
+ node prediction probability explain tensor([0.0673, 0.0629, 0.0488, 0.8210], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 3 most important relations  {'isWorkedOnBy': 2, 'dealtWithIn': 2, 'publishes': 3, 'type': 1, 'worksAtProject': 1, 'publication': 4, 'carriedOutBy': 1, 'isAbout': 8, 'member': 1, 'author': 4, 'label': 3, 'node_idx': '5752'}
  final masks and lenght tensor(indices=tensor([[ 23482,  23485,  23486,  23526,  23566,  23614,  23634,
                          24429,  24430,  39057,  39075,  46930,  46930,  63383,
                          63424,  63461,  63465,  88602, 146780, 146780, 146780,
@@ -10416,8 +10376,11 @@ node_idx 5752
                       0.3999, 0.4025, 0.3948, 0.8886, 0.9136, 0.3928, 0.3519,
                       0.3921, 0.9589, 0.8932, 0.3881]),
        size=(753935, 8285), nnz=67, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 27 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 27
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 3
 14
 num_high 31 len(mask) 32
@@ -10642,11 +10605,11 @@ sel masked ver tensor(indices=tensor([[6949, 7139, 7140, 5935, 6949, 5505, 5935,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'publication': 4, 'publishes': 3, 'author': 3, 'member': 2, 'type': 1, 'photo': 1, 'worksAtProject': 1, 'carriedOutBy': 1, 'hasProject': 1})
 dict index: {}
-node_idx 5795 
- node original label [3] 
- node predicted label explain 3 
- node prediction probability explain tensor([0.0858, 0.0734, 0.0693, 0.7715], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 3 most important relations  {'member': 2, 'publishes': 3, 'type': 1, 'photo': 1, 'worksAtProject': 1, 'publication': 4, 'carriedOutBy': 1, 'author': 3, 'hasProject': 1, 'label': 3, 'node_idx': '5795'} 
+node_idx 5795
+ node original label [3]
+ node predicted label explain 3
+ node prediction probability explain tensor([0.0858, 0.0734, 0.0693, 0.7715], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 3 most important relations  {'member': 2, 'publishes': 3, 'type': 1, 'photo': 1, 'worksAtProject': 1, 'publication': 4, 'carriedOutBy': 1, 'author': 3, 'hasProject': 1, 'label': 3, 'node_idx': '5795'}
  final masks and lenght tensor(indices=tensor([[ 23519,  23709,  23710,  23712,  39075,  46930,  63383,
                          63425,  88645, 114654, 146780, 146780, 147794, 154518,
                         154560, 179490, 179920, 196350, 229490, 237775, 246200,
@@ -10663,8 +10626,11 @@ node_idx 5795
                       0.9470, 0.9129, 0.9589, 0.9532, 0.9533, 0.8831, 0.9541,
                       0.3805, 0.8371, 0.3859, 0.9231]),
        size=(753935, 8285), nnz=32, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 17 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 17
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 3
 10
 num_high 17 len(mask) 17
@@ -10866,11 +10832,11 @@ sel masked ver tensor(indices=tensor([[5935, 5935, 5935, 5388, 5505, 5935, 5753,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'member': 2, 'isAbout': 2, 'isWorkedOnBy': 1, 'name': 1, 'type': 1, 'carriedOutBy': 1})
 dict index: {}
-node_idx 5753 
- node original label [3] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.2972, 0.2586, 0.2234, 0.2207], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 3 most important relations  {'isWorkedOnBy': 1, 'member': 2, 'name': 1, 'type': 1, 'isAbout': 2, 'carriedOutBy': 1, 'label': 3, 'node_idx': '5753'} 
+node_idx 5753
+ node original label [3]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.2972, 0.2586, 0.2234, 0.2207], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 3 most important relations  {'isWorkedOnBy': 1, 'member': 2, 'name': 1, 'type': 1, 'isAbout': 2, 'carriedOutBy': 1, 'label': 3, 'node_idx': '5753'}
  final masks and lenght tensor(indices=tensor([[ 39075,  46930,  63383,  63404,  88603, 146780, 146780,
                         154518, 154539, 179490, 179920, 196308, 229448, 237733,
                         304013, 328868, 328868],
@@ -10881,8 +10847,11 @@ node_idx 5753
                       0.9639, 0.4045, 0.9583, 0.9022, 0.9579, 0.4084, 0.3909,
                       0.4101, 0.9275, 0.4036]),
        size=(753935, 8285), nnz=17, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 8 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 8
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 3
 6
 num_high 6 len(mask) 7
@@ -11064,17 +11033,20 @@ sel masked ver tensor(indices=tensor([[5798, 5798, 5798],
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'fax': 1, 'phone': 1, 'type': 1})
 dict index: {}
-node_idx 5798 
- node original label [3] 
- node predicted label explain 0 
- node prediction probability explain tensor([0.3434, 0.3050, 0.1910, 0.1607], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'type': 1, 'label': 3, 'node_idx': '5798'} 
+node_idx 5798
+ node original label [3]
+ node predicted label explain 0
+ node prediction probability explain tensor([0.3434, 0.3050, 0.1910, 0.1607], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 0 most important relations  {'fax': 1, 'phone': 1, 'type': 1, 'label': 3, 'node_idx': '5798'}
  final masks and lenght tensor(indices=tensor([[ 88648, 179490, 196353, 229493, 237778, 328913, 328913],
                        [     0,   5798,   3422,      0,   5592,   5230,   5231]]),
        values=tensor([1.6082, 0.3748, 0.3867, 1.6007, 0.3299, 0.3672, 0.9766]),
        size=(753935, 8285), nnz=7, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 3
  ---------------------------------------------------------------
+r_exp.py:102: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
+wandb: WARNING Calling wandb.login() after wandb.init() has no effect.
 node label: 3
 31
 num_high 78 len(mask) 78
@@ -11376,11 +11348,11 @@ sel masked ver tensor(indices=tensor([[6912, 6915, 6956, 7044, 7860, 5854, 6912,
        grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>)
 Counter({'isAbout': 10, 'publishes': 6, 'publication': 6, 'author': 5, 'isWorkedOnBy': 2, 'fax': 1, 'phone': 1, 'name': 1})
 dict index: {}
-node_idx 5854 
- node original label [3] 
- node predicted label explain 3 
- node prediction probability explain tensor([0.0925, 0.0264, 0.0758, 0.8053], grad_fn=<SoftmaxBackward0>) 
- node predicted label full 3 most important relations  {'isWorkedOnBy': 2, 'publishes': 6, 'fax': 1, 'phone': 1, 'name': 1, 'publication': 6, 'isAbout': 10, 'author': 5, 'label': 3, 'node_idx': '5854'} 
+node_idx 5854
+ node original label [3]
+ node predicted label explain 3
+ node prediction probability explain tensor([0.0925, 0.0264, 0.0758, 0.8053], grad_fn=<SoftmaxBackward0>)
+ node predicted label full 3 most important relations  {'isWorkedOnBy': 2, 'publishes': 6, 'fax': 1, 'phone': 1, 'name': 1, 'publication': 6, 'isAbout': 10, 'author': 5, 'label': 3, 'node_idx': '5854'}
  final masks and lenght tensor(indices=tensor([[ 23482,  23485,  23526,  23566,  23614,  23634,  23937,
                          23938,  24429,  24430,  24437,  24458,  24460,  24461,
                          88704, 147757, 147760, 147801, 147841, 147841, 147889,
@@ -11418,19 +11390,5 @@ node_idx 5854
                       0.3926, 0.9493, 0.9263, 0.3821, 0.3814, 0.8894, 0.4223,
                       0.3890]),
        size=(753935, 8285), nnz=78, layout=torch.sparse_coo,
-       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 32 
+       grad_fn=<SparseCooTensorWithDimsAndTensorsBackward0>) 32
  ---------------------------------------------------------------
-wandb: Waiting for W&B process to finish... (success).
-wandb: - 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: \ 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: | 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: / 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: - 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: \ 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: 
-wandb: Run summary:
-wandb: len mask > 0.5 32
-wandb:           loss -293.7309
-wandb:  mask_ent_loss 0.51139
-wandb:      pred_loss 1.83871
-wandb:       reg_loss 0.27773
-wandb:      size_loss -299.35873
-wandb:  size_num_loss 3.0
-wandb: 
-wandb:  View run dark-trooper-36 at: https://wandb.ai/t-liberatore/RGCN-Explainer/runs/mdnfxjsk
-wandb: Synced 6 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
-wandb: Find logs at: ./wandb/run-20230504_121456-mdnfxjsk/logs
