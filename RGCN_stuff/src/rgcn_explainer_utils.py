@@ -1,3 +1,5 @@
+from re import M
+import re
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -184,11 +186,13 @@ def match_to_triples(v, data, sparse=True):
         # s,o = v.coalesce().indices()%data.num_entities
         # result = torch.stack([s,p,o], dim=1)
         matching = []
-        for i,i2 in zip(v[:,0],v[:,1]):
-            for j,j1,j2, index in zip(data[:,0],data[:,1],  data[:,2], range(len(data[:,0]))):
-                if i == j and i2 == j2:
-                    matching.append(data[index])
+        indexes = v.coalesce().indices()%data.num_entities
+        for j in range(indexes.size()[1]):
+            for triple in data.triples:
+                if triple[0] == indexes[0][j] and triple[2] == indexes[1][j]:
+                    matching.append(triple)
         result = torch.stack(matching)
+
                     
     else:
         matching = []
@@ -255,13 +259,13 @@ def selected(masked_ver, threshold,data, low_threshold, float=False):
     sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
     indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) 
-    triples_matched = match_to_triples(np.array(new_index), data.triples)
-    #triples_matched = match_to_triples(sel_masked_ver, data)
+    #triples_matched = match_to_triples(np.array(new_index), data.triples)
+    triples_matched = match_to_triples(sel_masked_ver, data)
     #print(triples_matched)
     if float:
             l = {}
             for i,j in zip(triples_matched[:,1],sel_masked_ver.coalesce().values()):
-
+                
                 if data.i2rel[int(i)][0] in l.keys():
                     l[data.i2rel[int(i)][0]] += j
                 else:
@@ -325,8 +329,8 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
 
     else:
         #get triples to get relations 
-        triples_matched = match_to_triples(np.array(new_index), data.triples)
-        #triples_matched = match_to_triples(sel_masked_ver, data)
+        #triples_matched = match_to_triples(np.array(new_index), data.triples)
+        triples_matched = match_to_triples(sel_masked_ver, data)
         l = []
         for i in triples_matched[:,1]:
             l.append(data.i2rel[int(i)][0])
@@ -423,7 +427,7 @@ def d_classes(data):
     """
     indices_nodes = data.entities
     d = list(data.e2i.keys())
-    values_indices_nodes = [d[i] for i in indices_nodes]
+    values_indices_nodes = [d[int(i)] for i in indices_nodes]
     dict = {}
     for i in range(len(values_indices_nodes)):
         try:
@@ -538,3 +542,71 @@ def prunee(data , n=2):
     return nw
 
 
+def subset_sparse(sparse_full,data,  threshold=0.5):
+    ''' Select the subset of the tensor based on the threshold value'''
+    num_entities = data.num_entities
+    x_values = sparse_full.coalesce().values()
+    x_indices = sparse_full.coalesce().indices()
+    x = torch.sparse_coo_tensor(indices = x_indices, values = x_values)
+    subset_mask = (x._values() > threshold).to_dense()
+    subset_indices = x._indices()[:, subset_mask.nonzero().squeeze()]
+    subset_values = x._values()[subset_mask]
+    subset_sparse = torch.sparse_coo_tensor(subset_indices, subset_values)
+    num_high = subset_sparse._nnz()
+    _ ,p = torch.div(subset_sparse.coalesce().indices(),num_entities, rounding_mode='floor')
+    relation_counter = dict(Counter(p.tolist()))
+    return subset_sparse, num_high,p, relation_counter
+
+
+def select_relation(sparse_tensor,num_entities,relation_id):
+    ''' Select the subset of the tensor based on the relation id'''
+    _ ,p = torch.div(sparse_tensor.coalesce().indices(),num_entities, rounding_mode='floor')
+    output_indices = sparse_tensor.coalesce().indices()[:, p==relation_id]
+    output_values = sparse_tensor.coalesce().values()[p==relation_id]
+    value_indices = torch.where(p == relation_id)[0]
+    #I can then use the value indices to change the values in the mask??
+    return output_indices, output_values, value_indices
+
+
+def get_class_entity(node,data):
+    ''' Get class of a node'''
+    url = data.i2e[int(node)][0]
+    try:
+        if '#' in url:
+            url = url.split('#')[1]
+        if 'http' in url:
+            return str(url).split('/')[3]
+
+    except IndexError:
+        return 'blank' #str(url)
+    
+def get_class_relation(node,data):
+    ''' Get class of a relation node'''
+    rel =str(data.i2r[node]).split('/')[-1]
+    if '#' in rel:
+            rel = rel.split('#')[1]
+
+    return str(rel)
+
+
+
+def domain_range_freq(data,num_classes):
+    '''Get the frequency of the domain and range of the relations'''
+    dict_domain = {}
+    dict_range = {}
+    for m in data.triples:
+
+
+        if int(m[1]) in dict_domain:
+            dict_domain[int(m[1]) ].append(get_class_entity(m[0],data))
+        else:
+            dict_domain[int(m[1]) ] = [get_class_entity(m[0],data)]
+        if int(m[1])  in dict_range:
+            dict_range[int(m[1]) ].append(get_class_entity(m[2],data))
+        else:
+            dict_range[int(m[1]) ] = [get_class_entity(m[2],data)]
+    for k,v in dict_domain.items():
+        dict_domain[k] = len(set(v))/num_classes
+    for k,v in dict_range.items():
+        dict_range[k] = set(v)
+    return dict_domain, dict_range

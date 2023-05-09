@@ -28,6 +28,9 @@ import networkx as nx
 #rgcn 
 from rgcn_model import adj, enrich, sum_sparse, RGCN
 from src.rgcn_explainer_utils import *
+
+
+
 #Get adjacency matrix: in this context this is hor / ver graph
 def hor_ver_graph(triples, n, r):
     """ 
@@ -79,7 +82,8 @@ class Explainer:
         #self.n_hops = 0 if prune else 2 # number layers to propagate (in the paper it is 2)
         self.sub_edges, self.neighbors, self.sub_edges_tensor = find_n_hop_neighbors(self.edge_index, n=self.n_hops, node=self.node_idx)
         self.sub_triples = match_to_triples(self.sub_edges_tensor.t(),self.triples, sparse=False)
-
+        self.overall_rel_frequency = dict(Counter(self.data.triples[:,1].tolist()))
+        
     def new_index(self):
         idxw, clsw = self.data.withheld[:, 0], self.data.withheld[:, 1]
         idxw, clsw = idxw.long(), clsw.long()
@@ -110,11 +114,12 @@ class Explainer:
         # print(ver_graph.size(), hor_graph.size())
         # print(ver_graph.coalesce().indices().size(), hor_graph.coalesce().indices().size())
         # print(ver_graph)
-        #breakpoint()
+
         explainer = ExplainModule(
             hor_graph, ver_graph,
             self.model,
-            label
+            label,
+            self.data
         )
 
 
@@ -131,11 +136,11 @@ class Explainer:
         self.model.eval()
         explainer.train()  # set the explainer model to training mode
 
-        for epoch in range(20):
+        for epoch in range(10):
             explainer.zero_grad()  # zero the gradient buffers of all parameters
             explainer.optimizer.zero_grad()
             ypred, masked_hor, masked_ver = explainer(self.node_idx)  # forward pass of the explainer
-            loss, pred_loss, size_loss, size_num_loss, mask_ent_loss, reg_loss = explainer.loss(ypred, pred_label, self.node_idx, epoch)  # loss function
+            loss, pred_loss, size_loss, size_num_loss, mask_ent_loss, reg_loss, squared_loss = explainer.loss(ypred, pred_label, self.node_idx, epoch)  # loss function
             print('loss:', loss)
 
             loss.backward()
@@ -153,7 +158,7 @@ class Explainer:
             )
             wandb.log({"len mask > 0.5": len([i for i in masked_ver.coalesce().values() if i > 0.5]), "loss": loss,
                        "pred_loss": pred_loss, "size_loss": size_loss, "size_num_loss": size_num_loss,
-                       "mask_ent_loss": mask_ent_loss, "reg_loss": reg_loss})
+                       "mask_ent_loss": mask_ent_loss, "reg_loss": reg_loss, "squae_loss": squared_loss})
             
         print('Finished Training')
 
@@ -171,20 +176,22 @@ class ExplainModule(nn.Module):
             hor_graph,
             ver_graph,
             model,
-            label):
+            label, 
+            data):
         super(ExplainModule, self).__init__()
         self.hor_graph, self.ver_graph = hor_graph, ver_graph #hor_ver_graph(data.triples, data.num_entities, data.num_relations)
         self.model = model
         self.label = label
+        self.data = data
+
 
         num_nodes = self.hor_graph.coalesce().indices().size()[1] #self.hor_graph.size()[0]#self.hor_graph.coalesce().values().shape[0]
-        self.mask = self.construct_edge_mask(num_nodes)
-        #print(self.mask.size())
-        
+        self.mask = self.construct_edge_mask(num_nodes, self.hor_graph,self.data)
+
         params = [self.mask]
         self.diag_mask = torch.ones(num_nodes, num_nodes) - torch.eye(num_nodes)
         #self.optimizer = torch.optim.Adam(params, lr=0.5, weight_decay=0.001)
-        
+       
 
         self.coeffs = {
             "pred": 10,
@@ -226,6 +233,75 @@ class ExplainModule(nn.Module):
                 mask.normal_(1.0, std)
         elif init_strategy == "const":
             nn.init.constant_(mask, const_val)        
+        return mask
+    
+    def construct_edge_mask(self, num_nodes,sparse_tensor,data, init_strategy="domain_frequency", const_val=1.0, relation_id = 2):
+        """
+        Construct edge mask
+        """
+        data = self.data
+        num_entities = data.num_entities
+        torch.manual_seed(42)
+        mask = nn.Parameter(torch.FloatTensor(num_nodes))
+        if init_strategy == "normal":
+            std = nn.init.calculate_gain("relu") * math.sqrt(
+                2.0 / (num_nodes + num_nodes)
+            )
+            with torch.no_grad():
+                mask.normal_(1.0, std)
+        elif init_strategy == "const":
+            nn.init.constant_(mask, const_val) 
+        elif init_strategy == "zero_out":
+            '''initialize the mask with the zero out strategy: we zero out edges belonging to specific relations'''
+            std = nn.init.calculate_gain("relu") * math.sqrt(
+                2.0 / (num_nodes + num_nodes)
+            )
+            with torch.no_grad():
+                mask.normal_(1.0, std)
+            output_indices, output_values, value_indices=select_relation(sparse_tensor,relation_id)
+            _,_,value_indices1=select_relation(sparse_tensor,33)
+            print(value_indices, value_indices1)
+            value_indices = torch.cat((value_indices, value_indices1), 0)
+            mask.data[[value_indices]] = 0
+        
+
+        elif init_strategy == "overall_frequency":
+            '''Initialize the mask with the overall frequency of the relations'''
+            _ ,p = torch.div(sparse_tensor.coalesce().indices(), num_entities, rounding_mode='floor').tolist()
+            overall_rel_frequency = dict(Counter(data.triples[:,1].tolist()))#.most_common()
+
+            overall_rel_frequency_  = {key: round(value/len(data.triples[:,1].tolist()),5) for key, value in overall_rel_frequency.items()}
+            for i in p:
+                _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
+                mask.data[[value_indices]] = overall_rel_frequency_[i]
+        
+        elif init_strategy == "relative_frequency":
+            ''' Initialize the mask with the relative frequency of the relations-relative for the node to be explained'''
+            _ ,p = torch.div(sparse_tensor.coalesce().indices(), num_entities, rounding_mode='floor').tolist()
+            rel_frequency = dict(Counter(p))
+            rel_frequency_  = {key: round(value/len(p),5) for key, value in rel_frequency.items()}
+            for i in p:
+                _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
+                mask.data[[value_indices]] = rel_frequency_[i]
+
+        elif init_strategy == "inverse_relative_frequency":
+            ''' Initialize the mask with the relative frequency of the relations-relative for the node to be explained'''
+            _ ,p = torch.div(sparse_tensor.coalesce().indices(), num_entities, rounding_mode='floor').tolist()
+            rel_frequency = dict(Counter(p))
+            rel_frequency_  = {key: 1 - round(value/len(p),5) for key, value in rel_frequency.items()}
+            for i in p:
+                _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
+                mask.data[[value_indices]] = rel_frequency_[i]
+
+
+        elif init_strategy == "domain_frequency":
+            _ ,p = torch.div(sparse_tensor.coalesce().indices(), num_entities, rounding_mode='floor').tolist()
+            dict_domain, dict_range = domain_range_freq(data, len(d_classes(data)))
+            for i in p:
+
+                _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
+                mask.data[[value_indices]] = dict_domain[i]
+            
         return mask
 
     def _masked_adj_ver(self):
@@ -269,16 +345,11 @@ class ExplainModule(nn.Module):
         #print('node_idx', node_idx)
         self.masked_ver = self._masked_adj_ver()  # masked adj is the adj matrix with the mask applied
         self.masked_hor = self._masked_adj_hor()  # masked adj is the adj matrix with the mask applied
-        #print('masked_hor', self.masked_hor)
 
-        #ypred = self.model(self.masked_hor, self.masked_ver)
         ypred = self.model.forward2(self.masked_hor, self.masked_ver)
-        #print('ypred', ypred)
         node_pred = ypred[node_idx,:]
         res = nn.Softmax(dim=0)(node_pred[0:])
         
-
-        #print('res:', res)
         return res,   self.masked_hor, self.masked_ver
 
     def size_loss_f(self,mask, coeffs):
@@ -294,6 +365,9 @@ class ExplainModule(nn.Module):
         size_loss = (mask - mask_center).pow(2) * weight
         return coeffs.get("size", 1.0) * size_loss.sum()
 
+    def get_frequency_relations(self,v):
+        _ ,p = torch.div(v.coalesce().indices(), v.size()[0], rounding_mode='floor')
+        return dict(Counter(p))
 
     def loss(self, pred, pred_label, node_idx, epoch):
         """
@@ -301,28 +375,38 @@ class ExplainModule(nn.Module):
             pred: prediction made by current model
             pred_label: the label predicted by the original model.
         """
+        selected_mask, num_high, p,relation_counter = subset_sparse(self.masked_hor, self.data)
+        print('relation_counter', relation_counter)
+
+        mask = torch.sigmoid(self.mask)  # sigmoid of the mask
+        mask_without_small = mask[mask > 0.5]
+        print('mask_without_small', mask_without_small)
+        num_high = len(mask_without_small)
+        print('num_high', num_high,'len(mask)', len(mask))
+
 
         # prediction loss
-        lambda_reg = self.coeffs["lambda_reg"]
+
         
         gt_label_node = self.label#[node_idx]
         logit = pred[gt_label_node]
         pred_loss =  -torch.log(logit) * self.coeffs["pred"]
 
-        # size loss
-        mask = self.mask
-        num_high = len([i for i in mask if i > 0.5])
+        #size loss
+        lambda_reg = self.coeffs["lambda_reg"]
         if num_high>300:
             lambda_reg = 0.5
-        print('num_high', num_high,'len(mask)', len(mask))
-        # print('mask', mask)
-        #print('gradient of the mask:', mask.grad)  # None at the beginning
 
-        mask = torch.sigmoid(self.mask)  # sigmoid of the mask
 
-        #size_loss = self.coeffs["size"] * torch.sum(mask)
-        mask_without_small = mask[mask > 0.5]
-        print('mask_without_small', mask_without_small)
+
+        lambda_l1 = 0.5
+        lambda_squared = 0.5
+
+        # Compute the L1 regularization loss
+        l1_loss = lambda_l1 * torch.sum(torch.abs(mask))
+
+        # Compute the squared regularization loss
+        squared_loss = lambda_squared * torch.sum(mask**2) + l1_loss
         if len(mask_without_small) < len(mask):
 
             size_loss =  100*self.coeffs["size"] * torch.std(mask_without_small)
@@ -330,13 +414,13 @@ class ExplainModule(nn.Module):
         else:   
             reg_loss =  lambda_reg * torch.norm(mask_without_small, p=1)
             size_loss = self.coeffs["size"] * torch.std(mask) 
-        #size_loss = self.size_loss_f(mask, self.coeffs)
-
+        # size_loss = self.size_loss_f(mask, self.coeffs)
+        #size_loss = 10 * torch.sum(mask)
 
         #size_num_loss = self.coeffs["size_num"] * num_high #(num_high - self.num_nodes / 2) ** 2
         #size_num_loss = self.coeffs["size_num"] * (len(mask) - num_high / 2) ** 2
-        #size_num_loss = self.coeffs["size_num"] * (num_high+0.0001)/len(mask) 
-        size_num_loss = self.coeffs["size_num"] * num_high#(num_high+0.0001)/len(mask) 
+        size_num_loss = self.coeffs["size_num"] * (num_high+0.0001)/len(mask) 
+        #size_num_loss = self.coeffs["size_num"] * num_high#(num_high+0.0001)/len(mask) 
 
 
 
@@ -350,7 +434,7 @@ class ExplainModule(nn.Module):
         if len(mask_without_small) <=3:
             loss = pred_loss
         else:
-            loss = pred_loss + size_loss + size_num_loss + mask_ent_loss + reg_loss
+            loss = pred_loss + size_num_loss + mask_ent_loss + reg_loss + squared_loss + size_loss
 
         # laplacian loss
         # D = torch.diag(torch.sum(self.masked_adj[0], 0))
@@ -365,9 +449,17 @@ class ExplainModule(nn.Module):
         print('pred_loss', pred_loss)
         print('size_loss', size_loss)
         print('size_num_loss', size_num_loss)
+        print('mask_ent_loss', mask_ent_loss)
+        print('reg_loss', reg_loss)
+        print('squared_loss', squared_loss)
 
 
-        return loss, pred_loss, size_loss, size_num_loss, mask_ent_loss, reg_loss
+        return loss, pred_loss, size_loss, size_num_loss, mask_ent_loss, reg_loss, squared_loss
+
+
+    def per_relation_loss(self, pred):
+        _ ,p = torch.div(self.masked_hor.coalesce().indices(), self.masked_hor.size[0], rounding_mode='floor')
+        print(p)
 
 
 
@@ -376,7 +468,7 @@ class ExplainModule(nn.Module):
 
 import wandb
 
-def main(name,node_idx, prune=True, explain_all = False, train=False):
+def main(name,node_idx, prune=True, explain_all = False, train=False, threshold =0.5):
 
 
 
@@ -400,7 +492,6 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
     data.entities = np.append(data.triples[:,0].detach().numpy(),(data.triples[:,2].detach().numpy()))
     get_relations(data)
     d_classes(data)
-    #breakpoint()
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
 
 
@@ -456,7 +547,7 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
                     '\n node prediction probability explain', res,
                         '\n node predicted label full', torch.argmax(res_full).item(),
                         'most important relations ', h,
-                        '\n final masks and lenght', masked_ver, len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>0.5]),
+                        '\n final masks and lenght', masked_ver, len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>threshold ]),
                         '\n ---------------------------------------------------------------')
         if not os.path.exists(f'Relation_Importance_{name}'):
             os.makedirs(f'Relation_Importance_{name}') 
@@ -476,7 +567,7 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         else:
             masked_ver = torch.load(f'chk/{name}_chk/masked_adj/masked_ver{node_idx}_new')
             masked_hor = torch.load(f'chk/{name}_chk/masked_adj/masked_hor{node_idx}_new')
-        h = visualize(node_idx, n_hops, data, masked_ver,threshold=0.5, name = name, result_weights=False, low_threshold=False)
+        h = visualize(node_idx, n_hops, data, masked_ver,threshold=threshold , name = name, result_weights=False, low_threshold=False)
         h = selected(masked_ver, threshold=0.5,data=data, low_threshold=False)
         res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
         #print('ypred explain', res)
@@ -510,7 +601,7 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
             '\n node prediction probability explain', res,
             '\n node predicted label full', torch.argmax(res_full).item(),
             '\n node prediction probability full', res_full,
-            '\n final masks and lenght', masked_ver, len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>0.5]))
+            '\n final masks and lenght', masked_ver, len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>threshold ]))
         if not os.path.exists(f'Relation_Importance_{name}'):
             os.makedirs(f'Relation_Importance_{name}') 
         df.to_csv(f'Relation_Importance_{name}/Relations_Important_{name}_{node_idx}.csv', index=False)
@@ -518,5 +609,5 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
 
 
 if __name__ == "__main__":
-    main('aifb',node_idx= 5791, prune= True, explain_all =True, train=True)    
+    main('aifb',node_idx= 5677, prune= True, explain_all =False, train=True, threshold = 0.5)    
     #main('aifb',node_idx= 5791, prune= True, explain_all =False, train=True)    
