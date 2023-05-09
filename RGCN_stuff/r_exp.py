@@ -1,4 +1,5 @@
 from pickle import FALSE, TRUE
+from colorama import init
 from responses import FalseBool
 import torch 
 import torch.nn as nn
@@ -195,7 +196,7 @@ class ExplainModule(nn.Module):
 
         self.coeffs = {
             "pred": 10,
-            "size": -100,  # 0.005,
+            "size": -10,  # 0.005,
             "feat_size": 1.0,
             "ent": 1,
             "feat_ent": 0.1,
@@ -235,10 +236,12 @@ class ExplainModule(nn.Module):
             nn.init.constant_(mask, const_val)        
         return mask
     
-    def construct_edge_mask(self, num_nodes,sparse_tensor,data, init_strategy="domain_frequency", const_val=1.0, relation_id = 2):
+    def construct_edge_mask(self, num_nodes,sparse_tensor,data, init_strategy="inverse_relative_frequency", const_val=1.0, relation_id = 2):
         """
         Construct edge mask
         """
+        if num_nodes > 1000:
+            init(strategy="const", const_val=0.1)
         data = self.data
         num_entities = data.num_entities
         torch.manual_seed(42)
@@ -301,7 +304,24 @@ class ExplainModule(nn.Module):
 
                 _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
                 mask.data[[value_indices]] = dict_domain[i]
-            
+
+        elif init_strategy == "range_frequency":
+            _ ,p = torch.div(sparse_tensor.coalesce().indices(), num_entities, rounding_mode='floor').tolist()
+            dict_domain, dict_range = domain_range_freq(data, len(d_classes(data)))
+            for i in p:
+                    _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
+                    mask.data[[value_indices]] = dict_range[i]
+        elif init_strategy == "rdf":
+            rdf = [i for i in range(data.num_relations) if 'rdf' in data.i2r[i]]
+            for i in rdf:
+                _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
+                mask.data[[value_indices]] = 0
+        elif init_strategy == "owl":
+            owl = [i for i in range(data.num_relations) if 'owl' in data.i2r[i]]
+            for i in owl:
+                _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
+                mask.data[[value_indices]] = 0
+                
         return mask
 
     def _masked_adj_ver(self):
@@ -609,5 +629,5 @@ def main(name,node_idx, prune=True, explain_all = False, train=False, threshold 
 
 
 if __name__ == "__main__":
-    main('aifb',node_idx= 5677, prune= True, explain_all =False, train=True, threshold = 0.5)    
+    main('aifb',node_idx= 5791, prune= True, explain_all =False, train=True, threshold = 0.5)    
     #main('aifb',node_idx= 5791, prune= True, explain_all =False, train=True)    
