@@ -94,6 +94,7 @@ def adj(triples, num_nodes, num_rels, cuda=False, vertical=True):
     indices = torch.tensor([from_indices, upto_indices], dtype=torch.long, device=d(cuda))
 
 
+
     assert indices.size(1) == len(triples)
     # assert indices[0, :].max() < size[0], f'{indices[0, :].max()}, {size}, {r}'
     # assert indices[1, :].max() < size[1], f'{indices[1, :].max()}, {size}, {r}'

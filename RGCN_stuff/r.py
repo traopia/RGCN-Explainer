@@ -603,9 +603,9 @@ def main2(name, node_idx, n_hops, threshold, train, prune = True, pyg_torch = Fa
         data = torch.load(f'data/IMDB/finals/{name}.pt')
     if prune:
         data = prunee(data, 2)
-        data.triples = data.triples.clone().detach()
-        data.withheld = data.withheld.clone().detach()
-        data.training = data.training.clone().detach()
+        data.triples = torch.Tensor(data.triples)#data.triples.clone().detach()
+        data.withheld = torch.Tensor(data.withheld)#data.withheld.clone().detach()
+        data.training = torch.Tensor(data.training)#data.training.clone().detach()
 
           
     print(f'Number of entities: {data.num_entities}') #data.i2e
