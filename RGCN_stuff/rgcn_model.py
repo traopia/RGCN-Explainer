@@ -241,7 +241,7 @@ class RGCN(nn.Module):
 
         # Apply weights and sum over relations
         #hidden layer
-        h = torch.mm(self.hor_graph, weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
+        h = torch.sparse.mm(self.hor_graph, weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
         assert h.size() == (n, e)
 
         h = F.relu(h + self.bias1) #apply non linearity and add bias
@@ -249,7 +249,7 @@ class RGCN(nn.Module):
         ## Layer 2
 
         # Multiply adjacencies by hidden
-        h = torch.mm(self.ver_graph, h) # sparse mm
+        h = torch.sparse.mm(self.ver_graph, h) # sparse mm
         h = h.view(r, n, e) # new dim for the relations
 
         if self.bases2 is not None:
