@@ -1,0 +1,4 @@
+label,node_idx,abstract,address,author,booktitle,carriedOutBy,carriesOut,chapter,dealtWithIn,edition,editor,fax,financedBy,finances,hasProject,head,homepage,howpublished,isAbout,isWorkedOnBy,isbn,journal,member,month,name,note,number,pages,phone,photo,projectInfo,publication,publishes,series,title,type,volume,worksAtProject,year,type,type,range,subClassOf,allValuesFrom,inverseOf,onProperty
+0,5678,,,6.0,,1.0,1.0,,5.0,,1.0,1,,,3.0,,1,,5.0,4.0,,,3.0,,,,,,,1.0,3.0,9.0,10.0,,,1.0,,1.0,,1.0,1.0,,,,,
+0,5724,,,1.0,,,,,,,,1,,,,,1,,,,,,,,1.0,,,,1.0,,,,,,,1.0,,,,1.0,1.0,,,,,
+0,5699,,,,,,,,,,,1,,,,,1,,,,,,,,1.0,,,,1.0,,,,,,,,,,,,,,,,,
