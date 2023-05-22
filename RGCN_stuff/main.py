@@ -209,7 +209,7 @@ class RGCN(nn.Module):
 
         return self.comps1.pow(p).sum() + self.bases1.pow(p).sum()
 
-def go(name='am', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False, emb=16, bases=None, printnorms=None):
+def go(name='amplus', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False, emb=16, bases=None, printnorms=None):
 
     include_val = name in ('aifb','mutag','bgs','am')
     # -- For these datasets, the validation is added to the training for the final eval.

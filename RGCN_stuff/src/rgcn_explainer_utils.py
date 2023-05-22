@@ -185,29 +185,94 @@ def match_to_classes(tensor1, tensor2):
 
 
 
-def match_to_triples(v, data, sparse=True):
+# def match_to_triples(v, data, sparse=True):
+#     if sparse:
+#         # p,_ = torch.div(v.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+#         # s,o = v.coalesce().indices()%data.num_entities
+#         # result = torch.stack([s,p,o], dim=1)
+#         matching = []
+#         indexes = v.coalesce().indices()%data.num_entities
+#         for j in range(indexes.size()[1]):
+#             for triple in data.triples:
+#                 if triple[0] == indexes[0][j] and triple[2] == indexes[1][j]:
+#                     matching.append(triple)
+#         result = torch.stack(matching)
+
+                    
+#     else:
+#         matching = []
+#         for i,i2 in zip(v[:,0],v[:,1]):
+#             for j,j1,j2, index in zip(data[:,0],data[:,1],  data[:,2], range(len(data[:,0]))):
+#                 if i == j and i2 == j2:
+#                     matching.append(data[index])
+                    
+
+#         result = torch.stack(matching)
+    
+#     return result
+
+
+# def match_to_triples(v,h, data, sparse=True):
+#     if sparse:
+#         pv,_ = torch.div(v.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+#         sv,ov = v.coalesce().indices()%data.num_entities
+#         result_v = torch.stack([sv,pv,ov], dim=1)
+#         ph,_ = torch.div(h.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+#         sh,oh = h.coalesce().indices()%data.num_entities
+#         result_h = torch.stack([sh,ph,oh], dim=1)
+#         result = torch.cat((result_v, result_h), 0)
+
+
+                    
+#     else:
+#         _,ph = torch.div(h, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+#         sh,oh = h%data.num_entities
+#         result_h = torch.stack([sh,ph,oh], dim=1)
+#         pv, _ = torch.div(v, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+#         sv,ov = v%data.num_entities
+#         result_v = torch.stack([sv,pv,ov], dim=1)
+#         result = torch.cat((result_v, result_h), 0)
+#         print(pv, ph)
+
+                    
+    
+#     return result
+
+
+
+def match_to_triples(v,h, data, sparse=True):
     if sparse:
-        # p,_ = torch.div(v.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-        # s,o = v.coalesce().indices()%data.num_entities
-        # result = torch.stack([s,p,o], dim=1)
-        matching = []
-        indexes = v.coalesce().indices()%data.num_entities
-        for j in range(indexes.size()[1]):
-            for triple in data.triples:
-                if triple[0] == indexes[0][j] and triple[2] == indexes[1][j]:
-                    matching.append(triple)
-        result = torch.stack(matching)
+        pv,_ = torch.div(v.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+        sv,ov = v.coalesce().indices()%data.num_entities
+        result_v = torch.stack([sv,pv,ov], dim=1)
+        ph,_ = torch.div(h.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+        sh,oh = h.coalesce().indices()%data.num_entities
+        result_h = torch.stack([sh,ph,oh], dim=1)
+        result = torch.cat((result_v, result_h), 0)
+
 
                     
     else:
-        matching = []
-        for i,i2 in zip(v[:,0],v[:,1]):
-            for j,j1,j2, index in zip(data[:,0],data[:,1],  data[:,2], range(len(data[:,0]))):
-                if i == j and i2 == j2:
-                    matching.append(data[index])
-                    
+        if len(h )!= 0:
+            _,ph = torch.div(h, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+            sh,oh = h%data.num_entities
+            result_h = torch.stack([sh,ph,oh], dim=1)
+        if len(v)!=0:
+            pv, _ = torch.div(v, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+            sv,ov = v%data.num_entities
+            result_v = torch.stack([sv,pv,ov], dim=1)
+        if len(h) != 0 and len(v) != 0:
+            result = torch.cat((result_v, result_h), 0)
+            print(pv,ph)
+        if len(h) == 0:
+            result = result_v
+            print(pv)
+        if len(v) == 0:
+            result = result_h
+            print(ph)
+        
 
-        result = torch.stack(matching)
+                    
     
     return result
 
@@ -260,12 +325,12 @@ def encode_dict(dict_index):
     return encoded_dict
 
 
-def selected(masked_ver, threshold,data, low_threshold, float=False):
-    sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
-    indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
-    new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) 
+def selected(masked_ver, masked_hor, threshold,data, low_threshold, float=False):
+    sel_masked_ver, sel_masked_hor = sub_sparse_tensor(masked_ver, threshold,data, low_threshold), sub_sparse_tensor(masked_hor, threshold,data, low_threshold)
+    indices_nodes_v, indices_nodes_h = sel_masked_ver.coalesce().indices().detach().numpy(), sel_masked_hor.coalesce().indices().detach().numpy()
+    new_index_v, new_index_h = np.transpose(np.stack((indices_nodes_v[0], indices_nodes_v[1]))) , np.transpose(np.stack((indices_nodes_h[0], indices_nodes_h[1])))
     #triples_matched = match_to_triples(np.array(new_index), data.triples)
-    triples_matched = match_to_triples(sel_masked_ver, data)
+    triples_matched = match_to_triples(sel_masked_ver,sel_masked_hor,  data)
     #print(triples_matched)
     if float:
             l = {}
@@ -667,6 +732,7 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
     
     #select only nodes with a certain threshold
     sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
+    sel_masked_hor = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
     if len(sel_masked_ver)==0:
         sel_masked_ver=sub_sparse_tensor(masked_ver, 0,data, low_threshold)
     print('sel masked ver',sel_masked_ver)
@@ -683,7 +749,7 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
 
     else:
 
-        triples_matched = match_to_triples(sel_masked_ver, data)
+        triples_matched = match_to_triples(sel_masked_ver,sel_masked_hor, data)
         l = []
         for i in triples_matched[:,1]:
             l.append(data.i2rel[int(i)][0])
@@ -703,8 +769,8 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
     for item in list(G.nodes):
         if item in ordered_dict:
             ordered_dict[item].append(dict_index[item])
-        else:
-            ordered_dict[item] =  dict_index[item]
+        # else:
+        #     ordered_dict[item] =  dict_index[item]
 
     dict_index = ordered_dict
 
@@ -746,6 +812,7 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
         nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=8,font_color='red')
         
         res = Counter(unnest_list(rel.values()))
+        print(res)
     if result_weights:
         if not os.path.exists(f'chk/{name}_chk/{experiment_name}⁄graphs'):
             os.makedirs(f'chk/{name}_chk/{experiment_name}⁄graphs')  
