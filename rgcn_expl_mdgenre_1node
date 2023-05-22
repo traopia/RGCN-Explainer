@@ -1,0 +1,10 @@
+wandb: Currently logged in as: t-liberatore. Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.15.3 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.15.0
+wandb: Run data is saved locally in /home/tliberatore/RGCN-Explainer/wandb/run-20230519_133128-mg0xujtm
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lilac-fire-56
+wandb:  View project at https://wandb.ai/t-liberatore/RGCNExplainer_AIFB_
+wandb:  View run at https://wandb.ai/t-liberatore/RGCNExplainer_AIFB_/runs/mg0xujtm
+slurmstepd: error: *** JOB 11796641 ON r38n1 CANCELLED AT 2023-05-19T13:47:22 DUE TO TIME LIMIT ***

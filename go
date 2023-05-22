@@ -8,5 +8,5 @@
 #SBATCH --gpus-per-task=4
 #SBATCH --output=rgcn_expl_mdgenre_1node
 
-python3 r_exp.py
+python3 RGCN_stuff/r_exp.py
 #python3 rgcn_torch.py

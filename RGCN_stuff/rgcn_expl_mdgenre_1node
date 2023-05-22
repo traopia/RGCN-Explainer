@@ -1,0 +1,32 @@
+wandb: Currently logged in as: t-liberatore. Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.15.3 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.15.0
+wandb: Run data is saved locally in /home/tliberatore/RGCN-Explainer/RGCN_stuff/wandb/run-20230518_191020-haj8ziw5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run distinctive-feather-42
+wandb:  View project at https://wandb.ai/t-liberatore/RGCNExplainer_AIFB_
+wandb:  View run at https://wandb.ai/t-liberatore/RGCNExplainer_AIFB_/runs/haj8ziw5
+loaded data mdgenre (68.52s).
+Number of entities: 349344
+Number of classes: 12
+Types of relations: 154
+['P10', 'P102', 'P103', 'P1038', 'P1040', 'P1050', 'P106', 'P1066', 'P108', 'P109', 'P118', 'P119', 'P1191', 'P1196', 'P1283', 'P1303', 'P1317', 'P1327', 'P1340', 'P1343', 'P1344', 'P135', 'P138', 'P140', 'P1411', 'P1412', 'P1424', 'P1431', 'P144', 'P1442', 'P1449', 'P1455', 'P1476', 'P1477', 'P1532', 'P154', 'P1559', 'P1576', 'P161', 'P162', 'P166', 'P170', 'P172', 'P175', 'P179', 'P18', 'P180', 'P1801', 'P1814', 'P1830', 'P185', 'P1853', 'P1875', 'P1877', 'P1884', 'P1889', 'P19', 'P1942', 'P195', 'P1950', 'P1971', 'P20', 'P2001', 'P2031', 'P2032', 'P2047', 'P2048', 'P2061', 'P2067', 'P2094', 'P21', 'P2130', 'P2142', 'P22', 'P2348', 'P241', 'P2515', 'P26', 'P2632', 'P264', 'P27', 'P272', 'P31', 'P3174', 'P3275', 'P3373', 'P3383', 'P344', 'P358', 'P3602', 'P361', 'P364', 'P373', 'P3803', 'P39', 'P40', 'P406', 'P407', 'P410', 'P412', 'P413', 'P443', 'P451', 'P462', 'P463', 'P4805', 'P4839', 'P485', 'P495', 'P4969', 'P5008', 'P5072', 'P509', 'P512', 'P53', 'P54', 'P551', 'P569', 'P57', 'P570', 'P577', 'P58', 'P607', 'P6275', 'P6379', 'P641', 'P69', 'P6942', 'P7084', 'P725', 'P734', 'P735', 'P737', 'P742', 'P750', 'P7763', 'P793', 'P800', 'P802', 'P840', 'P856', 'P86', 'P91', 'P910', 'P915', 'P921', 'P935', 'P937', 'P941', 'P945', 'P97', 'P973', 'P989', 'P990']
+num_neighbors 25565
+{'size': 0.005, 'size_std': 10, 'ent': 1, 'size_num': 0.001, 'lr': 0.1, 'epochs': 30, 'init_strategy': 'overall_frequency', 'threshold': 0.5, 'experiment': 'RGCNExplainer_AIFB_'}
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb:  View run distinctive-feather-42 at: https://wandb.ai/t-liberatore/RGCNExplainer_AIFB_/runs/haj8ziw5
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230518_191020-haj8ziw5/logs
+Traceback (most recent call last):
+  File "r_exp.py", line 646, in <module>
+    main('mdgenre',node_idx= 263997, prune= False, explain_all = False, train=True)
+  File "r_exp.py", line 494, in main
+    model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/torch/serialization.py", line 791, in load
+    with _open_file_like(f, 'rb') as opened_file:
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/torch/serialization.py", line 271, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/home/tliberatore/.local/lib/python3.8/site-packages/torch/serialization.py", line 252, in __init__
+    super().__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: 'chk/mdgenre_chk/model_mdgenre_prune_False'
