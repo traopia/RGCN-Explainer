@@ -123,6 +123,6 @@ def main(name,node_idx, prune=True, all = True):
     
 
 if __name__ == '__main__':
-    main('aifb',5757, prune=True, all = True)
+    main('mdgenre',5757, prune=False, all = True)
     
 
