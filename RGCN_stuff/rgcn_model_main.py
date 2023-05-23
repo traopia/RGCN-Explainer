@@ -16,6 +16,7 @@ import numpy as np
 from src.rgcn_explainer_utils import prunee
 #torch.cuda.set_per_process_memory_fraction(0.5, device=None)
 
+
 def go(name='IMDB_most_genre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
 
     include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre', 'IMDB_most_genre')

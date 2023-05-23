@@ -4,6 +4,7 @@ from pickle import FALSE, TRUE
 from re import A
 from colorama import init
 from responses import FalseBool
+from sqlalchemy import false
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -87,10 +88,19 @@ class Explainer:
         self.pred_label = torch.load(f'chk/{self.name}_chk/prediction_{self.name}_prune_{prune}')
         self.node_idx = node_idx
         self.n_hops = n_hops
-        #self.hor_graph, self.ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
-        #self.n_hops = 0 if prune else 2 # number layers to propagate (in the paper it is 2)
-        self.sub_edges, self.neighbors, self.sub_edges_tensor = find_n_hop_neighbors(self.edge_index, n=self.n_hops, node=self.node_idx)
-        self.sub_triples = match_to_triples(self.sub_edges_tensor.t(),self.triples, sparse=False)
+        self.hor_graph, self.ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+
+        #hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+        self.edge_index_h, self.edge_index_v = self.hor_graph.coalesce().indices(), self.ver_graph.coalesce().indices()
+        # print('edge_index_h', self.edge_index_h)
+        # print('edge_index_v', self.edge_index_v)
+        self.sub_edges, self.neighbors, self.sub_edges_tensor_h  = find_n_hop_neighbors(self.edge_index_h, n=self.n_hops, node=self.node_idx)
+        self.sub_edges, self.neighbors, self.sub_edges_tensor_v  = find_n_hop_neighbors(self.edge_index_v, n=self.n_hops, node=self.node_idx)
+        # print('sub_edges v', self.sub_edges_tensor_v)
+        # print('sub_edges h', self.sub_edges_tensor_h)
+
+        #self.sub_edges, self.neighbors, self.sub_edges_tensor = find_n_hop_neighbors(self.edge_index, n=self.n_hops, node=self.node_idx)
+        self.sub_triples = match_to_triples(self.sub_edges_tensor_v, self.sub_edges_tensor_h,self.data, sparse=False)
         self.overall_rel_frequency = dict(Counter(self.data.triples[:,1].tolist()))
         self.config = config
         
@@ -113,13 +123,12 @@ class Explainer:
         neighbors = list(self.neighbors)
         print(len(neighbors))
         sub_hor_graph, sub_ver_graph = hor_ver_graph(self.sub_triples, self.n, self.r)
+        print('sub_hor_graph done')
         hor_graph, ver_graph = torch.tensor(sub_hor_graph, dtype=torch.float), torch.tensor(sub_ver_graph, dtype=torch.float)
     
         label = torch.tensor([self.label[node_idx]], dtype=torch.long)
         pred_label = torch.argmax(self.pred_label[node_idx_new])
 
-        #wandb.init(project='RGCNExplainer', config=self.params)
-        #config = wandb.config
 
         explainer = ExplainModule(
             hor_graph, ver_graph,
@@ -131,27 +140,11 @@ class Explainer:
 
 
 
-
-        # sweep_config = {
-        #     'method': 'grid',
-        #     'parameters': {
-        #         'lr': {'values': [0.05, 0.1, 0.5]},
-        #         'size': {'values': [0.05, 0.005, 0.0005]},
-        #         'ent': {'values': [10,1]},
-        #         'size_std': {'values': [10,1]},
-        #         'size_num': {'values': [0.5, 0.1, 0.05]},
-        #     }
-        # }
-        # sweep_id = wandb.sweep(sweep_config, project='RGCNExplainer')
-        # wandb.agent(sweep_id, function=main)
-
-        # wandb.init(project='RGCNExplainer', config=params)  
-        # wandb.login()
         config = wandb.config
 
         self.model.eval()
         explainer.train()  # set the explainer model to training mode
-
+        print('start training')
         for epoch in range(config.epochs):
             explainer.zero_grad()  # zero the gradient buffers of all parameters
             explainer.optimizer.zero_grad()
@@ -387,7 +380,7 @@ class ExplainModule(nn.Module):
         
         gt_label_node = self.label#[node_idx]te
         logit = pred[gt_label_node]
-        pred_loss =  -torch.log(logit) 
+        pred_loss = config["pred"]* -torch.log(logit) 
 
         #size_num_loss = -(config["size_std"]*config["size_num"] * (len(mask) - num_high+3) )
         size_num_loss = config["size_std"]* (num_high+3)/len(mask)
@@ -434,8 +427,13 @@ class ExplainModule(nn.Module):
 import wandb
 
 def main(name,node_idx, prune=True, explain_all = False, train=False):
-
+    if explain_all == True:
+        exp = 'all'
+    else:
+        exp = node_idx
     n_hops = 0 if prune else 2
+    #n_hops = 2
+
 
     if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
         data = kg.load(name, torch=True, final=False)
@@ -475,15 +473,16 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
     }
     #sweep_id = wandb.sweep(sweep_config, project='RGCNExplainer_AIFB_5757')
     params={
-                "size": 0.005,  
+                "pred": 1,
+                "size": 0.005, #0.005,  
                 "size_std": 10, #num_neighbors*0.1,#-10,
                 "ent": 1,
                 "size_num": 0.001,
                 "lr": 0.1,
                 "epochs": 30,
-                "init_strategy": "overall_frequency", #[],
+                "init_strategy": "const", #[],
                 "threshold": 0.5,
-                "experiment": "RGCNExplainer_AIFB_",
+                "experiment": f"RGCNExplainer_AIFB_{exp}",
             }
     wandb.login()
     wandb.init(project=params['experiment'], config=params)
@@ -497,16 +496,17 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
     low = []
     relations = [data.i2rel[i][0] for i in range(len(data.i2rel))]
     model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
-    relations = ['label', 'node_idx'] + relations
+    relations = ['label', 'node_idx','number_neighbors', 'prediction_explain', 'prediction_full', 'prediction_explain_binary'] + relations
     df = pd.DataFrame(columns=relations)
     df_floats = pd.DataFrame(columns=relations)
     if explain_all == True:
         for target_label in range(len(d.keys())):
             for node_idx in d[target_label]:
+                print('node_idx', node_idx)
                 _,neighbors,sub_edge = find_n_hop_neighbors(edge_index, n_hops, node_idx)
                 num_neighbors = len(sub_edge.t())
                 if num_neighbors*0.1 > 10:
-                    config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+                    config.update({'size_std': num_neighbors*0.0001}, allow_val_change=True)
   
                 #elif num_neighbors*0.1 < 1:
                 else:
@@ -530,9 +530,11 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
                 torch.save(masked_ver, f'chk/{name}_chk/{experiment_name}/masked_adj/masked_ver{node_idx}')
                 torch.save(masked_hor, f'chk/{name}_chk/{experiment_name}/masked_adj/masked_hor{node_idx}') 
                 #h = visualize(node_idx, n_hops, data, masked_ver,threshold=config['threshold'], name = name, result_weights=False, low_threshold=False)
-                h = selected(masked_ver, threshold=config['threshold'],data=data, low_threshold=False)
-                masked_ver,masked_hor = convert_binary(masked_ver, config['threshold']), convert_binary(masked_hor, config['threshold'])
+                h = selected(masked_ver,masked_hor,  threshold=config['threshold'],data=data, low_threshold=False)
                 res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
+                masked_ver,masked_hor = convert_binary(masked_ver, config['threshold']), convert_binary(masked_hor, config['threshold'])
+                res_binary = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
+                
 
                 hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
                 y_full = model.forward2(hor_graph, ver_graph)
@@ -541,12 +543,11 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
 
                 high.append(h)
                 h = dict(h)
-                info = {'label': target_label, 'node_idx': str(node_idx),'number_neighbors': num_neighbors, 'prediction_explain': str(res.detach().numpy()), 'prediction_full': str(res_full.detach().numpy())}
+                info = {'label': target_label, 'node_idx': str(node_idx),'number_neighbors': num_neighbors, 'prediction_explain': str(res.detach().numpy()), 'prediction_full': str(res_full.detach().numpy()), 'prediction_explain_binary': str(res_binary.detach().numpy())}
                 h.update(info)
-                #predictions =  {'number_neighbors': num_neighbors, 'prediction_explain': str(res.detach().numpy()), 'prediction_full': str(res_full.detach().numpy())}
-                #h.update(predictions)
+                print('info:',h)
+
                 df.loc[str(node_idx)] = h
-                #df.loc[str(node_idx)].update(predictions)
 
 
 
@@ -559,11 +560,11 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
                 experiment_name = f'size_{config["size"]}_lr_{config["lr"]}_epochs_{config["epochs"]}_threshold_{config["threshold"]}_init_{config["init_strategy"]}'
                 if not os.path.exists(f'Relation_Importance_{name}/{experiment_name}'):
                     os.makedirs(f'Relation_Importance_{name}/{experiment_name}')
-                #df.to_csv(f'Relation_Importance_{name}/{experiment_name}/Relations_Important_{name}_{node_idx}.csv', index=False)
+                df.to_csv(f'Relation_Importance_{name}/{experiment_name}/Relations_Important_{name}_{node_idx}.csv', index=False)
 
                 print('node_idx', node_idx, 
                     '\n node original label',[k for k, v in d.items() if node_idx in v],
-                    '\n node predicted label explain', torch.argmax(res).item(),
+                    '\n node predicted label explain', torch.argmax(res).item(), 'explain binary', torch.argmax(res_binary).item(),
                     '\n node prediction probability explain', res,
                         '\n node predicted label full', torch.argmax(res_full).item(),
                         'most important relations ', h,
@@ -580,28 +581,42 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
             node_idx = d[0][0]
         if train:
             #config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
-            config.update({'size_std': num_neighbors*10}, allow_val_change=True)
+            #config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
             #config.update({'size': num_neighbors*0.01 * 0.005}, allow_val_change=True)
+            if num_neighbors > 100:
+                #config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+                config.update({'size_std': num_neighbors}, allow_val_change=True)
+            elif num_neighbors < 10:
+                config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+                config.update({'pred': 2}, allow_val_change=True)
             print('config size std:',config['size_std'])
+
             print('config size:',config['size'])
             explainer = Explainer(model, data,name,  node_idx, n_hops, prune, config)
             masked_hor, masked_ver = explainer.explain()
             #wandb.agent(sweep_id, explainer.explain)
-            if not os.path.exists(f'chk/{name}_chk/masked_adj'):
-                    os.makedirs(f'chk/{name}_chk/masked_adj') 
-            torch.save(masked_ver, f'chk/{name}_chk/masked_adj/masked_ver{node_idx}_new')
-            torch.save(masked_hor, f'chk/{name}_chk/masked_adj/masked_hor{node_idx}_new') 
+            directory = f'chk/{name}_chk/{experiment_name}/masked_adj'
+
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            else:
+                print(f"Directory '{directory}' already exists.")
+            torch.save(masked_ver, f'chk/{name}_chk/{experiment_name}/masked_adj/masked_ver{node_idx}')
+            torch.save(masked_hor, f'chk/{name}_chk/{experiment_name}/masked_adj/masked_hor{node_idx}') 
         else:
-            masked_ver = torch.load(f'chk/{name}_chk/masked_adj/masked_ver{node_idx}_new')
-            masked_hor = torch.load(f'chk/{name}_chk/masked_adj/masked_hor{node_idx}_new')
+            masked_ver = torch.load(f'chk/{name}_chk/{experiment_name}/masked_adj/masked_ver{node_idx}')
+            masked_hor = torch.load(f'chk/{name}_chk/{experiment_name}/masked_adj/masked_ver{node_idx}')
         h = visualize(node_idx, n_hops, data, masked_ver,threshold=config['threshold'] , name = name, result_weights=False, low_threshold=False, experiment_name=experiment_name)
-        h = selected(masked_ver, threshold=config['threshold'],data=data, low_threshold=False)
-        masked_ver,masked_hor = convert_binary(masked_ver, config['threshold']), convert_binary(masked_hor, config['threshold'])
+        h = selected(masked_ver,masked_hor,  threshold=config['threshold'],data=data, low_threshold=False)
         res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
+
+        masked_ver,masked_hor = convert_binary(masked_ver, config['threshold']), convert_binary(masked_hor, config['threshold'])
+        res_binary = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
 
 
         hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
         hor_graph, ver_graph = convert_binary(hor_graph, config['threshold']), convert_binary(ver_graph, config['threshold'])
+        #print('hor graph', hor_graph.nz)
         y_full = model.forward2(hor_graph, ver_graph)
         node_pred_full = y_full[node_idx, :]
         res_full = nn.Softmax(dim=0)(node_pred_full)
@@ -615,9 +630,11 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         h.update(info)
         
         df.loc[str(node_idx)] = h
-        df['number neighbors'] = num_neighbors
-        df['prediction explain'] = str(res.detach().numpy())
-        df['prediction full'] = str(res_full.detach().numpy())
+        df['number_neighbors'] = num_neighbors
+        df['prediction_explain_binary'] = str(res_binary.detach().numpy())
+        df['prediction_full'] = str(res_full.detach().numpy())
+        df['prediction_explain'] = str(res.detach().numpy())
+
         
 
         # h_floats = selected(masked_ver, threshold=0.5,data=data, low_threshold=False,float=True)
@@ -630,7 +647,8 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         print('node_idx', node_idx, 
             '\n node original label',target_label,
             '\n node predicted label explain', torch.argmax(res).item(),
-            '\n node prediction probability explain', res,
+            '\n node prediction probability explain', res, 'explain binary', torch.argmax(res_binary).item(),
+            '\n node prediction probability explain binary', res_binary,
             '\n node predicted label full', torch.argmax(res_full).item(),
             '\n node prediction probability full', res_full,
             '\n final masks and lenght', masked_ver, len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ]))
@@ -643,4 +661,5 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
 
 if __name__ == "__main__":
 
-    main('mdgenre',node_idx= 263997, prune= False, explain_all = False, train=True)      
+    #main('mdgenre',node_idx= 263997, prune= False, explain_all = False, train=True)  
+    main('mdgenre', node_idx = 5757, prune= False, explain_all = True, train=True)  
