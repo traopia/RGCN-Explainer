@@ -40,31 +40,6 @@ import wandb
 
 
 
-#Get adjacency matrix: in this context this is hor / ver graph
-def hor_ver_graph(triples, n, r):
-    """ 
-    input: triples, number of nodes, number of relations
-    output: hor_graph, ver_graph : horizontally and vertically stacked adjacency matrix
-    """
-    #triples = enrich(triples_small, n, r)
-
-    hor_ind, hor_size = adj(triples, n, 2*r+1, vertical=False)
-    ver_ind, ver_size = adj(triples, n, 2*r+1, vertical=True)
-    #number of relations is 2*r+1 because we added the inverse and self loop
-
-    _, rn = hor_size #horizontally stacked adjacency matrix size
-    #print(hor_size)
-    r = rn // n #number of relations enriched divided by number of nodes
-
-    vals = torch.ones(ver_ind.size(0), dtype=torch.float) #number of enriched triples
-    #vals = vals / sum_sparse(ver_ind, vals, ver_size) #normalize the values by the number of edges
-
-    hor_graph = torch.sparse.FloatTensor(indices=hor_ind.t(), values=vals, size=hor_size) #size: n,r, emb
-
-
-    ver_graph = torch.sparse.FloatTensor(indices=ver_ind.t(), values=vals, size=ver_size)
-
-    return hor_graph, ver_graph
 
 class Explainer:
     def __init__(self,
@@ -92,8 +67,6 @@ class Explainer:
 
         #hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
         self.edge_index_h, self.edge_index_v = self.hor_graph.coalesce().indices(), self.ver_graph.coalesce().indices()
-        # print('edge_index_h', self.edge_index_h)
-        # print('edge_index_v', self.edge_index_v)
         self.sub_edges, self.neighbors, self.sub_edges_tensor_h  = find_n_hop_neighbors(self.edge_index_h, n=self.n_hops, node=self.node_idx)
         self.sub_edges, self.neighbors, self.sub_edges_tensor_v  = find_n_hop_neighbors(self.edge_index_v, n=self.n_hops, node=self.node_idx)
         # print('sub_edges v', self.sub_edges_tensor_v)
@@ -169,14 +142,17 @@ class Explainer:
             #            "pred_loss": pred_loss, "size_loss": size_loss, "mask_ent_loss": mask_ent_loss,
             #            "size_num_loss": size_num_loss,"reg_loss": reg_loss, "squae_loss": squared_loss})
             
-            wandb.log({f"len mask > {config['threshold']}": len([i for i in masked_ver.coalesce().values() if i > config['threshold']]), "loss": loss,
+            wandb.log({f"len mask > {config['threshold']}": len([i for i in masked_ver.coalesce().values() if i > config['threshold']]) , "loss": loss,
             "pred_loss": pred_loss, "size_loss": size_loss, "mask_ent_loss": mask_ent_loss, "size_std_loss": size_std_loss, "size_num_loss": size_num_loss, "num_high": num_high})
         print('Finished Training')
 
         masked_hor_values = (masked_hor.coalesce().values() * hor_graph.coalesce().values())
         masked_ver_values = (masked_ver.coalesce().values() * ver_graph.coalesce().values())
-        masked_hor = torch.sparse.FloatTensor(masked_hor.coalesce().indices(), masked_hor_values, hor_graph.size())
-        masked_ver = torch.sparse.FloatTensor(masked_ver.coalesce().indices(), masked_ver_values, ver_graph.size())
+        # masked_hor = torch.sparse.FloatTensor(masked_hor.coalesce().indices(), masked_hor_values, hor_graph.size())
+        # masked_ver = torch.sparse.FloatTensor(masked_ver.coalesce().indices(), masked_ver_values, ver_graph.size())
+        masked_hor = torch.sparse.FloatTensor(hor_graph.coalesce().indices(), masked_hor_values, hor_graph.size())
+        masked_ver = torch.sparse.FloatTensor(ver_graph.coalesce().indices(), masked_ver_values, ver_graph.size())
+
 
         return masked_hor, masked_ver
 
@@ -212,13 +188,11 @@ class ExplainModule(nn.Module):
 
 
     
-    def construct_edge_mask(self, num_nodes,sparse_tensor,data, const_val=1.0, relation_id = 2):
+    def construct_edge_mask(self, num_nodes,sparse_tensor,data, const_val=1.0, relation_id = 39):
         """
         Construct edge mask
         """
         init_strategy = self.init_strategy
-        # if num_nodes > 1000:
-        #     init(strategy="const", const_val=0.1)
         data = self.data
         num_entities = data.num_entities
         torch.manual_seed(42)
@@ -232,6 +206,7 @@ class ExplainModule(nn.Module):
                 mask.normal_(1.0, std)
         elif init_strategy == "const":
             nn.init.constant_(mask, const_val) 
+
         elif init_strategy == "zero_out":
             '''initialize the mask with the zero out strategy: we zero out edges belonging to specific relations'''
             std = nn.init.calculate_gain("relu") * math.sqrt(
@@ -239,8 +214,8 @@ class ExplainModule(nn.Module):
             )
             with torch.no_grad():
                 mask.normal_(1.0, std)
-            output_indices, output_values, value_indices=select_relation(sparse_tensor,relation_id)
-            _,_,value_indices1=select_relation(sparse_tensor,33)
+            output_indices, output_values, value_indices=select_relation(sparse_tensor,self.data.num_entities,relation_id)
+            _,_,value_indices1=select_relation(sparse_tensor,self.data.num_entities, 28)
             print(value_indices, value_indices1)
             value_indices = torch.cat((value_indices, value_indices1), 0)
             mask.data[[value_indices]] = 0
@@ -342,6 +317,7 @@ class ExplainModule(nn.Module):
     def forward(self, node_idx):
         self.masked_ver = self._masked_adj_ver()  # masked adj is the adj matrix with the mask applied
         self.masked_hor = self._masked_adj_hor()  # masked adj is the adj matrix with the mask applied
+        masked_ver, masked_hor = self.masked_ver, self.masked_hor
         masked_ver,masked_hor = convert_binary(self.masked_ver, self.config["threshold"]), convert_binary(self.masked_hor, self.config["threshold"])
         ypred = self.model.forward2(masked_hor, masked_ver)
         #ypred = self.model.forward2(self.masked_hor, self.masked_ver)
@@ -380,7 +356,12 @@ class ExplainModule(nn.Module):
         
         gt_label_node = self.label#[node_idx]te
         logit = pred[gt_label_node]
-        pred_loss = config["pred"]* -torch.log(logit) 
+        # pred_loss = config["pred"]* -torch.log(logit) 
+        if torch.argmax(pred) != gt_label_node:
+            pred_loss = 5 * -torch.log(logit) 
+        else:
+            pred_loss = config["pred"]* -torch.log(logit)
+
 
         #size_num_loss = -(config["size_std"]*config["size_num"] * (len(mask) - num_high+3) )
         size_num_loss = config["size_std"]* (num_high+3)/len(mask)
@@ -394,14 +375,15 @@ class ExplainModule(nn.Module):
         
 
         # entropy edge mask 
-        #mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
-        mask_ent = - torch.log(mask)
-        mask_ent_loss = config["ent"] * torch.mean(mask_ent)
+        mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
+        #mask_ent = - torch.log(mask)
+        mask_ent_loss =  config["ent"] * torch.mean(mask_ent)
 
 
         #loss = torch.exp(pred_loss + mask_ent_loss + size_num_loss + size_loss_std + size_loss ) #
         loss = torch.exp(pred_loss + size_loss + mask_ent_loss + size_loss_std)
-
+        #loss = pred_loss + size_loss + mask_ent_loss + size_loss_std
+        #loss = pred_loss + mask_ent_loss
         print('pred_loss', pred_loss)
         print('size_loss', size_loss)
         #
@@ -432,7 +414,7 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
     else:
         exp = node_idx
     n_hops = 0 if prune else 2
-    #n_hops = 2
+    n_hops = 2
 
 
     if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
@@ -452,8 +434,8 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
     print(f'Types of relations: {data.num_relations}') #data.i2r
     data.entities = np.append(data.triples[:,0].detach().numpy(),(data.triples[:,2].detach().numpy()))
     get_relations(data)
-    d_classes(data)
-    d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
+    d = d_classes(data)
+    #d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
     edge_index = edge_index_oneadj(data.triples)
     _,neighbors,sub_edge = find_n_hop_neighbors(edge_index, n_hops, node_idx)
     num_neighbors = len(sub_edge.t())
@@ -474,16 +456,17 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
     #sweep_id = wandb.sweep(sweep_config, project='RGCNExplainer_AIFB_5757')
     params={
                 "pred": 1,
-                "size": 0.005, #0.005,  
-                "size_std": 10, #num_neighbors*0.1,#-10,
+                "size":  0.005,#0.005, #0.005,  
+                "size_std": 0, #num_neighbors*0.1,#-10,
                 "ent": 1,
                 "size_num": 0.001,
-                "lr": 0.1,
+                "lr": 0.05,
                 "epochs": 30,
-                "init_strategy": "const", #[],
+                "init_strategy": "normal", #[],
                 "threshold": 0.5,
                 "experiment": f"RGCNExplainer_AIFB_{exp}",
             }
+
     wandb.login()
     wandb.init(project=params['experiment'], config=params)
     
@@ -505,14 +488,12 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
                 print('node_idx', node_idx)
                 _,neighbors,sub_edge = find_n_hop_neighbors(edge_index, n_hops, node_idx)
                 num_neighbors = len(sub_edge.t())
-                if num_neighbors*0.1 > 10:
-                    config.update({'size_std': num_neighbors*0.0001}, allow_val_change=True)
-  
-                #elif num_neighbors*0.1 < 1:
-                else:
-                    config.update({'size_std': 10}, allow_val_change=True)
-                #config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+
+                config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+                config.update({'ent': num_neighbors*0.01}, allow_val_change=True)
+
                 print('config size std:',config['size_std'])
+                print('config ent:',config['ent'])
                 
                 explainer = Explainer(model, data,name,  node_idx, n_hops, prune,config)
                 masked_hor, masked_ver = explainer.explain()
@@ -529,7 +510,7 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
                     print(f"Directory '{directory}' already exists.")
                 torch.save(masked_ver, f'chk/{name}_chk/{experiment_name}/masked_adj/masked_ver{node_idx}')
                 torch.save(masked_hor, f'chk/{name}_chk/{experiment_name}/masked_adj/masked_hor{node_idx}') 
-                #h = visualize(node_idx, n_hops, data, masked_ver,threshold=config['threshold'], name = name, result_weights=False, low_threshold=False)
+                #h = visualize(node_idx, n_hops, data, masked_ver,masked_hor,threshold=config['threshold'], name = name, result_weights=False, low_threshold=False)
                 h = selected(masked_ver,masked_hor,  threshold=config['threshold'],data=data, low_threshold=False)
                 res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
                 masked_ver,masked_hor = convert_binary(masked_ver, config['threshold']), convert_binary(masked_hor, config['threshold'])
@@ -541,7 +522,7 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
                 node_pred_full = y_full[node_idx, :]
                 res_full = nn.Softmax(dim=0)(node_pred_full)
 
-                high.append(h)
+                #high.append(h)
                 h = dict(h)
                 info = {'label': target_label, 'node_idx': str(node_idx),'number_neighbors': num_neighbors, 'prediction_explain': str(res.detach().numpy()), 'prediction_full': str(res_full.detach().numpy()), 'prediction_explain_binary': str(res_binary.detach().numpy())}
                 h.update(info)
@@ -583,17 +564,23 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
             #config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
             #config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
             #config.update({'size': num_neighbors*0.01 * 0.005}, allow_val_change=True)
-            if num_neighbors > 100:
-                #config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
-                config.update({'size_std': num_neighbors}, allow_val_change=True)
-            elif num_neighbors < 10:
-                config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
-                config.update({'pred': 2}, allow_val_change=True)
+
+            config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+            config.update({'ent': num_neighbors*0.01}, allow_val_change=True)
+
+            # if num_neighbors > 100:
+            #     #config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+            #     config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+            #     #config.update({'ent': num_neighbors*0.1}, allow_val_change=True)
+            # elif num_neighbors < 10:
+            #     config.update({'size_std': num_neighbors*0.1}, allow_val_change=True)
+            #     config.update({'pred': 2}, allow_val_change=True)
             print('config size std:',config['size_std'])
 
             print('config size:',config['size'])
             explainer = Explainer(model, data,name,  node_idx, n_hops, prune, config)
             masked_hor, masked_ver = explainer.explain()
+            print('masked_hor ind', masked_hor.coalesce().indices())
             #wandb.agent(sweep_id, explainer.explain)
             directory = f'chk/{name}_chk/{experiment_name}/masked_adj'
 
@@ -606,8 +593,10 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         else:
             masked_ver = torch.load(f'chk/{name}_chk/{experiment_name}/masked_adj/masked_ver{node_idx}')
             masked_hor = torch.load(f'chk/{name}_chk/{experiment_name}/masked_adj/masked_ver{node_idx}')
-        h = visualize(node_idx, n_hops, data, masked_ver,threshold=config['threshold'] , name = name, result_weights=False, low_threshold=False, experiment_name=experiment_name)
-        h = selected(masked_ver,masked_hor,  threshold=config['threshold'],data=data, low_threshold=False)
+        # h = visualize(node_idx, n_hops, data, masked_ver,masked_hor, threshold=config['threshold'] , name = name, result_weights=False, low_threshold=False, experiment_name=experiment_name)
+        h = visualize(node_idx, n_hops, data, masked_ver, threshold=config['threshold'] , name = name, result_weights=False, low_threshold=False, experiment_name=experiment_name)
+       
+        #h = selected(masked_ver,masked_hor,  threshold=config['threshold'],data=data, low_threshold=False)
         res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
 
         masked_ver,masked_hor = convert_binary(masked_ver, config['threshold']), convert_binary(masked_hor, config['threshold'])
@@ -622,6 +611,7 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         res_full = nn.Softmax(dim=0)(node_pred_full)
         high.append(h)
         h = dict(h)
+        print('Important relations', h)
 
 
 
@@ -662,4 +652,4 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
 if __name__ == "__main__":
 
     #main('mdgenre',node_idx= 263997, prune= False, explain_all = False, train=True)  
-    main('mdgenre', node_idx = 5757, prune= True, explain_all = True, train=True)  
+    main('aifb', node_idx = 5905, prune= True, explain_all = False, train=True)  
