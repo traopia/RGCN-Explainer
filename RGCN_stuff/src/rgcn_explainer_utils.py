@@ -692,15 +692,3 @@ def select_one_relation(sparse_tensor,data, relation,value =1):
     coalesced_values[value_indices] = value
     masked_sparse_tensor = torch.sparse_coo_tensor(coalesced_indices, coalesced_values, sparse_tensor.size())
     return masked_sparse_tensor
-
-
-
-def keep_columns_with_non_zero_values(df):
-    # Get the column names with non-zero values
-    df = df.fillna(0)
-    non_zero_columns = df.columns[df.astype(bool).any(axis=0)]
-
-    # Create a new DataFrame with only the columns containing non-zero values
-    modified_df = df[non_zero_columns]
-
-    return modified_df
