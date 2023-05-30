@@ -1,10 +1,16 @@
-wandb: Currently logged in as: t-liberatore. Use `wandb login --relogin` to force relogin
-wandb: wandb version 0.15.3 is available!  To upgrade, please run:
-wandb:  $ pip install wandb --upgrade
-wandb: Tracking run with wandb version 0.15.0
-wandb: Run data is saved locally in /home/tliberatore/RGCN-Explainer/wandb/run-20230522_094856-3574km29
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run playful-serenity-5
-wandb:  View project at https://wandb.ai/t-liberatore/RGCNExplainer_AIFB_all
-wandb:  View run at https://wandb.ai/t-liberatore/RGCNExplainer_AIFB_all/runs/3574km29
-slurmstepd: error: *** JOB 11803491 ON r28n2 CANCELLED AT 2023-05-22T10:05:03 DUE TO TIME LIMIT ***
+cuda
+loaded data mdgenre (68.58s).
+label tensor([0], device='cuda:0')
+node_idx 109635
+Traceback (most recent call last):
+  File "RGCN_stuff/baseline.py", line 159, in <module>
+    main('mdgenre',5757, prune=False, all = False)
+  File "RGCN_stuff/baseline.py", line 146, in main
+    count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
+  File "RGCN_stuff/baseline.py", line 84, in prediction_with_one_relation
+    baseline = baseline_pred(data, model, node_idx)
+  File "RGCN_stuff/baseline.py", line 68, in baseline_pred
+    out = model.forward2(h_,v_)
+  File "/home/tliberatore/RGCN-Explainer/RGCN_stuff/rgcn_model.py", line 211, in forward2
+    h = torch.sparse.mm(ver_graph, h) # sparse mm
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 6.44 GiB (GPU 0; 23.65 GiB total capacity; 19.93 GiB already allocated; 3.08 GiB free; 19.97 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF

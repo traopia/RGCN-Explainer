@@ -113,7 +113,7 @@ class RGCN(nn.Module):
     def __init__(self, triples, n, r, numcls, emb=16, bases=None, Explain = None):
 
         super().__init__()
-
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.emb = emb
         self.bases = bases
         self.numcls = numcls
@@ -145,6 +145,7 @@ class RGCN(nn.Module):
         # layer 1 weights
         if bases is None:
             self.weights1 = nn.Parameter(torch.FloatTensor(r, n, emb))
+            self.weights1.to(device)
             nn.init.xavier_uniform_(self.weights1, gain=nn.init.calculate_gain('relu'))
 
             self.bases1 = None
@@ -159,6 +160,7 @@ class RGCN(nn.Module):
         if bases is None:
 
             self.weights2 = nn.Parameter(torch.FloatTensor(r, emb, numcls) )
+            self.weights2.to(device)
             nn.init.xavier_uniform_(self.weights2, gain=nn.init.calculate_gain('relu'))
 
             self.bases2 = None
@@ -175,11 +177,14 @@ class RGCN(nn.Module):
 
     def forward2(self, hor_graph, ver_graph):
 
-
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         ## Layer 1
+        hor_graph, ver_graph = hor_graph.to(device), ver_graph.to(device)
 
         n, rn = hor_graph.size() #horizontally stacked adjacency matrix size
         r = rn // n
+
+        # n, r = self.n, self.r
         e = self.emb
         b, c = self.bases, self.numcls
 
@@ -188,7 +193,8 @@ class RGCN(nn.Module):
             weights = torch.mm(self.comps1, self.bases1.view(b, n*e)).view(r, n, e)
         else:
             weights = self.weights1
-
+        # print(weights.size())
+        # print(r,n,e)
         assert weights.size() == (r, n, e) #r relations, n nodes, e embedding size
 
         # Apply weights and sum over relations
@@ -276,3 +282,55 @@ class RGCN(nn.Module):
             return self.weights1.pow(2).sum()
 
         return self.comps1.pow(p).sum() + self.bases1.pow(p).sum()
+    
+
+    def forward3(self, hor_graph):
+
+
+        ## Layer 1
+        ver_graph = hor_graph.t()
+
+        n, rn = hor_graph.size() #horizontally stacked adjacency matrix size
+        r = rn // n
+
+        # n, r = self.n, self.r
+        e = self.emb
+        b, c = self.bases, self.numcls
+
+        if self.bases1 is not None:
+            # weights = torch.einsum('rb, bij -> rij', self.comps1, self.bases1)
+            weights = torch.mm(self.comps1, self.bases1.view(b, n*e)).view(r, n, e)
+        else:
+            weights = self.weights1
+        # print(weights.size())
+        # print(r,n,e)
+        assert weights.size() == (r, n, e) #r relations, n nodes, e embedding size
+
+        # Apply weights and sum over relations
+        #hidden layer
+
+        h = torch.sparse.mm(hor_graph, weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
+        assert h.size() == (n, e)
+
+        h = F.relu(h + self.bias1) #apply non linearity and add bias
+
+        ## Layer 2
+
+        # Multiply adjacencies by hidden
+        h = torch.sparse.mm(ver_graph, h) # sparse mm
+        h = h.view(r, n, e) # new dim for the relations
+
+        if self.bases2 is not None:
+            # weights = torch.einsum('rb, bij -> rij', self.comps2, self.bases2)
+            weights = torch.mm(self.comps2, self.bases2.view(b, e * c)).view(r, e, c)
+        else:
+            weights = self.weights2
+
+        # Apply weights, sum over relations
+        # h = torch.einsum('rhc, rnh -> nc', weights, h)
+        h = torch.bmm(h, weights).sum(dim=0)
+
+        assert h.size() == (n, c)
+
+        return h + self.bias2
+

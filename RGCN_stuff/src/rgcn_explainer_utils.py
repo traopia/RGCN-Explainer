@@ -7,9 +7,10 @@ import torch
 from collections import Counter
 from kgbench import load, tic, toc, d, Data
 import os
+from rgcn_model import adj, enrich, sum_sparse, RGCN
 
 def dict_index_classes(data, masked_ver):
-    indices_nodes = masked_ver.coalesce().indices().detach().numpy()
+    indices_nodes = masked_ver.coalesce().indices().tolist()
 
     d = list(data.e2i.keys())
     values_indices_nodes = [d[i] for i in indices_nodes[1]]
@@ -32,7 +33,7 @@ def dict_triples_semantics(data,  masked_ver, sub_triples):
         
     """
     dict_index = dict_index_classes(data,masked_ver)
-    indices_nodes = masked_ver.coalesce().indices().detach().numpy()
+    indices_nodes = masked_ver.coalesce().indices().tolist()
     new_ver = indices_nodes[0]%data.num_entities
     new_index = np.transpose(np.stack((new_ver, indices_nodes[1])))
     #sub_triples = match_to_triples(new_index, data.triples)
@@ -49,58 +50,7 @@ def dict_triples_semantics(data,  masked_ver, sub_triples):
     return dict 
 
 
-#Visualize the result
-def visualize_result(node_idx, masked_ver, neighbors, data, num_hops):
-    """Visualizes the n-hop neighborhood of a given node."""
-    indices_nodes = masked_ver.coalesce().indices().detach().numpy()
-    new_ver = indices_nodes[0]%data.num_entities #get original indexes
-    new_index = np.transpose(np.stack((new_ver, indices_nodes[1]))) #original edge indexes
-    G = nx.from_edgelist(new_index)
-    
-    #create dict of index - node: to visualize index of the node
-    labeldict = {}
-    for node in G.nodes:
-        labeldict[node] = node 
-    #print(G.nodes)
-    dict_index = dict_index_classes(data,masked_ver)
-    #order dict index according to G nodes in networkx
-    ordered_dict = {}
-    for item in list(G.nodes):
-        ordered_dict[item] = dict_index[item]
 
-    dict_index = ordered_dict
-    
-
-    #get inverse of dict to allow mapping of different 'classes' of nodes to different nodes
-    inv_map = {v: k for k, v in dict_index.items()}
-    print(inv_map) #use inv:map to get a legend of node colors for later 
-    color_list = list(dict_index.values())
-    
-    #make a list out of it 
-    for i in range(len(color_list)):
-        if color_list[i] in inv_map:
-            color_list[i] = inv_map[color_list[i]]   
-
-            
-    #edge colors reflect the masked ver values - more important relations have darker color
-    #to check why we have relations than expexted :')
-    edge_colors = list(masked_ver.coalesce().values().detach().numpy())[:int(G.number_of_edges())]
-
-    # draw graph with edge colors
-    plt.figure()  
-    plt.title("Node {}'s {}-hop neighborhood important nodes".format(node_idx, num_hops))
-    pos = nx.circular_layout(G)
-    nx.draw(G, pos=pos, with_labels=True, edge_color = edge_colors, edge_cmap=plt.cm.Reds,node_color =  color_list  ,labels = labeldict, cmap="Set2" )
-
-    #add colorbar legend
-
-
-    sm = plt.cm.ScalarMappable(cmap=plt.cm.Reds, norm=plt.Normalize(vmin=0, vmax=1))
-    sm.set_array(edge_colors)
-    cbar = plt.colorbar(sm)
-    cbar.ax.set_title('Weight')
-
-    plt.show()  
 
 #Neighborhood
 #Extract neighborhood
@@ -161,84 +111,14 @@ def match_to_classes(tensor1, tensor2):
     return matching   
 
 
-#match triples 
-# def match_to_triples(tensor1, tensor2):
-#     """
-#     tensor1: sub_edge tensor: edges of the neighborhood - transpose!!
-#     tensor2: data.triples: all edges
-#     """
-#     matching = []
-#     for i,i2 in zip(tensor1[:,0],tensor1[:,1]):
-#         for j,j1,j2, index in zip(tensor2[:,0],tensor2[:,1],  tensor2[:,2], range(len(tensor2[:,0]))):
-#             if i == j and i2 == j2:
-#                 matching.append(tensor2[index])
-                
-
-#     result = torch.stack(matching)
-#     return result
-
-# def match_to_triples(v, data):
-#     p,_ = v.coalesce().indices()//data.num_entities
-#     s,o = v.coalesce().indices()%data.num_entities
-#     result = torch.stack([s,p,o], dim=1)
-#     return result
 
 
 
-# def match_to_triples(v, data, sparse=True):
-#     if sparse:
-#         # p,_ = torch.div(v.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-#         # s,o = v.coalesce().indices()%data.num_entities
-#         # result = torch.stack([s,p,o], dim=1)
-#         matching = []
-#         indexes = v.coalesce().indices()%data.num_entities
-#         for j in range(indexes.size()[1]):
-#             for triple in data.triples:
-#                 if triple[0] == indexes[0][j] and triple[2] == indexes[1][j]:
-#                     matching.append(triple)
-#         result = torch.stack(matching)
-
-                    
-#     else:
-#         matching = []
-#         for i,i2 in zip(v[:,0],v[:,1]):
-#             for j,j1,j2, index in zip(data[:,0],data[:,1],  data[:,2], range(len(data[:,0]))):
-#                 if i == j and i2 == j2:
-#                     matching.append(data[index])
-                    
-
-#         result = torch.stack(matching)
-    
-#     return result
 
 
-# def match_to_triples(v,h, data, sparse=True):
-#     if sparse:
-#         pv,_ = torch.div(v.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-#         sv,ov = v.coalesce().indices()%data.num_entities
-#         result_v = torch.stack([sv,pv,ov], dim=1)
-#         ph,_ = torch.div(h.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-#         sh,oh = h.coalesce().indices()%data.num_entities
-#         result_h = torch.stack([sh,ph,oh], dim=1)
-#         result = torch.cat((result_v, result_h), 0)
 
 
-                    
-#     else:
-#         _,ph = torch.div(h, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-#         sh,oh = h%data.num_entities
-#         result_h = torch.stack([sh,ph,oh], dim=1)
-#         pv, _ = torch.div(v, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-#         sv,ov = v%data.num_entities
-#         result_v = torch.stack([sv,pv,ov], dim=1)
-#         result = torch.cat((result_v, result_h), 0)
-#         print(pv, ph)
-
-                    
-    
-#     return result
-
-
+########## the one
 
 def match_to_triples(v,h, data, sparse=True):
     if sparse:
@@ -253,6 +133,17 @@ def match_to_triples(v,h, data, sparse=True):
 
                     
     else:
+
+        # _,ph = torch.div(h, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+        # sh,oh = h%data.num_entities
+        # result_h = torch.stack([sh,ph,oh], dim=1)
+
+        # pv, _ = torch.div(v, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+        # sv,ov = v%data.num_entities
+        # result_v = torch.stack([sv,pv,ov], dim=1)
+
+        # result = torch.cat((result_v, result_h), 0)
+
         if len(h )!= 0:
             _,ph = torch.div(h, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
             sh,oh = h%data.num_entities
@@ -285,12 +176,12 @@ def edge_index_oneadj(triples):
 def sub_sparse_tensor(sparse_tensor, threshold, data, low_threshold=False):
     if low_threshold:
         nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() < threshold]
-        nonzero_indices[0] = nonzero_indices[0]%data.num_entities
+        nonzero_indices[0] = nonzero_indices[0]#%data.num_entities
         nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() < threshold]
         sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)
     else:
         nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() > threshold]
-        nonzero_indices[0] = nonzero_indices[0]%data.num_entities
+        nonzero_indices[0] = nonzero_indices[0]#%data.num_entities
         nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() > threshold]
         sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)    
     return sel_masked_ver
@@ -327,7 +218,7 @@ def encode_dict(dict_index):
 
 def selected(masked_ver, masked_hor, threshold,data, low_threshold, float=False):
     sel_masked_ver, sel_masked_hor = sub_sparse_tensor(masked_ver, threshold,data, low_threshold), sub_sparse_tensor(masked_hor, threshold,data, low_threshold)
-    indices_nodes_v, indices_nodes_h = sel_masked_ver.coalesce().indices().detach().numpy(), sel_masked_hor.coalesce().indices().detach().numpy()
+    indices_nodes_v, indices_nodes_h = sel_masked_ver.coalesce().indices().tolist(), sel_masked_hor.coalesce().indices().tolist()
     new_index_v, new_index_h = np.transpose(np.stack((indices_nodes_v[0], indices_nodes_v[1]))) , np.transpose(np.stack((indices_nodes_h[0], indices_nodes_h[1])))
     #triples_matched = match_to_triples(np.array(new_index), data.triples)
     triples_matched = match_to_triples(sel_masked_ver,sel_masked_hor,  data)
@@ -359,7 +250,7 @@ def selected_float(masked_ver, threshold,data, low_threshold):
     returns: a dictionary with the sum of the mask for each relation'''
     sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
     sel_masked_ver = masked_ver
-    indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
+    indices_nodes = sel_masked_ver.coalesce().indices().tolist()
     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) 
     triples_matched = match_to_triples(np.array(new_index), data.triples)
 
@@ -375,105 +266,11 @@ def selected_float(masked_ver, threshold,data, low_threshold):
     return Counter(l)
     
 
-# def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=True, low_threshold=False ):
-#     """ 
-#     Visualize important nodes for node idx prediction
-#     """
-#     dict_index = dict_index_classes(data,masked_ver)
-    
-#     #select only nodes with a certain threshold
-#     sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
-#     if len(sel_masked_ver)==0:
-#         sel_masked_ver=sub_sparse_tensor(masked_ver, 0,data, low_threshold)
-#     print('sel masked ver',sel_masked_ver)
-#     indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
-#     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) #original edge indexes
 
-    
-    
-#     G = nx.Graph()
-#     if result_weights:
-#         values = sel_masked_ver.coalesce().values().detach().numpy()
-#         for s,p,o in zip(indices_nodes[0],values , indices_nodes[1]):
-#             G.add_edge(int(s), int(o), weight=np.round(p, 2))
-
-#     else:
-#         #get triples to get relations 
-#         #triples_matched = match_to_triples(np.array(new_index), data.triples)
-#         triples_matched = match_to_triples(sel_masked_ver, data)
-#         l = []
-#         for i in triples_matched[:,1]:
-#             l.append(data.i2rel[int(i)][0])
-#         print(Counter(l))
-#         for s,p,o in triples_matched:
-#             G.add_edge(int(s), int(o), weight=int(p))
-
-#     edges,weights = zip(*nx.get_edge_attributes(G,'weight').items())
-
-
-#     pos = nx.circular_layout(G)
-
-#     ordered_dict = {}
-#     for item in list(G.nodes):
-#         if item in ordered_dict:
-#             ordered_dict[item].append(dict_index[item])
-#         # else:
-#         #     ordered_dict[item] =  dict_index[item]
-
-#     dict_index = ordered_dict
-
-#     labeldict = {}
-#     for node in G.nodes:
-#         labeldict[int(node)] = int(node)  
-
-#     print('dict index:', dict_index)
-
-#     dict = {}
-#     for k,v in dict_index.items():
-#         for k1,v1 in data.entities_classes.items():
-#             if v==k1: 
-
-#                 dict[k] = v1
-#             else:
-#                 if k not in dict:
-#                     dict[k] = 0
-                
-
-#     color_list = list(dict.values())
-#     color_list = list(encode_dict(dict_index).values())
-
-
-    
-#     if result_weights:
-        
-#         nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=weights, node_color =  color_list, cmap="Set2",edge_cmap=plt.cm.Reds,font_size=8)
-#         nx.draw_networkx_edge_labels( G, pos,edge_labels=nx.get_edge_attributes(G,'weight'),font_size=8,font_color='red')
-#         # sm = plt.cm.ScalarMappable(cmap=plt.cm.Reds, norm=plt.Normalize(vmin=0, vmax=1))
-#         # sm.set_array(weights)
-#         # cbar = plt.colorbar(sm)
-#         # cbar.ax.set_title('Weight')
-#         plt.title("Node {}'s {}-hop neighborhood important nodes".format(node_idx, n_hop))
-#     else:
-#         rel = nx.get_edge_attributes(G,'weight')
-#         for k,v in rel.items():
-#             rel[k] = data.i2rel[v][0]
-#         nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=weights,node_color =  color_list, cmap="Set2",font_size=8)
-#         nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=8,font_color='red')
-#         res = Counter(rel.values())
-#     if result_weights:
-#         if not os.path.exists(f'chk/{name}_chk/graphs'):
-#             os.makedirs(f'chk/{name}_chk/graphs')  
-#         plt.savefig(f'chk/{name}_chk/graphs/Explanation_{node_idx}_{n_hop}_weights.png')
-#         #plt.show()
-#     else:
-#         if not os.path.exists(f'chk/{name}_chk/graphs'):
-#             os.makedirs(f'chk/{name}_chk/graphs')  
-#         plt.savefig(f'chk/{name}_chk/graphs/Explanation_{node_idx}_{n_hop}_relations.png')    
-#         #plt.show()
-#         return res
     
 
 def get_relations(data):
+    ''' Get all relations in the dataset'''
     all_relations = []
     for i in range(data.num_relations):
         rel = str(data.i2r[i]).split('/')[-1]
@@ -485,7 +282,7 @@ def get_relations(data):
         dict[i] = [all_relations[i]]
         dict[i].append(data.i2r[i])
 
-    print(all_relations)
+    #print(all_relations)
 
     data.i2rel = dict
     return data.i2rel       
@@ -495,7 +292,7 @@ def d_classes(data):
     """ 
     Get classes of nodes (select only the alphanum - not literals)
     """
-    data.entities = np.append(data.triples[:,0].detach().numpy(),(data.triples[:,2].detach().numpy()))
+    data.entities = np.append(data.triples[:,0].tolist(),(data.triples[:,2].tolist()))
     indices_nodes = data.entities
     d = list(data.e2i.keys())
     values_indices_nodes = [d[int(i)] for i in indices_nodes]
@@ -516,6 +313,7 @@ def d_classes(data):
             d[k] = c
             c+=1
     data.entities_classes = d
+    d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
     return d    
 
 
@@ -631,7 +429,11 @@ def subset_sparse(sparse_full,data,  threshold=0.5):
 
 def select_relation(sparse_tensor,num_entities,relation_id):
     ''' Select the subset of the tensor based on the relation id'''
-    _ ,p = torch.div(sparse_tensor.coalesce().indices(),num_entities, rounding_mode='floor')
+    p = torch.div(sparse_tensor.coalesce().indices(),num_entities, rounding_mode='floor')
+    if sparse_tensor.shape[0]> sparse_tensor.shape[1]:
+        p = p[0]
+    else:
+        p = p[1]
     output_indices = sparse_tensor.coalesce().indices()[:, p==relation_id]
     output_values = sparse_tensor.coalesce().values()[p==relation_id]
     value_indices = torch.where(p == relation_id)[0]
@@ -687,9 +489,9 @@ def convert_binary(sparse_tensor, threshold=0.5):
     ''' Converts a sparse tensor to a binary sparse tensor based on a threshold'''
     # convert values to either 0 or 1 based on a threshold of 0.5
     mask = sparse_tensor._values() > threshold
-    print('non zero:',len(mask.nonzero()))
     converted_values = torch.zeros_like(sparse_tensor._values())
     converted_values[mask] = 1
+    #print("Number of non zero values: ", converted_values.nonzero().size(0))
 
     # create a new sparse tensor with the converted values
     converted_sparse_tensor = torch.sparse_coo_tensor(sparse_tensor._indices(), converted_values, size=sparse_tensor.size())
@@ -699,6 +501,7 @@ def convert_binary(sparse_tensor, threshold=0.5):
 
 
 def find_repeating_sublists(sublists):
+    ''' Find repeating sublists in a list'''
     repeating_elements = {}
 
     for sublist in sublists:
@@ -735,7 +538,7 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
     sel_masked_hor = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
     if len(sel_masked_ver)==0:
         sel_masked_ver=sub_sparse_tensor(masked_ver, 0,data, low_threshold)
-    print('sel masked ver',sel_masked_ver)
+    #print('sel masked ver',sel_masked_ver)
     indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) #original edge indexes
 
@@ -743,7 +546,7 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
     
     G = nx.Graph()
     if result_weights:
-        values = sel_masked_ver.coalesce().values().detach().numpy()
+        values = sel_masked_ver.coalesce().values().tolist()
         for s,p,o in zip(indices_nodes[0],values , indices_nodes[1]):
             G.add_edge(int(s), int(o), weight=np.round(p, 2))
 
@@ -753,7 +556,7 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
         l = []
         for i in triples_matched[:,1]:
             l.append(data.i2rel[int(i)][0])
-        triples_matched = find_repeating_sublists(triples_matched.numpy())
+        triples_matched = find_repeating_sublists(triples_matched.tolist())
         for s,p,o in triples_matched:
             G.add_edge(int(s), int(o), weight=p)
 
@@ -825,5 +628,79 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
             os.makedirs(f'chk/{name}_chk/{experiment_name}⁄graphs')  
         plt.savefig(f'chk/{name}_chk/{experiment_name}⁄graphs/Explanation_{node_idx}_relations.png')    
         #plt.show()
-        return res, weights
+        return res
     
+
+
+def sub(v, threshold):
+    nonzero_indices = v.coalesce().indices()[:, v.coalesce().values() > threshold]
+    nonzero_indices[0] = nonzero_indices[0]#%data.num_entities
+    nonzero_values = v.coalesce().values()[v.coalesce().values() > threshold]
+    sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values)
+    return sel_masked_ver
+
+  
+
+
+def select_on_relation_sparse(sparse_tensor,data, relation):
+    ''' Selects the values of a sparse tensor based on the relation'''
+    output_indices, output_values, value_indices=select_relation(sparse_tensor,data.num_entities,relation)
+    coalesced_tensor = sparse_tensor.coalesce()
+    coalesced_values = coalesced_tensor._values()
+    coalesced_indices = coalesced_tensor._indices()
+    coalesced_values[value_indices] = 0
+    masked_sparse_tensor = torch.sparse_coo_tensor(coalesced_indices, coalesced_values, sparse_tensor.size())
+    return masked_sparse_tensor
+
+
+
+#Get adjacency matrix: in this context this is hor / ver graph
+def hor_ver_graph(triples, n, r):
+    """ 
+    input: triples, number of nodes, number of relations
+    output: hor_graph, ver_graph : horizontally and vertically stacked adjacency matrix
+    """
+    #triples = enrich(triples_small, n, r)
+
+    hor_ind, hor_size = adj(triples, n, 2*r+1, vertical=False)
+    ver_ind, ver_size = adj(triples, n, 2*r+1, vertical=True)
+    #number of relations is 2*r+1 because we added the inverse and self loop
+
+    _, rn = hor_size #horizontally stacked adjacency matrix size
+    #print(hor_size)
+    r = rn // n #number of relations enriched divided by number of nodes
+
+    vals = torch.ones(ver_ind.size(0), dtype=torch.float) #number of enriched triples
+    #vals = vals / sum_sparse(ver_ind, vals, ver_size) #normalize the values by the number of edges
+
+    hor_graph = torch.sparse.FloatTensor(indices=hor_ind.t(), values=vals, size=hor_size) #size: n,r, emb
+
+
+    ver_graph = torch.sparse.FloatTensor(indices=ver_ind.t(), values=vals, size=ver_size)
+
+    return hor_graph, ver_graph
+
+
+
+def select_one_relation(sparse_tensor,data, relation,value =1):
+    """ Selects the values of a sparse tensor based on the relation"""
+    sparse_tensor = torch.sparse_coo_tensor(sparse_tensor._indices(), torch.zeros(sparse_tensor._indices().shape[1]), sparse_tensor.size() )
+    output_indices, output_values, value_indices=select_relation(sparse_tensor,data.num_entities,relation)
+    coalesced_tensor = sparse_tensor.coalesce()
+    coalesced_values = coalesced_tensor._values()
+    coalesced_indices = coalesced_tensor._indices()
+    coalesced_values[value_indices] = value
+    masked_sparse_tensor = torch.sparse_coo_tensor(coalesced_indices, coalesced_values, sparse_tensor.size())
+    return masked_sparse_tensor
+
+
+
+def keep_columns_with_non_zero_values(df):
+    # Get the column names with non-zero values
+    df = df.fillna(0)
+    non_zero_columns = df.columns[df.astype(bool).any(axis=0)]
+
+    # Create a new DataFrame with only the columns containing non-zero values
+    modified_df = df[non_zero_columns]
+
+    return modified_df
