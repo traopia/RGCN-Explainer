@@ -622,3 +622,97 @@ def main(name,node_idx, prune=True, explain_all = False, train=False):
         df.to_csv(f'Relation_Importance_{name}/{experiment_name}/Relations_Important_{name}_{node_idx}.csv', index=False)
         #df_floats.to_csv(f'Relation_Importance_{name}/Relations_Important_{name}_{node_idx}_floats.csv', index=False)
         return h    
+    
+
+
+    # def loss(self, pred, config, epoch):
+    #     """
+    #     Args:
+    #         pred: prediction made by current model
+    #         pred_label: the label predicted by the original model.
+    #     """
+    #     #selected_mask, num_high, p,relation_counter = subset_sparse(self.masked_hor, self.data, self.config["threshold"])
+    #     #print('relation_counter', relation_counter)
+    #     #self.mask = ((self.mask-0.5)**2)
+
+
+    #     mask = torch.sigmoid(self.mask)  # sigmoid of the mask
+   
+    #     mask_without_small = mask[mask > config["threshold"]]
+    #     print('mask_without_small', torch.mean(mask_without_small))#, torch.max(mask_without_small,0), torch.min(mask_without_small,0))
+    #     num_high = len(mask_without_small)
+    #     print('num_high', num_high,'len(mask)', len(mask))
+    #     print('mask', torch.mean(mask), torch.std(mask))
+
+
+    #     # prediction loss
+
+        
+    #     gt_label_node = self.label#[node_idx]te
+    #     logit = pred[gt_label_node]
+    #     # pred_loss = config["pred"]* -torch.log(logit) 
+    #     if torch.argmax(pred) != gt_label_node:
+    #         pred_loss = 5 * -torch.log(logit) 
+    #         size_loss, mask_ent_loss,size_loss_std, size_num_loss, num_high, type_loss = 0,0,0,0,0,0
+
+
+    #     else:
+    #         adaptive_pred_coeff = config["pred"] * (epoch+1)*0.1
+    #         print('adaptive_pred_coeff', adaptive_pred_coeff)
+    #         #pred_loss = config["pred"]* -torch.log(logit)
+    #         pred_loss = adaptive_pred_coeff* -torch.log(logit)
+
+
+    #         size_num_loss = config["size_std"]* (num_high+3)/len(mask)
+
+
+    #         adaptive_size_coeff = config["size"] * 1/(epoch+1)
+    #         print('adaptive_size_coeff', adaptive_size_coeff)
+    #         #size_loss = config["size"] * torch.sum(torch.abs(mask))
+    #         size_loss = adaptive_size_coeff * torch.sum(torch.abs(mask))
+
+
+    #         adaptive_size_std_coeff = config["size_std"] * (epoch+1)*0.01
+    #         print('adaptive_size_std_coeff', adaptive_size_std_coeff)
+    #         size_loss_std = -config["size_std"] * torch.std(mask_without_small) 
+            
+
+    #         #type loss
+    #         print('types',len(mask[[self.type_indices]][mask[[self.type_indices]] > 0.5]))
+    #         type_len = len(mask[[self.type_indices]][mask[[self.type_indices]] > 0.5])
+    #         #type_loss = -0.01 *len(mask[[self.type_indices]][mask[[self.type_indices]] > 0.5])
+    #         adaptive_type_coeff =  0.1 * 1/(epoch+1)
+    #         type_loss = adaptive_type_coeff *torch.sum(mask[[self.type_indices]][mask[[self.type_indices]] > 0.5])
+
+
+
+    #         mask = mask/ torch.sum(mask)
+            
+
+    #         # entropy edge mask 
+    #         mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
+    #         #mask_ent = - torch.log(mask)
+    #         adaptive_ent_coeff =  config["ent"] * 1/(epoch+1)
+    #         #mask_ent_loss =  config["ent"] * torch.mean(mask_ent)
+    #         mask_ent_loss =  adaptive_ent_coeff * torch.mean(mask_ent)
+
+
+
+
+
+
+
+    #         #loss = torch.exp(pred_loss + mask_ent_loss + size_num_loss + size_loss_std + size_loss ) #
+    #     loss = torch.exp(pred_loss + size_loss + mask_ent_loss + size_loss_std + type_loss)
+    #     #loss = pred_loss + size_loss + mask_ent_loss + size_loss_std
+    #     #loss = pred_loss + mask_ent_loss
+    #     print('pred_loss', pred_loss)
+    #     print('size_loss', size_loss)
+    #     print('type_loss', type_loss)
+    #     #
+    #     #print('size_num_loss', size_num_loss)
+    #     print('mask_ent_loss', mask_ent_loss)
+
+    #     print('size_loss_std', size_loss_std)
+
+    #     return loss, pred_loss, size_loss, mask_ent_loss,size_loss_std, size_num_loss, num_high

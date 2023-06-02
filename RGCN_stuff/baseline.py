@@ -46,10 +46,25 @@ def prediction_wrong_if(data,model, node_idx,label):
         h_ = select_on_relation_sparse(h,data, key)
         out = model.forward2(h_,v_)
         res = nn.Softmax(dim=0)(out[node_idx])
-        if torch.argmax(res)!=label:
-            print(f'for node {node_idx}, wrong prediction without {data.i2r[key]}')
-            count[data.i2rel[key][0]] = res.detach().tolist()
-            ones[data.i2rel[key][0]] = 1
+        # for i in label:
+        #     if torch.argmax(res)!=i:
+        #         print(f'for node {node_idx}, wrong prediction without {data.i2r[key]}')
+        #         count[data.i2rel[key][0]] = res.detach().tolist()
+        #         ones[data.i2rel[key][0]] = 1
+        # else:
+        #     pass
+        #for i in label:
+        if len(label) > 1:
+            if torch.argmax(res)!=label[0] or torch.argmax(res)!=label[1]:
+                print(f'for node {node_idx}, wrong prediction without {data.i2r[key]}')
+                count[data.i2rel[key][0]] = res.detach().tolist()
+                ones[data.i2rel[key][0]] = 1
+        if len(label) == 1:
+            if torch.argmax(res)!=label:
+                print(f'for node {node_idx}, wrong prediction without {data.i2r[key]}')
+                count[data.i2rel[key][0]] = res.detach().tolist()
+                ones[data.i2rel[key][0]] = 1
+
         else:
             pass
 
@@ -85,16 +100,17 @@ def prediction_with_one_relation(data, model, node_idx,label):
     for key in Counter(m[:,1].tolist()).keys():
         v_ = select_one_relation(v,data, key)
         h_ = select_one_relation(h,data, key)
-        print(v_, h_)
+        #print(v_, h_)
         out = model.forward2(h_,v_)
         res = nn.Softmax(dim=0)(out[node_idx])
-
-        if torch.argmax(res)!=label:
+        for i in label:
+            if torch.argmax(res)!=i:
             #count[data.i2rel[key][0]] = None
-            pass
+                pass
         else:
             if list(res) != list(baseline):
-                print(f'correct only with {data.i2rel[key][0]}, {key}', res)
+                #print(f'correct only with {data.i2rel[key][0]}, {key}', res)
+                print(f'correct only with {data.i2rel[key][0]}, {key}')
                 count[data.i2rel[key][0]] = res.detach().tolist()
                 ones[data.i2rel[key][0]] = 1
 
@@ -106,16 +122,23 @@ def prediction_with_one_relation(data, model, node_idx,label):
 
 
 def main(name,node_idx, prune=True, all = True, test = False):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
     print(device)
     model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
     model.to(device)
-    if test:
-        data = kg.load(name, torch=True, final=True)
-        id_test = 'test'
-    else:
-        data = kg.load(name, torch=True) 
+    if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
+        data = kg.load(name, torch=True, final=False)
+        if test:
+            data = kg.load(name, torch=True, final=True)
+            id_test = 'test'
+        else:
+            data = kg.load(name, torch=True) 
+            id_test = 'withheld'
+    else:    
+        data = torch.load(f'data/IMDB/finals/{name}.pt')
         id_test = 'withheld'
+
 
     data = prunee(data, 2)
     data.to(device)
@@ -143,8 +166,8 @@ def main(name,node_idx, prune=True, all = True, test = False):
     else: 
         node_idx = d[list(d.keys())[0]][0]       
         label = data.withheld[data.withheld[:,0]==node_idx,1]
-        count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
-        #count, ones, id = prediction_wrong_if(data, model, node_idx,label)
+        #count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
+        count, ones, id = prediction_wrong_if(data, model, node_idx,label)
         print(count)
         df.loc[str(node_idx)] = count
         df.to_csv(f'chk/{name}_chk/Important_{id}_{name}_results{node_idx}_{id_test}.csv', index=False)
@@ -156,7 +179,5 @@ def main(name,node_idx, prune=True, all = True, test = False):
     
 
 if __name__ == '__main__':
-    main('mdgenre',5757, prune=False, all = False)
+    main('IMDb_us',7185, prune=True, all = True, test = True)
     
-
-
