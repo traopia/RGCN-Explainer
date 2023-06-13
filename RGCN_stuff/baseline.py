@@ -1,6 +1,6 @@
 from networkx import dfs_postorder_nodes
 from sklearn import base
-from sqlalchemy import false
+#from sqlalchemy import false
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,7 +13,7 @@ import kgbench as kg
 from kgbench import load, tic, toc, d
 
 from src.rgcn_explainer_utils import *
-from rgcn_model import RGCN
+from rgcn import RGCN
 
 
 def prediction_full(data, model, node_idx):

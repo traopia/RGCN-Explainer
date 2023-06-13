@@ -7,9 +7,10 @@ import torch
 from collections import Counter
 from kgbench import load, tic, toc, d, Data
 import os
-from rgcn_model import adj, enrich, sum_sparse, RGCN
+from rgcn import adj, enrich, sum_sparse, RGCN
 
 def dict_index_classes(data, masked_ver):
+    '''  Get a dictionary where the keys are the nodes in indexes and values their semantic values'''
     indices_nodes = masked_ver.coalesce().indices().tolist()
 
     d = list(data.e2i.keys())
@@ -102,6 +103,7 @@ def match_to_classes(tensor1, tensor2):
     """
     tensor1: sub graph indices
     tensor2: data.y labelsss
+    returns: the class of the nodes in the subgraph
     """
     matching = []
     for i in (tensor1[:,0]):
@@ -121,6 +123,13 @@ def match_to_classes(tensor1, tensor2):
 ########## the one
 
 def match_to_triples(v,h, data, sparse=True):
+    """
+    v: vertical adjacency matrix
+    h: horizontal adjacency matrix
+    data: dataset
+    sparse: if True, the adjacency matrix is sparse, otherwise it is dense
+    returns: the triples corresponding to the adjacency matrix (from stack indexes to original indexes)
+    """
     if sparse:
         pv,_ = torch.div(v.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
         sv,ov = v.coalesce().indices()%data.num_entities
@@ -154,13 +163,13 @@ def match_to_triples(v,h, data, sparse=True):
             result_v = torch.stack([sv,pv,ov], dim=1)
         if len(h) != 0 and len(v) != 0:
             result = torch.cat((result_v, result_h), 0)
-            print(pv,ph)
+            #print('all good')
         if len(h) == 0:
             result = result_v
-            print(pv)
+            print('ph is empty')
         if len(v) == 0:
             result = result_h
-            print(ph)
+            print('pv is empty')
         
 
                     
@@ -169,11 +178,22 @@ def match_to_triples(v,h, data, sparse=True):
 
 #edge index
 def edge_index_oneadj(triples):
+    """
+    triples: data triples
+    returns: edge index of the graph
+    """
     edge_index = torch.stack((triples[:, 0], triples[:, 2]),dim=0)
     return edge_index
 
 
 def sub_sparse_tensor(sparse_tensor, threshold, data, low_threshold=False):
+    """
+    sparse_tensor: adjacency matrix
+    threshold: threshold for the adjacency matrix
+    data: dataset
+    low_threshold: if True, select the indexes with values lower than the threshold, otherwise higher
+    returns: the subset of the adjacency matrix based on the threshold
+    """
     if low_threshold:
         nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() < threshold]
         nonzero_indices[0] = nonzero_indices[0]#%data.num_entities
@@ -189,12 +209,21 @@ def sub_sparse_tensor(sparse_tensor, threshold, data, low_threshold=False):
 
 
 def sel_masked(sparse_tensor, threshold, data):
+    """
+    sparse_tensor: adjacency matrix
+    threshold: threshold for the adjacency matrix
+    data: dataset
+    returns: the subset of the adjacency matrix based on the threshold
+    """
     nonzero_indices = sparse_tensor.coalesce().indices()[:, sparse_tensor.coalesce().values() > threshold]
     nonzero_values = sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values() > threshold]
     sel_masked_ver = torch.sparse_coo_tensor(nonzero_indices, nonzero_values, size =  (data.num_entities, data.num_entities*(2*data.num_relations+data.num_relations)))
     return sel_masked_ver
 
 def encode_classes(dict_index):
+    """ 
+    Encode the classes of the nodes in the graph
+    """
     d = []
     for k,v in dict_index.items():
         d.append(v)
@@ -207,6 +236,9 @@ def encode_classes(dict_index):
 
 
 def encode_dict(dict_index):
+    """ 
+    Encode the classes of the nodes in the graph
+    """
     encoded_dict = {}
     dict = encode_classes(dict_index)
     for k,v in dict_index.items():
@@ -217,6 +249,14 @@ def encode_dict(dict_index):
 
 
 def selected(masked_ver, masked_hor, threshold,data, low_threshold, float=False):
+    """ 
+    masked_ver: masked vertically stacked adjacency matrix
+    masked_hor: masked horizontally stacked adjacency matrix
+    threshold: threshold for the masked adjacency matrix
+    data: dataset
+    low_threshold: if True, select the indexes with values lower than the threshold, otherwise higher
+
+    """
     sel_masked_ver, sel_masked_hor = sub_sparse_tensor(masked_ver, threshold,data, low_threshold), sub_sparse_tensor(masked_hor, threshold,data, low_threshold)
     indices_nodes_v, indices_nodes_h = sel_masked_ver.coalesce().indices().tolist(), sel_masked_hor.coalesce().indices().tolist()
     new_index_v, new_index_h = np.transpose(np.stack((indices_nodes_v[0], indices_nodes_v[1]))) , np.transpose(np.stack((indices_nodes_h[0], indices_nodes_h[1])))
@@ -247,7 +287,8 @@ def selected_float(masked_ver, threshold,data, low_threshold):
     threshold: threshold for the masked adjacency matrix
     data: dataset
     low_threshold: if True, the threshold is applied to the masked adjacency matrix, otherwise to the original adjacency matrix
-    returns: a dictionary with the sum of the mask for each relation'''
+    returns: a dictionary with the sum of the mask for each relation
+    '''
     sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
     sel_masked_ver = masked_ver
     indices_nodes = sel_masked_ver.coalesce().indices().tolist()
@@ -282,10 +323,9 @@ def get_relations(data):
         dict[i] = [all_relations[i]]
         dict[i].append(data.i2r[i])
 
-    #print(all_relations)
-
     data.i2rel = dict
-    return data.i2rel       
+    relations = [data.i2rel[i][0] for i in range(len(data.i2rel))]
+    return  relations
 
 
 def d_classes(data):
@@ -480,8 +520,9 @@ def domain_range_freq(data,num_classes):
             dict_range[int(m[1]) ] = [get_class_entity(m[2],data)]
     for k,v in dict_domain.items():
         dict_domain[k] = len(set(v))/num_classes
+
     for k,v in dict_range.items():
-        dict_range[k] = set(v)
+        dict_range[k] = len(set(v))/num_classes
     return dict_domain, dict_range
 
 
@@ -527,15 +568,20 @@ def find_repeating_sublists(sublists):
 def unnest_list(nested_list):
     return [item for sublist in nested_list for item in (unnest_list(sublist) if isinstance(sublist, list) else [sublist])]
 
-def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=True, low_threshold=False,experiment_name=None ):
+def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=True, low_threshold=False,experiment_name=None, selected_visualization=True):
     """ 
     Visualize important nodes for node idx prediction
     """
+    get_relations(data)
     dict_index = dict_index_classes(data,masked_ver)
     
     #select only nodes with a certain threshold
-    sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
-    sel_masked_hor = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
+    if selected_visualization:
+        sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
+        sel_masked_hor = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
+    else:
+        sel_masked_ver = masked_ver
+        sel_masked_hor = masked_ver
     if len(sel_masked_ver)==0:
         sel_masked_ver=sub_sparse_tensor(masked_ver, 0,data, low_threshold)
     #print('sel masked ver',sel_masked_ver)
@@ -609,10 +655,13 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
         plt.title("Node {}'s {}-hop neighborhood important nodes".format(node_idx, n_hop))
     else:
         rel = nx.get_edge_attributes(G,'weight')
+        # rel = nx.get_edge_attributes(G,'weight')
+        # for k,v in rel.items():
+        #     rel[k] = data.i2rel[v][0]
         rel = {k: [data.i2rel[i][0] for i in v] for k,v in rel.items()}
         col_weights = [sum(weights[i], 3) if len(weights[i]) > 1 else weights[i][0] for i in range(len(weights))]
         nx.draw(G, pos,labels = labeldict, edge_color=col_weights,edgelist=edges,node_color =  color_list, cmap="Set2",font_size=7, arrows = True)
-        nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=8,font_color='red')
+        #nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=8,font_color='red')
         
         res = Counter(unnest_list(rel.values()))
         print(res)
@@ -633,6 +682,12 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
 
 
 def sub(v, threshold):
+    """ 
+    Select the subset of the tensor based on the threshold value
+    v: adjacency matrix
+    threshold: threshold for the adjacency matrix
+    returns: the subset of the adjacency matrix based on the threshold
+    """
     nonzero_indices = v.coalesce().indices()[:, v.coalesce().values() > threshold]
     nonzero_indices[0] = nonzero_indices[0]#%data.num_entities
     nonzero_values = v.coalesce().values()[v.coalesce().values() > threshold]
@@ -653,8 +708,6 @@ def select_on_relation_sparse(sparse_tensor,data, relation):
     return masked_sparse_tensor
 
 
-
-#Get adjacency matrix: in this context this is hor / ver graph
 def hor_ver_graph(triples, n, r):
     """ 
     input: triples, number of nodes, number of relations
@@ -692,3 +745,94 @@ def select_one_relation(sparse_tensor,data, relation,value =1):
     coalesced_values[value_indices] = value
     masked_sparse_tensor = torch.sparse_coo_tensor(coalesced_indices, coalesced_values, sparse_tensor.size())
     return masked_sparse_tensor
+
+
+
+
+def object_type(v,h,data, relation_id = None,type=True):
+    ''' Get the object class of a specific relation'''
+    if type:
+        relation_id = [i for i in range(data.num_relations) if 'type' in data.i2r[i]][-1]
+    output_indices_v, output_values, value_indices = select_relation(v, data.num_entities, relation_id)
+    output_indices_h, output_values, value_indices = select_relation(h, data.num_entities, relation_id)
+    objects_types = match_to_triples(output_indices_v, output_indices_h,data, sparse=False)
+    list = []
+    for i in objects_types:
+        list.append(data.i2e[i[2]][0])
+    result = Counter(list)
+    return result
+
+
+def select_entity(sparse_tensor,class_id):
+    ''' Select the subset of the tensor based on the id of the class to be zeroed out'''
+    value_indices = torch.where(sparse_tensor.coalesce().indices() == class_id)
+    coalesced_tensor = sparse_tensor.coalesce()
+    coalesced_values = coalesced_tensor._values()
+    coalesced_indices = coalesced_tensor._indices()
+    coalesced_values[value_indices[1]] = 0
+    masked_sparse_tensor = torch.sparse_coo_tensor(coalesced_indices, coalesced_values, sparse_tensor.size())
+
+    return masked_sparse_tensor
+
+
+def inverse_tensor(sparse_tensor):
+    """ Convert 0 to 1 and viceversa in sparse tensor
+    The aim is computing the Fidelity- score"""
+    sparse_tensor = convert_binary(sparse_tensor, 0.5)
+    sparse_tensor = torch.sparse_coo_tensor(indices=sparse_tensor._indices(), 
+                                        values=1 - sparse_tensor._values(), 
+                                        size=sparse_tensor.size())
+    return sparse_tensor
+
+
+def convert_back(sparse_tensor, data):
+    sparse_tensor = torch.sparse_coo_tensor(
+        sparse_tensor.coalesce().indices()%data.num_entities, sparse_tensor.coalesce().values(), size=sparse_tensor.size()
+    )
+    return sparse_tensor
+
+
+
+def number_neighbors(node_idx, data, n_hops):
+        ''' Get the number of neighbors of a node in a n-hop neighborhood'''
+
+        hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+        edge_index_h, edge_index_v = hor_graph.coalesce().indices(), ver_graph.coalesce().indices()
+        sub_edges, neighbors_h, sub_edges_tensor_h  = find_n_hop_neighbors(edge_index_h, n_hops, node_idx)
+        sub_edges, neighbors_v, sub_edges_tensor_v  = find_n_hop_neighbors(edge_index_v, n_hops, node_idx)
+        num_neighbors = len(list(neighbors_h) + list(neighbors_v))
+        return num_neighbors
+
+def find_threshold(sparse_tensor, num_exp):
+    ''' Find the threshold value for the sparse tensor'''
+    # sparse_tensor = torch.sparse_coo_tensor(
+    #     sparse_tensor.coalesce().indices()%data.num_entities, sparse_tensor.coalesce().values(), size=sparse_tensor.size()
+    # )
+    numbers = sparse_tensor.coalesce().values()
+    sorted_numbers = sorted(numbers, reverse=True)
+    count = 0
+    threshold = None
+    
+    for num in sorted_numbers:
+        if count == num_exp:
+            break
+        threshold = num
+        count += 1
+    
+    return threshold
+
+
+def threshold_mask(h,v ,data, num_exp):
+    ''' Apply a threshold mask to the adjacency matrix'''
+    t =     find_threshold(v, num_exp)
+    #v, h = convert_back(v, data), convert_back(h, data)
+    v, h =convert_binary(v,t), convert_binary(h,t)
+    return h,v,t
+
+
+def important_relation(h,v,data, node_idx, threshold):
+    masked_ver_sub, masked_hor_sub = sub(v, threshold), sub(h,threshold)
+    m = match_to_triples(masked_ver_sub, masked_hor_sub, data, node_idx)
+    counter = dict(Counter(m[:,1].tolist()))
+    counter = {data.i2rel[k][0]:v for k,v in counter.items() if k!=0}
+    return counter
