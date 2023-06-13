@@ -54,7 +54,7 @@ if explain_all == True:
         for node_idx in dict_classes[target_label]:
             num_neighbors = number_neighbors(node_idx, data, n_hops)
             def wrapped_main1():
-                main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, dict_classes, num_neighbors,config = None)
+                main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, df_threshold, dict_classes, num_neighbors,config = None)
 
             if sweep:
                 sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}_playground" )
@@ -63,7 +63,7 @@ if explain_all == True:
             else:
                 config = default_params
                 
-                counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, dict_classes, num_neighbors,config )
+                counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold, dict_classes, num_neighbors,config )
                 wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}_playground"})
 
             directory = f'chk/{name}_chk/{experiment_name}'
@@ -71,7 +71,7 @@ if explain_all == True:
             df_threshold.loc[str(node_idx)] = counter_threshold
             if not os.path.exists(directory + f'/Relation_Importance'):
                 os.makedirs(directory + f'/Relation_Importance')
-                
+
             # df.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}.csv', index=False)
             # df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}_threshold.csv', index=False)
             print('saved results to directory')

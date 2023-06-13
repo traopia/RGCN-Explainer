@@ -91,7 +91,7 @@ default_params={
 "break_if_wrong_pred": False,
 "break_on_number_of_high": False,
 "print": False,
-"explain_all": False,
+"explain_all": True,
 "dataset_name": 'aifb',
 "prune": True
 }
