@@ -113,7 +113,8 @@ class RGCN(nn.Module):
     def __init__(self, triples, n, r, numcls, emb=16, bases=None, Explain = None):
 
         super().__init__()
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = "cpu"
         self.emb = emb
         self.bases = bases
         self.numcls = numcls
@@ -177,7 +178,8 @@ class RGCN(nn.Module):
 
     def forward2(self, hor_graph, ver_graph):
 
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = "cpu"
         ## Layer 1
         hor_graph, ver_graph = hor_graph.to(device), ver_graph.to(device)
 
