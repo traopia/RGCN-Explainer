@@ -1,16 +1,18 @@
-cuda
-loaded data mdgenre (68.58s).
-label tensor([0], device='cuda:0')
+cpu
+loaded data mdgenre (69.2s).
+label tensor([0])
 node_idx 109635
 Traceback (most recent call last):
-  File "RGCN_stuff/baseline.py", line 159, in <module>
-    main('mdgenre',5757, prune=False, all = False)
-  File "RGCN_stuff/baseline.py", line 146, in main
+  File "RGCN_stuff/baseline.py", line 160, in <module>
+    main('mdgenre',5757, prune=False, all = False, test = False)
+  File "RGCN_stuff/baseline.py", line 147, in main
     count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
   File "RGCN_stuff/baseline.py", line 84, in prediction_with_one_relation
     baseline = baseline_pred(data, model, node_idx)
   File "RGCN_stuff/baseline.py", line 68, in baseline_pred
     out = model.forward2(h_,v_)
-  File "/home/tliberatore/RGCN-Explainer/RGCN_stuff/rgcn_model.py", line 211, in forward2
-    h = torch.sparse.mm(ver_graph, h) # sparse mm
-torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 6.44 GiB (GPU 0; 23.65 GiB total capacity; 19.93 GiB already allocated; 3.08 GiB free; 19.97 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+  File "/home/tliberatore/RGCN-Explainer/RGCN_stuff/rgcn_model.py", line 203, in forward2
+    h = torch.sparse.mm(hor_graph, weights.view(r*n, e))  #matmul with horizontally stacked adjacency matrix and initialized weights
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cpu and cuda:0! (when checking argument for argument mat1 in method wrapper_SparseCUDA__addmm)
+/var/spool/slurm/slurmd/job11843144/slurm_script: line 11:  4915 Killed                  python3 RGCN_stuff/baseline.py
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=11843144.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.

@@ -57,14 +57,14 @@ if explain_all == True:
                 main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, df_threshold, dict_classes, num_neighbors,config = None)
 
             if sweep:
-                sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}_playground" )
+                sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
                 
                 counter, counter_threshold,experiment_name = wandb.agent(sweep_id, function= wrapped_main1)
             else:
                 config = default_params
                 
                 counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold, dict_classes, num_neighbors,config )
-                wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}_playground"})
+                wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}"})
 
             directory = f'chk/{name}_chk/{experiment_name}'
             df.loc[str(node_idx)] = counter
@@ -87,14 +87,14 @@ if explain_all == False:
         main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold, dict_classes, num_neighbors,config = None)
 
     if sweep:
-        sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}_playground" )
+        sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
         
         counter, counter_threshold, experiment_name = wandb.agent(sweep_id, function= wrapped_main1)
     else:
         config = default_params
         
         counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, df_threshold, dict_classes, num_neighbors,config )
-        wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}_playground"})
+        wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}"})
     
 
     directory = f'chk/{name}_chk/{experiment_name}'

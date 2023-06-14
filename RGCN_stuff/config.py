@@ -1,6 +1,6 @@
 import wandb
 
-sweep = False
+sweep = True
 
 
 
@@ -38,16 +38,16 @@ parameters_dict = {
         'values': [False]
     },
     'kill_type': {
-        'values': [False]
+        'values': [True]
     },
     'init_strategy': {
-        'values': ['normal']#['normal','const','zero_out_people','one_out','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency','rdf','owl','type']
+        'values': ['normal','const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency']
     },
     'break_if_wrong_pred': {
-        'values': [False]
+        'values': [False,True]
     },
     'break_on_number_of_high': {
-        'values': [False]
+        'values': [False,True]
     }
 }
 
