@@ -84,7 +84,6 @@ jsonpath-python==1.0.6
 jsonpickle==3.0.1
 jsonpointer==2.1
 keras==2.11.0
-kgbench @ file:///Users/macoftraopia/Documents/GitHub/kgbench-loader
 kglab==0.6.6
 kiwisolver==1.4.4
 langcodes==3.3.0
