@@ -107,12 +107,12 @@ def prediction_with_one_relation(data, model, node_idx,label):
             if torch.argmax(res)!=i:
             #count[data.i2rel[key][0]] = None
                 pass
-        else:
-            if list(res) != list(baseline):
-                #print(f'correct only with {data.i2rel[key][0]}, {key}', res)
-                print(f'correct only with {data.i2rel[key][0]}, {key}')
-                count[data.i2rel[key][0]] = res.detach().tolist()
-                ones[data.i2rel[key][0]] = 1
+            else:
+                if list(res) != list(baseline):
+                    #print(f'correct only with {data.i2rel[key][0]}, {key}', res)
+                    print(f'correct only with {data.i2rel[key][0]}, {key}')
+                    count[data.i2rel[key][0]] = res.detach().tolist()
+                    ones[data.i2rel[key][0]] = 1
 
     print(f'correct with {len(count)} relations out of {len(Counter(m[:,1].tolist()).keys())} relations')
     return count, ones, id 
@@ -179,5 +179,5 @@ def main(name,node_idx, prune=True, all = True, test = False):
     
 
 if __name__ == '__main__':
-    main('IMDb_us',7185, prune=True, all = True, test = True)
+    main('mutag',7185, prune=True, all = True, test = False)
     

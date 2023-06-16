@@ -76,7 +76,7 @@ default_params={
 "size": 0.00005,  
 #"size_std": num_neighbors, 
 "ent": 10,
-"type": 1,
+"type": -1,
 "lr": 0.1,
 "weight_decay": 0.9,
 "adaptive": False,
@@ -84,15 +84,15 @@ default_params={
 "init_strategy": "normal", 
 "threshold": 0.5,
 #"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
-"hops": 2,
+"hops": 0,
 "try": '', 
-"kill_type": True,
+"kill_type": False,
 "relation_id": 39, 
 "break_if_wrong_pred": False,
 "break_on_number_of_high": False,
 "print": False,
 "explain_all": True,
-"dataset_name": 'aifb',
+"dataset_name": 'mutag',
 "prune": True
 }
 

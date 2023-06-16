@@ -836,3 +836,34 @@ def important_relation(h,v,data, node_idx, threshold):
     counter = dict(Counter(m[:,1].tolist()))
     counter = {data.i2rel[k][0]:v for k,v in counter.items() if k!=0}
     return counter
+
+
+def random_explanation_baseline(sparse_tensor):
+    ''' Create a random explanation baseline for a given sparse tensor'''
+    # Retrieve the indices of non-zero elements
+    # explanation_lenght = len(sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values()>config['threshold'] ])
+    explanation_lenght = len(sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values()> 0.5 ])
+    indices = sparse_tensor._indices()
+
+    # Get the total number of non-zero elements
+    num_nonzero = indices.size(1)
+
+    # Specify the number of random indices you want to select
+    n = explanation_lenght
+
+    # Generate 'n' random indices within the range of non-zero indices
+    random_indices = torch.randperm(num_nonzero)[:n]
+
+    # Create a new sparse tensor with the same shape as the original tensor but with all values set to 0
+    new_sparse_tensor = torch.sparse.FloatTensor(indices, torch.zeros(num_nonzero), size=sparse_tensor.size())
+
+    # Assign 1 to the randomly selected indices in the new sparse tensor
+    new_sparse_tensor._values()[random_indices] = 1
+
+    # Print the new sparse tensor
+    return new_sparse_tensor
+
+def frequency_relations(data):
+    freq = Counter(data.triples[:,1].tolist())
+    sorted_freq = {data.i2r[k]: v for k, v in sorted(freq.items(), key=lambda item: item[1], reverse=True)}
+    return sorted_freq

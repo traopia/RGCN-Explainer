@@ -456,6 +456,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     config = wandb.config
     wandb.config.update({"size_std": num_neighbors})
 
+    label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
+
 
     explainer = Explainer(model,pred_label, data,name,  node_idx, n_hops, prune, config)
     masked_hor, masked_ver = explainer.explain()
@@ -473,7 +475,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
 
 
     
-    if config.explain_all == False:
+    if config.explain_all == True:
         if not os.path.exists(directory + f'/masked_adj'):
             os.makedirs(directory + f'/masked_adj')
         else:
@@ -504,7 +506,11 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     res_full = nn.Softmax(dim=0)(model.forward2(hor_graph, ver_graph)[node_idx, :])
 
 
-
+    #Random explanation
+    h_random, v_random = random_explanation_baseline(masked_hor), random_explanation_baseline(masked_ver)
+    counter = important_relation(h_random, v_random, data,node_idx, 0.5)
+    print('Random baseline Important relations', counter)
+    res_random = nn.Softmax(dim=0)(model.forward2(h_random, v_random)[node_idx, :])
 
     #threshold to max of explanation edges
     h_threshold, v_threshold,t = threshold_mask(masked_hor, masked_ver, data, num_exp = 10)
@@ -517,10 +523,15 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     print('Important relations', counter)
 
     #metrics
-    fidelity_minus = torch.mean(1 - (res_full - res_binary))
-    fidelity_plus = torch.mean((res_full - res1_m))
+    # fidelity_minus = torch.mean(1 - (res_full - res_binary))
+    # fidelity_plus = torch.mean((res_full - res1_m))
 
-    sparsity = 1 - len([i for i in masked_ver.coalesce().values() if i > config['threshold']])/len(masked_ver.coalesce().values())
+    fidelity_minus = 1 - (res_full[int(label)] - res_binary[int(label)])
+    fidelity_plus = (res_full[int(label)] - res1_m[int(label)])
+    print(fidelity_minus, fidelity_plus)
+    explanation_lenght = len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ])
+    sparsity = 1 - explanation_lenght/len(masked_ver.coalesce().values())
+
   
     score = fidelity_minus + fidelity_plus + sparsity
     wandb.log({'score': score})
@@ -529,7 +540,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     target_label = str([k for k, v in dict_classes.items() if node_idx in v])
     info = {'label': str(target_label), 'node_idx': str(node_idx), 'number_neighbors': str(num_neighbors),
              'prediction_explain_binary': str(res_binary.detach().numpy()), 'prediction_full': str(res_full.detach().numpy()), 
-             'prediction_explain': str(res.detach().numpy()), 'prediction 1-m explain binary': str(res1_m.detach().numpy()), 
+             'prediction_explain': str(res.detach().numpy()), 'prediction 1-m explain binary': str(res1_m.detach().numpy()),
+             'prediction_random': str(res_random.detach().numpy()), 
              'prediction_sub': str(res_sub.detach().numpy()), 'prediction_threshold': str(res_threshold.detach().numpy()),
             'fidelity_minus': str(fidelity_minus), 'fidelity_plus': str(fidelity_plus), 'sparsity': str(sparsity)}
     counter.update(info)
@@ -555,6 +567,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
         '\n pred prob threshold', res_threshold,'threshold',t, 'with num edges', len(v_threshold.coalesce().values()[v_threshold.coalesce().values()>config['threshold'] ]),
         '\n pred prob full', res_full,       
         '\n pred prob sub', res_sub,
+        '\n pred prob 1-m explain binary', res1_m,
+        '\n pred prob random', res_random,
         '\n final masks and lenght', torch.mean(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ]), torch.std(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ]),#convert_back(masked_ver,data), 
         len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ]),
         '\n overall mean', torch.mean(masked_ver.coalesce().values()), torch.std(masked_ver.coalesce().values()),

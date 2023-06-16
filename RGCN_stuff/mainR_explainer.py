@@ -37,7 +37,8 @@ relations = get_relations(data)
 
 relations = ['label', 'node_idx','number_neighbors', 
              'prediction_explain', 'prediction_full', 'prediction_explain_binary',
-             'prediction 1-m explain binary', 'prediction_sub', 'prediction_threshold',
+             'prediction 1-m explain binary', 
+             'prediction_random','prediction_sub', 'prediction_threshold',
              'fidelity_minus', 'fidelity_plus', 'sparsity'] + relations
 df = pd.DataFrame(columns=relations)
 df_threshold = pd.DataFrame(columns=relations) 
@@ -74,7 +75,7 @@ if explain_all == True:
 
             # df.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}.csv', index=False)
             # df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}_threshold.csv', index=False)
-            print('saved results to directory')
+            print('saved results to directory', directory)
     if not os.path.exists(directory + f'/Relation_Importance'):
         os.makedirs(directory + f'/Relation_Importance')
     df.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_full.csv', index=False)
