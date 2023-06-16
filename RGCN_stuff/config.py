@@ -84,7 +84,7 @@ default_params={
 "init_strategy": "normal", 
 "threshold": 0.5,
 #"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
-"hops": 0,
+"hops": 2,
 "try": '', 
 "kill_type": False,
 "relation_id": 39, 
