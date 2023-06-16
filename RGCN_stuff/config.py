@@ -91,7 +91,7 @@ default_params={
 "break_if_wrong_pred": False,
 "break_on_number_of_high": False,
 "print": False,
-"explain_all": True,
+"explain_all": False,
 "dataset_name": 'mutag',
 "prune": True
 }

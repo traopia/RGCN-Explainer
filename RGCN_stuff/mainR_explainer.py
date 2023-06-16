@@ -1,9 +1,9 @@
 import torch 
 import pandas as pd
 import numpy as np
-import kgbench as kg
+#import kgbench as kg
 
-
+from src.load import load
 #rgcn 
 from rgcn import  RGCN
 from src.rgcn_explainer_utils import *
@@ -20,7 +20,7 @@ from config import *
 
 
 if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
-    data = kg.load(name, torch=True, final=False)
+    data = load(name, torch=True, final=False)
 else:    
     data = torch.load(f'data/IMDB/finals/{name}.pt')
 if prune:
