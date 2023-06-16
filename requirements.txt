@@ -202,9 +202,6 @@ torch-ppr==0.0.8
 torch-scatter==2.1.0
 torch-sparse==0.6.16
 torchvision==0.13.1
-tqdm @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_03acd6t6ca/croot/tqdm_1679561866522/work
-
-
 urlpath==1.2.0
 wandb==0.15.4
 wasabi==1.1.1
