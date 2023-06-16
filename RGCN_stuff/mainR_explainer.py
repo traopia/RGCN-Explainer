@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 #import kgbench as kg
 
-from src.load import load
+from kgbench import load, tic, toc, d
 #rgcn 
 from rgcn import  RGCN
 from src.rgcn_explainer_utils import *
