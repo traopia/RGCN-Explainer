@@ -8,9 +8,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
-import src.kgbench as kg 
-
-from kgbench import load, tic, toc, d
+from src.kgbench import load, tic, toc, d
 
 from src.rgcn_explainer_utils import *
 from rgcn import RGCN
