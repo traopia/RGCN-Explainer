@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
-import kgbench as kg
+import src.kgbench as kg 
 
 from kgbench import load, tic, toc, d
 
@@ -128,12 +128,12 @@ def main(name,node_idx, prune=True, all = True, test = False):
     model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
     model.to(device)
     if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
-        data = kg.load(name, torch=True, final=False)
+        data = load(name, torch=True, final=False)
         if test:
-            data = kg.load(name, torch=True, final=True)
+            data = load(name, torch=True, final=True)
             id_test = 'test'
         else:
-            data = kg.load(name, torch=True) 
+            data = load(name, torch=True) 
             id_test = 'withheld'
     else:    
         data = torch.load(f'data/IMDB/finals/{name}.pt')

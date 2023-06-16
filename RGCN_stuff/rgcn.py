@@ -3,14 +3,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import Counter
-import kgbench as kg
 import fire, sys
 import math
-
-from kgbench import load, tic, toc, d
-
+from src.kgbench import load, tic, toc, d
 import os
-from kgbench import load, tic, toc, d, Data
+
 #from rgcn_model import RGCN
 #from src.gpu_functions import *
 
