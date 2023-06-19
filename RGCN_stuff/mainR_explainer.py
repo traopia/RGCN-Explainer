@@ -14,7 +14,10 @@ import wandb
 
 from R_explainer import *
 
-from config import *
+from config import * 
+import sys
+print(sys.executable)
+
 
 
 
