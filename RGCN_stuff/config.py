@@ -31,17 +31,17 @@ parameters_dict = {
     'ent': {
         'values': [ -10,1,10]
     },
-    'type': {
+    'most_freq_rel': {
         'values': [1,10]
     },
     'adaptive': {
         'values': [False]
     },
-    'kill_type': {
+    'kill_most_freq_rel': {
         'values': [True]
     },
     'init_strategy': {
-        'values': ['normal','const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency']
+        'values': ['normal','const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency', 'most_freq_rel']
     },
     'break_if_wrong_pred': {
         'values': [False,True]
@@ -76,7 +76,7 @@ default_params={
 "size": 0.00005,  
 #"size_std": num_neighbors, 
 "ent": 10,
-"type": -1,
+"most_freq_rel": -1,
 "lr": 0.1,
 "weight_decay": 0.9,
 "adaptive": False,
@@ -86,7 +86,7 @@ default_params={
 #"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
 "hops": 2,
 "try": '', 
-"kill_type": False,
+"kill_most_freq_rel": False,
 "relation_id": 39, 
 "break_if_wrong_pred": False,
 "break_on_number_of_high": False,

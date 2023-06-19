@@ -867,3 +867,20 @@ def frequency_relations(data):
     freq = Counter(data.triples[:,1].tolist())
     sorted_freq = {data.i2r[k]: v for k, v in sorted(freq.items(), key=lambda item: item[1], reverse=True)}
     return sorted_freq
+
+def most_frequent_relations(data, node_idx, n_hops):
+    ''' Most frequent relations for a given node (2 hops)'''
+    hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+    edge_index_h, edge_index_v = hor_graph.coalesce().indices(), ver_graph.coalesce().indices()
+
+    sub_edges_h, neighbors_h, sub_edges_tensor_h  = find_n_hop_neighbors(edge_index_h, n=n_hops, node=node_idx)
+    sub_edges_v, neighbors_v, sub_edges_tensor_v  = find_n_hop_neighbors(edge_index_v, n=n_hops, node=node_idx)
+    sub_triples = match_to_triples(sub_edges_tensor_v, sub_edges_tensor_h,data, sparse=False)
+    sub_h, sub_v = hor_ver_graph(sub_triples, data.num_entities, data.num_relations)
+    m = match_to_triples(sub_v, sub_h,data, node_idx)
+    freq = Counter(m[:,1].tolist())
+    sorted_freq = {data.i2r[k]: v for k, v in sorted(freq.items(), key=lambda item: item[1], reverse=True) if k!=0}
+
+    most_freq_rel = list(sorted_freq.keys())[0]
+    id_most_freq_rel = data.r2i[most_freq_rel]
+    return most_freq_rel

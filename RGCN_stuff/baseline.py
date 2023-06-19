@@ -11,6 +11,37 @@ from src.kgbench import load, tic, toc, d
 
 from src.rgcn_explainer_utils import *
 from rgcn import RGCN
+import psutil
+
+def print_cpu_utilization():
+    # Get CPU utilization percentage
+    cpu_percent = psutil.cpu_percent()
+    # Print CPU utilization
+    print(f"CPU utilization: {cpu_percent}%")
+
+    # Get virtual memory usage percentage
+    mem_percent = psutil.virtual_memory().percent
+
+    # Print virtual memory usage percentage
+    print(f"Virtual memory: {mem_percent}%")
+
+    # Get disk usage percentage
+    disk_percent = psutil.disk_usage('/').percent
+
+    # Print disk usage percentage
+    print(f"Disk usage: {disk_percent}%")
+
+    # Get cpu statistics
+    cpu_stats = psutil.cpu_stats()
+
+    # Print number of context switches
+    print(f"Number of context switches: {cpu_stats}")
+
+
+  
+
+# Call the function to print CPU utilization
+
 
 
 def prediction_full(data, model, node_idx):
@@ -156,15 +187,17 @@ def main(name,node_idx, prune=True, all = True, test = False):
                 count, ones, id = prediction_wrong_if(data, model, node_idx,label)
                 df.loc[str(node_idx)] = count
                 df_ones.loc[str(node_idx)] = ones
+        print_cpu_utilization()
         df.to_csv(f'chk/{name}_chk/Important_{id}_{name}_results_{id_test}.csv', index=False)
         df_ones.to_csv(f'chk/{name}_chk/Important_{id}_{name}_results_ones_{id_test}.csv', index=False)
 
     else: 
         node_idx = d[list(d.keys())[0]][0]       
         label = data.withheld[data.withheld[:,0]==node_idx,1]
-        #count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
-        count, ones, id = prediction_wrong_if(data, model, node_idx,label)
+        count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
+        #count, ones, id = prediction_wrong_if(data, model, node_idx,label)
         print(count)
+        print_cpu_utilization()
         df.loc[str(node_idx)] = count
         df.to_csv(f'chk/{name}_chk/Important_{id}_{name}_results{node_idx}_{id_test}.csv', index=False)
 
@@ -175,6 +208,6 @@ def main(name,node_idx, prune=True, all = True, test = False):
     
 
 if __name__ == '__main__':
-    main('mdgenre',7185, prune=True, all = True, test = False)
+    main('mdgenre',7185, prune=True, all = False, test = False)
 
     

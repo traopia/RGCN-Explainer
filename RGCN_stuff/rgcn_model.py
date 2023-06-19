@@ -3,11 +3,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import Counter
-import kgbench as kg
+import src.kgbench as kg
 import fire, sys
 import math
 
-from kgbench import load, tic, toc, d
+from src.kgbench import load, tic, toc, d
 
 #PREPROCESS
 def enrich(triples : torch.Tensor, n : int, r: int):

@@ -59,10 +59,22 @@ class Explainer:
         self.num_neighbors = len(set(list(self.neighbors_h) + list(self.neighbors_v)))
         self.num_edges = len(self.sub_edges_v)+len(self.sub_edges_h)
         self.baseline = baseline_pred(self.data, self.model, self.node_idx)
-        self.type = [i for i in range(data.num_relations) if 'type' in data.i2r[i]]
+        #self. = [i for i in range(data.num_relations) if 'type' in data.i2r[i]]
+
 
     
+    def most_freq_rel(self, sub_hor_graph, sub_ver_graph):
+        sub_h, sub_v = sub_hor_graph, sub_ver_graph
+        m = match_to_triples(sub_v, sub_h,self.data, self.node_idx)
+        freq = Counter(m[:,1].tolist())
+        sorted_freq = {self.baselinedata.i2r[k]: v for k, v in sorted(freq.items(), key=lambda item: item[1], reverse=True) if k!=0}
 
+        most_freq_rel = list(sorted_freq.keys())[0]
+        id_most_freq_rel = self.data.r2i[most_freq_rel]
+        return id_most_freq_rel
+
+
+        
 
     def explain(self):
         ''' Explain the prediction of the node with index node_idx: main method
@@ -72,9 +84,10 @@ class Explainer:
         print('num_neighbors:' ,self.num_neighbors,'num_edges:', self.num_edges)
         data, node_idx = self.data, self.node_idx
         sub_hor_graph, sub_ver_graph = hor_ver_graph(self.sub_triples, self.n, self.r)
+        self.most_freq_rel_node = most_frequent_relations(sub_hor_graph, sub_ver_graph)
         
-        if self.config['kill_type']:
-            for i in self.type:
+        if self.config['kill_most_freq_rel']:
+            for i in self.most_freq_rel_node:
                 sub_ver_graph, sub_hor_graph= select_on_relation_sparse(sub_ver_graph,data, i), select_on_relation_sparse(sub_hor_graph,data, i)
 
         explainer = ExplainModule(
@@ -137,8 +150,8 @@ class Explainer:
         print('Finished Training')
 
 
-        if self.config['kill_type']:
-            for i in self.type:
+        if self.config['kill_most_freq_rel']:
+            for i in self.most_freq_rel_node:
 
                 h_0 ,v_0= select_on_relation_sparse(sub_hor_graph,self.data, i), select_on_relation_sparse(sub_ver_graph,self.data, i)
                 sub_hor_graph, sub_ver_graph = h_0,v_0 
@@ -159,8 +172,8 @@ class Explainer:
 class ExplainModule(nn.Module):
     def __init__(
             self,
-            hor_graph,
-            ver_graph,
+            sub_hor_graph,
+            sub_ver_graph,
             model,
             label, 
             data,
@@ -168,21 +181,22 @@ class ExplainModule(nn.Module):
             num_edges,
             node_idx):
         super(ExplainModule, self).__init__()
-        self.hor_graph, self.ver_graph = hor_graph, ver_graph 
+        self.hor_graph, self.ver_graph = sub_hor_graph, sub_ver_graph 
         self.model = model
         self.label = label
         self.data = data
         self.config = config
         self.node_idx = node_idx
 
-        type = [i for i in range(data.num_relations) if 'type' in data.i2r[i]]
+        #type = [i for i in range(data.num_relations) if 'type' in data.i2r[i]]
+        most_freq_rel = most_frequent_relations(self.hor_graph, self.ver_graph)
         tensor_list = []
-        for i in type:
+        for i in most_freq_rel:
             _,_,value_indices_h=select_relation(self.hor_graph,self.data.num_entities,i)
             _,_, value_indices_v=select_relation(self.ver_graph,self.data.num_entities,i)
             tensor_list.append(value_indices_h)
             tensor_list.append(value_indices_v)
-        self.type_indices = torch.cat(tensor_list, 0)
+        self._indices = torch.cat(tensor_list, 0)
 
         num_nodes = num_edges
         self.mask = self.construct_edge_mask(num_nodes, self.hor_graph,self.data)
@@ -212,7 +226,7 @@ class ExplainModule(nn.Module):
             )
             with torch.no_grad():
                 mask.normal_(1.0, std)
-            #mask.data[[self.type_indices]] = 0
+            #mask.data[[self._indices]] = 0
 
         elif init_strategy == "const":
             nn.init.constant_(mask, const_val) 
@@ -232,7 +246,7 @@ class ExplainModule(nn.Module):
             _, _, value_indices1=select_relation(self.ver_graph,self.data.num_entities,relation_id)
             
             value_indices = torch.cat((value_indices1, value_indices3), 0)
-            mask.data[[self.type_indices]] = 0
+            mask.data[[self._indices]] = 0
 
         elif init_strategy == "zero_out_people":
             class_id=5230
@@ -248,7 +262,7 @@ class ExplainModule(nn.Module):
             
             value_indices = torch.cat((value_indices1, value_indices3), 0)
             mask.data[[value_indices]] = 1
-            mask.data[[self.type_indices]] = 1
+            mask.data[[self._indices]] = 1
 
 
         elif init_strategy == "overall_frequency":
@@ -311,10 +325,11 @@ class ExplainModule(nn.Module):
                 _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
                 mask.data[[value_indices]] = 0
 
-        elif init_strategy == "type":
+        elif init_strategy == "most_freq_rel":
             ''' Initialization that zeroes out the type relations'''
-            type = [i for i in range(data.num_relations) if 'type' in data.i2r[i]]
-            for i in type:
+            #type = [i for i in range(data.num_relations) if 'type' in data.i2r[i]]
+            most_freq_rel = most_frequent_relations(self.hor_graph, self.ver_graph)
+            for i in most_freq_rel:
                 _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
                 mask.data[[value_indices]] = 0
         if self.config.print:
@@ -423,24 +438,24 @@ class ExplainModule(nn.Module):
 
         #type loss
         
-        type_len = len(mask[[self.type_indices]][mask[[self.type_indices]] > 0.5])
+        most_freq_rel_len = len(mask[[self._indices]][mask[[self._indices]] > 0.5])
         if config.print:
-            print('types',type_len)
+            print('mosgt freq rel',most_freq_rel_len)
         
-        #type_loss = - config['type']*torch.sum(mask[[self.type_indices]][mask[[self.type_indices]] > 0.5])/torch.sum(mask)
-        type_loss = config['type'] * type_len/len(mask)
+        #type_loss = - config['type']*torch.sum(mask[[self._indices]][mask[[self._indices]] > 0.5])/torch.sum(mask)
+        most_freq_rel_loss = config['most_freq_rel'] * most_freq_rel_len/len(mask)
 
         wrong_pred = 1 if torch.argmax(pred) != self.label else 0
 
         
 
-        loss = torch.exp(pred_loss + size_loss + mask_ent_loss + size_loss_std +  type_loss)
+        loss = torch.exp(pred_loss + size_loss + mask_ent_loss + size_loss_std +  most_freq_rel_loss)
         #loss = pred_loss + size_loss + mask_ent_loss
         #loss = pred_loss + size_loss + mask_ent_loss + size_loss_std + wrong_pred + type_loss
         if config.print:
             print('pred_loss', pred_loss)
             print('size_loss', size_loss)
-            print('type_loss', type_loss)
+            print('type_loss', most_freq_rel_loss)
             print('mask_ent_loss', mask_ent_loss)
             print('wrong_pred', wrong_pred)
             print('size_loss_std', size_loss_std)
@@ -466,9 +481,9 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     sweep = True
     if sweep:
 
-        experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["type"]}_killtype_{config["kill_type"]}_break_{breaking}'
+        experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["type"]}_killtype_{config["kill_most"]}_break_{breaking}'
     else:
-        experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["type"]}_killtype_{config["kill_type"]}_break_{breaking}'
+        experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["type"]}_killtype_{config["kill_most"]}_break_{breaking}'
 
     directory = f'chk/{name}_chk/{experiment_name}'
     wandb.run.name = experiment_name
