@@ -5,7 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import torch
 from collections import Counter
-from kgbench import load, tic, toc, d, Data
+import src.kgbench as kg
 import os
 from rgcn import adj, enrich, sum_sparse, RGCN
 

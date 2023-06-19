@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from collections import Counter
 import fire, sys
 import math
-from src.kgbench import load, tic, toc, d
+import src.kgbench as kg
 import os
 
 #from rgcn_model import RGCN
@@ -393,7 +393,7 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='a
 
     else:
 
-        data = load(name, torch=True)   
+        data = kg.load(name, torch=True)   
         if prune:
             data = prunee(data, n=2)
 

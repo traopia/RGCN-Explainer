@@ -1,6 +1,8 @@
+### In this file the functions defined in KGBench are used to load the datasets: 
+## from the KGBench repository: https://github.com/pbloem/kgbench-loader
+## The functions are slightly modified to be able to load the datasets in the RGCN_stuff repository.
 
 import numpy as np
-import time, zipfile, tarfile
 
 from os.path import join
 from pathlib import Path
@@ -9,6 +11,14 @@ import pandas as pd
 import gzip, base64, io, sys, warnings, wget, os, random
 
 import torch
+import gzip
+import csv
+
+
+#from kgbnech 
+
+import rdflib as rdf
+import time, zipfile, tarfile
 
 """
 Dictionary  containing the download URLS for the datasets.
@@ -27,17 +37,6 @@ URLS = {
     'bgs':      ['https://www.dropbox.com/s/54mo6i8nipad2e2/bgs.tgz?dl=1']
 }
 
-def getfile(dir, name):
-    """
-    Returns a file object pointing to the specified file.
-
-    :param dir:
-    :param name:
-    :return:
-    """
-
-    with open(os.path.join(dir, name)) as file:
-        return file
 tics = []
 def tic():
     tics.append(time.time())
@@ -47,17 +46,6 @@ def toc():
         return None
     else:
         return time.time()-tics.pop()
-    
-def here(subpath=None):
-    """
-    :return: the path in which the package resides (the directory containing the 'kgbench' dir)
-    """
-    if subpath is None:
-        return os.path.abspath(os.path.dirname(__file__))
-
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), subpath))
-
-_XSD_NS = "http://www.w3.org/2001/XMLSchema#"
 
 def d(tensor=None):
     """
@@ -72,13 +60,103 @@ def d(tensor=None):
         return 'cuda'if tensor else 'cpu'
     return 'cuda' if tensor.is_cuda else 'cpu'
 
+def here(subpath=None):
+    """
+    :return: the path in which the package resides (the directory containing the 'kgbench' dir)
+    """
+    if subpath is None:
+        return os.path.abspath(os.path.dirname(__file__))
+
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), subpath))
+
+def load_rdf(rdf_file, name='', format='nt', store_file='./cache'):
+    """
+    Load an RDF file into a persistent store, creating the store if necessary.
+
+    If the store exists, return the stored graph.
+
+    :param file:
+    :param store_name:
+    :return:
+    """
+    if store_file is None:
+        # use in-memory store
+        graph = rdf.Graph()
+        graph.parse(rdf_file, format=format)
+        return graph
+
+    graph = rdf.Graph(store='Sleepycat', identifier=f'kgbench-{name}')
+    rt = graph.open(store_file + '-' + name, create=False)
+
+    if rt == rdf.store.NO_STORE:
+        print('Persistent store not found. Loading data.')
+        rt = graph.open(store_file, create=True)
+        graph.parse(rdf_file, format=format)
+
+    else:
+        assert rt == rdf.store.VALID_STORE, "The underlying store is corrupt"
+
+        print('Persistent store exists. Loading.')
+
+    return graph
+
+
+def getfile(container : str, name : str):
+    """
+    Returns a file object pointing to the specified file. Container can be either a zip file or a directory.
+
+    :param container: Directory or zip file
+    :param name:
+    :return:
+    """
+
+    if os.path.isdir(container):
+        with open(os.path.join(container, name)) as file:
+            return file
+
+    elif os.path.isfile(container):
+        try:
+            tar = tarfile.open(container, 'r:gz')
+            return tar.extractfile(name)
+        except:
+            print(f'File {container} does not appear to be a tgz file.')
+            raise
+
+# def getfile(dir, name):
+#     """
+#     Returns a file object pointing to the specified file.
+
+#     :param dir:
+#     :param name:
+#     :return:
+#     """
+
+#     with open(os.path.join(dir, name)) as file:
+#         return file
+
+
+
+
+"""
+Data loading utilities
+
+TODO:
+- create getters and setters for all object members
+- rename entities to nodes
+- rename datatype to annotation
+
+"""
+
+_XSD_NS = "http://www.w3.org/2001/XMLSchema#"
+
+
 class Data:
     """
     Class representing a dataset.
 
     """
 
-    def __init__(self, dir, final=False, use_torch=False, catval=False, name="unnamed_dataset"):
+    def __init__(self, dir, personalized = False, final=False, use_torch=False, catval=False, name="unnamed_dataset"):
 
         self.name = name
 
@@ -126,16 +204,32 @@ class Data:
 
             self.torch = use_torch
 
-            #self.triples = fastload(getfile(dir, 'triples.int.csv.gz'))
-            self.triples = fastload((dir + '/triples.int.csv.gz'))
 
-            self.i2r, self.r2i = load_indices(getfile(dir, 'relations.int.csv'))
-            self.i2e, self.e2i = load_entities(getfile(dir, 'nodes.int.csv'))
+
+            
+            
+
+            if personalized==True:
+                self.triples = fastload((dir + '/triples_cleaned.int.csv'), personalized=True)
+                self.i2r, self.r2i = load_indices((dir + '/relations.int.csv'))
+                self.i2e, self.e2i = load_entities((dir + '/nodes.int.csv'))
+
+            else:
+                self.triples = fastload(getfile(dir, 'triples.int.csv.gz'))
+                self.i2r, self.r2i = load_indices(getfile(dir, 'relations.int.csv'))
+                self.i2e, self.e2i = load_entities(getfile(dir, 'nodes.int.csv'))
 
             self.num_entities  = len(self.i2e)
             self.num_relations = len(self.i2r)
 
-            train, val, test = \
+            if personalized:
+
+                train, val, test = \
+                    np.loadtxt((dir + '/training.int.csv'),   dtype=np.int32, delimiter=',', skiprows=1), \
+                    np.loadtxt((dir +  '/validation.int.csv'), dtype=np.int32, delimiter=',', skiprows=1), \
+                    np.loadtxt((dir +  '/testing.int.csv'),    dtype=np.int32, delimiter=',', skiprows=1)
+            else:
+                train, val, test = \
                 np.loadtxt(getfile(dir, 'training.int.csv'),   dtype=np.int32, delimiter=',', skiprows=1), \
                 np.loadtxt(getfile(dir, 'validation.int.csv'), dtype=np.int32, delimiter=',', skiprows=1), \
                 np.loadtxt(getfile(dir, 'testing.int.csv'),    dtype=np.int32, delimiter=',', skiprows=1)
@@ -170,6 +264,14 @@ class Data:
                 self.triples = torch.from_numpy(self.triples)
                 self.training = torch.from_numpy(self.training)
                 self.withheld = torch.from_numpy(self.withheld)
+
+    def to(self, device):
+        # move all tensor attributes to the specified device
+        for name, attr in self.__dict__.items():
+            if isinstance(attr, torch.Tensor):
+                setattr(self, name, attr.to(device))
+        
+        return self
 
     def get_images(self, dtype='http://kgbench.info/dt#base64Image'):
         """
@@ -799,12 +901,21 @@ def group(data : Data):
 #
 #     return result
 
-def fastload(file):
+def fastload(file, personalized = False):
     """
     Quickly load an (m, 3) matrix of integer triples
     :param input:
     :return:
     """
+    if personalized:
+        triples = []
+        with open(file, 'rt', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for s, p, o in reader:
+                triples.append((int(s.encode('utf-8').decode('utf-8')), 
+                                int(p.encode('utf-8').decode('utf-8')), 
+                                int(o.encode('utf-8').decode('utf-8'))))
+        return triples
 
     triples = []
 
@@ -812,7 +923,13 @@ def fastload(file):
         for line in input:
 
             s, p, o = str(line).split(',')
+            s, p, o = s.encode('utf-8'), p.encode('utf-8'), o.encode('utf-8')
+            s, p, o = s.decode('utf-8'), p.decode('utf-8'), o.decode('utf-8')
             s, p, o = int(s), int(p), int(o)
             triples.append( (s, p, o) )
 
+
+
     return np.asarray(triples)
+
+

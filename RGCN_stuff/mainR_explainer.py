@@ -3,11 +3,12 @@ import pandas as pd
 import numpy as np
 #import kgbench as kg
 
-from src.kgbench import load, tic, toc, d
+#from src.kgbench import load, tic, toc, d
+import src.kgbench as kg
 #rgcn 
 from rgcn import  RGCN
 from src.rgcn_explainer_utils import *
-
+#import kgbench as kg
 #params
 import wandb
 
@@ -20,7 +21,7 @@ from config import *
 
 
 if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
-    data = load(name, torch=True, final=False)
+    data = kg.load(name, torch=True, final=False)
 else:    
     data = torch.load(f'data/IMDB/finals/{name}.pt')
 if prune:
