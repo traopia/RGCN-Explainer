@@ -1,7 +1,23 @@
+#Environment
+In order to run the code:
+```
+conda create -n RGCNExplainer python=3.9
+pip install -r req.txt
+export WANDB_API_KEY='YOUR_API_KEY'
+wandb login
+```
+
+
 # RGCN-Explainer
 In the following work GNNExplainer has been expanded to work with relational graph. 
+
 ```
-python3 RGCN_stuff/r_exp.py
+python3 RGCN_stuff/mainR_explainer.py
+```
+
+In order to change the hyperparameter configurations, see:
+```
+RGCN_stuff/config.py
 ```
 
 For an analysis of the results at class level. 
