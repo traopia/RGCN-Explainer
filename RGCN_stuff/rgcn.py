@@ -6,6 +6,7 @@ from collections import Counter
 import fire, sys
 import math
 import src.kgbench as kg
+from src.kgbench import load, tic, toc, d
 import os
 
 #from rgcn_model import RGCN
