@@ -15,12 +15,7 @@ from rgcn import RGCN
 
 def prediction_full(data, model, node_idx):
     hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
-    #y_full = model.forward2(hor_graph, ver_graph)
-    #node_pred_full = y_full[node_idx, :]
-    #res_full = nn.Softmax(dim=0)(node_pred_full)
     m = match_to_triples(ver_graph,hor_graph,data, node_idx)
-
-    #return res_full, m, hor_graph, ver_graph
     return m, hor_graph, ver_graph
 
 
@@ -36,7 +31,6 @@ def prediction_wrong_if(data,model, node_idx,label):
 
     count['label'], ones['label'] = label.tolist()[0], label.tolist()[0]
     count['node_idx'], ones['node_idx'] = node_idx, node_idx
-    #res_full, m, h,v = prediction_full(data, model, node_idx)
     m, h,v = prediction_full(data, model, node_idx)
     for key in Counter(m[:,1].tolist()).keys():
         v_ = select_on_relation_sparse(v,data, key)
@@ -119,8 +113,12 @@ def prediction_with_one_relation(data, model, node_idx,label):
 
 
 def main(name,node_idx, prune=True, all = True, test = False):
-    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = torch.device("cpu")
+    
+    if name == 'mdgenre':
+        prune = False
+        device = torch.device("cpu")
     print(device)
     model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
     model.to(device)
@@ -137,7 +135,8 @@ def main(name,node_idx, prune=True, all = True, test = False):
         id_test = 'withheld'
 
 
-    data = prunee(data, 2)
+    if prune:
+        data = prunee(data, 2)
     data.to(device)
     data.triples = torch.Tensor(data.triples).to(int)
     data.withheld = torch.Tensor(data.withheld).to(int)
@@ -176,5 +175,6 @@ def main(name,node_idx, prune=True, all = True, test = False):
     
 
 if __name__ == '__main__':
-    main('mutag',7185, prune=True, all = True, test = False)
+    main('mdgenre',7185, prune=True, all = True, test = False)
+
     
