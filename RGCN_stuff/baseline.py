@@ -183,8 +183,8 @@ def main(name,node_idx, prune=True, all = True, test = False):
             for node_idx in d[target_label]:
                 if node_idx in data.withheld[:,0]:
                     label = data.withheld[data.withheld[:,0]==node_idx,1]
-                #count, ones, id  = prediction_with_one_relation(data, model, node_idx,label)
-                count, ones, id = prediction_wrong_if(data, model, node_idx,label)
+                count, ones, id  = prediction_with_one_relation(data, model, node_idx,label)
+                #count, ones, id = prediction_wrong_if(data, model, node_idx,label)
                 df.loc[str(node_idx)] = count
                 df_ones.loc[str(node_idx)] = ones
         print_cpu_utilization()
@@ -208,6 +208,6 @@ def main(name,node_idx, prune=True, all = True, test = False):
     
 
 if __name__ == '__main__':
-    main('mdgenre',7185, prune=True, all = False, test = False)
+    main('mdgenre',7185, prune=True, all = True, test = False)
 
     

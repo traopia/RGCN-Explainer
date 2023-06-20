@@ -1,6 +1,6 @@
 import wandb
 
-sweep = True
+sweep = False
 
 
 
@@ -17,37 +17,37 @@ sweep_config['metric'] = metric
 parameters_dict = {
     'pred': {'values': [1]},
     'lr': {
-        'values': [0.1, 0.01]
+        'values': [0.1, 0.5]
     },
     'weight_decay': {
         'values': [0.9, 0.1]
     },
     'size': {
-        'values': [0.00005,  0.05]
+        'values': [0.00005,  0.0005]
     },
     # 'size_std': {
     #     'values': [10]
     # },
     'ent': {
-        'values': [ -10,1,10]
+        'values': [ -10,10]
     },
     'most_freq_rel': {
-        'values': [1,10]
+        'values': [-1,1]
     },
     'adaptive': {
         'values': [False]
     },
     'kill_most_freq_rel': {
-        'values': [True]
+        'values': [True,False]
     },
     'init_strategy': {
         'values': ['normal','const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency', 'most_freq_rel']
     },
     'break_if_wrong_pred': {
-        'values': [False,True]
+        'values': [False]
     },
     'break_on_number_of_high': {
-        'values': [False,True]
+        'values': [False]
     }
 }
 
@@ -86,7 +86,7 @@ default_params={
 #"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
 "hops": 2,
 "try": '', 
-"kill_most_freq_rel": False,
+"kill_most_freq_rel": True,
 "relation_id": 39, 
 "break_if_wrong_pred": False,
 "break_on_number_of_high": False,
