@@ -1,6 +1,6 @@
-import wandb
 
-sweep = False
+
+sweep = True
 
 
 
@@ -41,7 +41,7 @@ parameters_dict = {
         'values': [True,False]
     },
     'init_strategy': {
-        'values': ['normal','const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency', 'most_freq_rel']
+        'values': ['normal']#,'const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency', 'most_freq_rel']
     },
     'break_if_wrong_pred': {
         'values': [False]
