@@ -92,8 +92,8 @@ if explain_all == False:
         return counter, counter_threshold, experiment_name
     if sweep:
         sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
-        
-        counter, counter_threshold, experiment_name = wandb.agent(sweep_id, function= wrapped_main1)
+        counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, df_threshold, dict_classes, num_neighbors,config )
+        wandb.agent(sweep_id, function= wrapped_main1)
     else:
         config = default_params
         

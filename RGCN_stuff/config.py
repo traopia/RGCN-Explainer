@@ -82,7 +82,7 @@ default_params={
 "lr": 0.1,
 "weight_decay": 0.9,
 "adaptive": False,
-"epochs": 1,
+"epochs": 30,
 "init_strategy": "normal", 
 "threshold": 0.5,
 #"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
