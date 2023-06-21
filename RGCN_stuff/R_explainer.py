@@ -531,7 +531,7 @@ class ExplainModule(nn.Module):
 
 
 def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold, dict_classes, num_neighbors,config = None):
-
+    sweep = False
     wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}")
     config = wandb.config
     wandb.config.update({"size_std": num_neighbors})
@@ -543,14 +543,14 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     masked_hor, masked_ver, res_full = explainer.explain()
 
     breaking = 'wrong_pred' if config["break_if_wrong_pred"] else 'num_high' if config["break_on_number_of_high"] else 'no'
-    sweep = True
+    
     if sweep:
 
         experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["most_freq_rel"]}_killtype_{config["kill_most_freq_rel"]}_break_{breaking}'
         wandb.run.name = experiment_name
     else:
         experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["most_freq_rel"]}_killtype_{config["kill_most_freq_rel"]}_break_{breaking}'
-        wandb.run.name = node_idx
+        wandb.run.name = str(node_idx)
 
     directory = f'chk/{name}_chk/{experiment_name}'
     
