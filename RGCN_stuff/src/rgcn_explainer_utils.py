@@ -9,20 +9,57 @@ from src.kgbench import Data,d
 import os
 from rgcn import adj, enrich, sum_sparse, RGCN
 
-def dict_index_classes(data, masked_ver):
-    '''  Get a dictionary where the keys are the nodes in indexes and values their semantic values'''
-    indices_nodes = masked_ver.coalesce().indices().tolist()
+# def dict_index_classes(data, masked_ver):
+#     '''  Get a dictionary where the keys are the nodes in indexes and values their semantic values'''
+#     indices_nodes = masked_ver.coalesce().indices().tolist()
 
+#     d = list(data.e2i.keys())
+#     values_indices_nodes = [d[i] for i in indices_nodes[1]]
+#     dict = {}
+#     for i in range(len(values_indices_nodes)):
+#         try:
+#             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1]).split('/')[3]
+            
+#         except IndexError :
+#             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1])
+#     return dict   
+# 
+# def dict_index_classes(data, v):
+#     '''  Get a dictionary where the keys are the nodes in indexes and values their semantic values'''
+#     sv,ov = v.coalesce().indices()%data.num_entities
+#     indices_nodes = torch.stack((sv,ov),dim=0)
+#     d = list(data.e2i.keys())
+#     values_indices_nodes_0 = [d[i] for i in indices_nodes[0]]
+#     values_indices_nodes_1 = [d[i] for i in indices_nodes[1]]
+#     values_indices_nodes = list(zip(values_indices_nodes_0,values_indices_nodes_1))
+#     dict = {}
+#     for i in range(len(values_indices_nodes)):
+#         try:
+#             dict[values_indices_nodes[i][0][0]] = str(values_indices_nodes[i][1]).split('/')[3]
+            
+#         except IndexError :
+#             dict[values_indices_nodes[i][0][0]] = str(values_indices_nodes[i][1])
+#     return dict  
+
+def dict_index_classes(data, v):
+    '''  Get a dictionary where the keys are the nodes in indexes and values their semantic values'''
+    sv,ov = v.coalesce().indices()%data.num_entities
+    indices_nodes = torch.stack((sv,ov),dim=0)
     d = list(data.e2i.keys())
-    values_indices_nodes = [d[i] for i in indices_nodes[1]]
+    values_indices_nodes_0 = [d[i] for i in indices_nodes[0]]
+    values_indices_nodes_1 = [d[i] for i in indices_nodes[1]]
+    values_indices_nodes = list(zip(values_indices_nodes_0,values_indices_nodes_1))
     dict = {}
     for i in range(len(values_indices_nodes)):
         try:
-            dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1]).split('/')[3]
-            
+            if '#' not in str(values_indices_nodes[i][1]) :
+                dict[values_indices_nodes[i][0][0]] = str(values_indices_nodes[i][1]).split('/')[3]
+            if '#' in str(values_indices_nodes[i][1]):
+                dict[values_indices_nodes[i][0][0]] = str(values_indices_nodes[i][1][1]).split('#')[1].split(',')[0].replace("'","")
+
         except IndexError :
-            dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1])
-    return dict        
+            dict[values_indices_nodes[i][0][0]] = str(values_indices_nodes[i][1])
+    return dict
   
 def dict_triples_semantics(data,  masked_ver, sub_triples):
     """ 
@@ -56,9 +93,9 @@ def dict_triples_semantics(data,  masked_ver, sub_triples):
 #Neighborhood
 #Extract neighborhood
 
-def find_n_hop_neighbors(edge_index, n, node=None):
+def find_n_hop_neighbors(edge_index, n, node=None, adj = False):
     """ 
-    edge_index 
+    edge_index: if adj=True is data, else is edfge_index
     n = num hops
     node = node_idx
     returns: 
@@ -68,6 +105,8 @@ def find_n_hop_neighbors(edge_index, n, node=None):
 
     """
     # create dictionary of node neighborhoods
+    if adj:
+        edge_index = edge_index_oneadj(edge_index.triples)
     neighborhoods = {}
     for i in range(edge_index.max().item() + 1):
         neighborhoods[i] = set()
@@ -94,8 +133,6 @@ def find_n_hop_neighbors(edge_index, n, node=None):
             sub_edges.append(edge)
             
     sub_edges_tensor = torch.tensor([sub_edges[i] for i in range(len(sub_edges))]).t()        
-
-    #return {node: sub_edges}, {node: neighborhoods[node]}, sub_edges_tensor
     return sub_edges, neighborhoods[node], sub_edges_tensor      
 
 #match tro classes
@@ -328,6 +365,60 @@ def get_relations(data):
     return  relations
 
 
+# def d_classes(data):
+#     """ 
+#     Get classes of nodes (select only the alphanum - not literals)
+#     """
+#     data.entities = np.append(data.triples[:,0].tolist(),(data.triples[:,2].tolist()))
+#     indices_nodes = data.entities
+#     d = list(data.e2i.keys())
+#     values_indices_nodes = [d[int(i)] for i in indices_nodes]
+#     dict = {}
+#     for i in range(len(values_indices_nodes)):
+#         try:
+#             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i]).split('/')[3]
+            
+#         except IndexError :
+#             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i])
+
+#     a = encode_classes(dict)   
+#     d = {}
+
+#     c = 0
+#     for k in a.keys():
+#         if k.isalpha():
+#             d[k] = c
+#             c+=1
+#     data.entities_classes = d
+#     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
+#     return d    
+# def d_classes(data):
+#     """ 
+#     Get classes of nodes (select only the alphanum - not literals)
+#     """
+#     data.entities = np.append(data.triples[:,0].tolist(),(data.triples[:,2].tolist()))
+#     indices_nodes = data.entities
+#     d = list(data.e2i.keys())
+#     values_indices_nodes = [d[int(i)] for i in indices_nodes]
+#     dict = {}
+#     for i in range(len(values_indices_nodes)):
+#         try:
+#             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1][0]).split('#')[-1]
+            
+#         except IndexError :
+#             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i])
+
+#     a = encode_classes(dict)   
+#     d = {}
+
+#     c = 0
+#     for k in a.keys():
+#         if k.isalpha():
+#             d[k] = c
+#             c+=1
+#     data.entities_classes = d
+#     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
+#     return d  
 def d_classes(data):
     """ 
     Get classes of nodes (select only the alphanum - not literals)
@@ -339,7 +430,11 @@ def d_classes(data):
     dict = {}
     for i in range(len(values_indices_nodes)):
         try:
-            dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i]).split('/')[3]
+            #dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i]).split('/')[3]
+            if '#' not in str(values_indices_nodes[i][1]) :
+                dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1]).split('/')[3]
+            if '#' in str(values_indices_nodes[i][1]):
+                dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1][1]).split('#')[1].split(',')[0].replace("'","")
             
         except IndexError :
             dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i])
@@ -354,9 +449,7 @@ def d_classes(data):
             c+=1
     data.entities_classes = d
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
-    return d    
-
-
+    return d  
 
 
 
@@ -529,7 +622,8 @@ def domain_range_freq(data,num_classes):
 def convert_binary(sparse_tensor, threshold=0.5):
     ''' Converts a sparse tensor to a binary sparse tensor based on a threshold'''
     # convert values to either 0 or 1 based on a threshold of 0.5
-    mask = sparse_tensor._values() > threshold
+    mask = sparse_tensor._values() >= threshold
+
     converted_values = torch.zeros_like(sparse_tensor._values())
     converted_values[mask] = 1
     #print("Number of non zero values: ", converted_values.nonzero().size(0))
@@ -568,7 +662,121 @@ def find_repeating_sublists(sublists):
 def unnest_list(nested_list):
     return [item for sublist in nested_list for item in (unnest_list(sublist) if isinstance(sublist, list) else [sublist])]
 
-def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=True, low_threshold=False,experiment_name=None, selected_visualization=True):
+# def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=True, low_threshold=False,experiment_name=None, selected_visualization=True):
+#     """ 
+#     Visualize important nodes for node idx prediction
+#     """
+#     get_relations(data)
+#     dict_index = dict_index_classes(data,masked_ver)
+    
+#     #select only nodes with a certain threshold
+#     if selected_visualization:
+#         sel_masked_ver = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
+#         sel_masked_hor = sub_sparse_tensor(masked_ver, threshold,data, low_threshold)
+#     else:
+#         sel_masked_ver = masked_ver
+#         sel_masked_hor = masked_ver
+#     if len(sel_masked_ver)==0:
+#         sel_masked_ver=sub_sparse_tensor(masked_ver, 0,data, low_threshold)
+#     #print('sel masked ver',sel_masked_ver)
+#     indices_nodes = sel_masked_ver.coalesce().indices().detach().numpy()
+#     new_index = np.transpose(np.stack((indices_nodes[0], indices_nodes[1]))) #original edge indexes
+
+    
+    
+#     G = nx.Graph()
+#     if result_weights:
+#         values = sel_masked_ver.coalesce().values().tolist()
+#         for s,p,o in zip(indices_nodes[0],values , indices_nodes[1]):
+#             G.add_edge(int(s), int(o), weight=np.round(p, 2))
+
+#     else:
+
+#         triples_matched = match_to_triples(sel_masked_ver,sel_masked_hor, data)
+#         l = []
+#         for i in triples_matched[:,1]:
+#             l.append(data.i2rel[int(i)][0])
+#         triples_matched = find_repeating_sublists(triples_matched.tolist())
+#         for s,p,o in triples_matched:
+#             G.add_edge(int(s), int(o), weight=p)
+
+
+#     edges,weights = zip(*nx.get_edge_attributes(G,'weight').items())
+    
+#     weights = [[item] if not isinstance(item, list) else item for item in weights]
+
+
+#     pos = nx.circular_layout(G)
+
+#     ordered_dict = {}
+#     for item in list(G.nodes):
+#         if item in ordered_dict:
+#             ordered_dict[item].append(dict_index[item])
+#         # else:
+#         #     ordered_dict[item] =  dict_index[item]
+
+#     dict_index = ordered_dict
+
+#     labeldict = {}
+#     for node in G.nodes:
+#         labeldict[int(node)] = int(node)  
+
+
+#     dict = {}
+#     for k,v in dict_index.items():
+#         for k1,v1 in data.entities_classes.items():
+#             if v==k1: 
+
+#                 dict[k] = v1
+#             else:
+#                 if k not in dict:
+#                     dict[k] = 0
+                
+
+#     color_list = list(dict.values())
+#     color_list = list(encode_dict(dict_index).values())
+
+
+#     col_weights = [weights[i][0] for i in range(len(weights))]
+#     if result_weights:
+        
+#         nx.draw(G, pos,labels = labeldict,  edgelist=edges, edge_color=col_weights, node_color =  color_list, cmap="Set2",edge_cmap=plt.cm.Reds,font_size=8)
+#         nx.draw_networkx_edge_labels( G, pos,edge_labels=nx.get_edge_attributes(G,'weight'),font_size=8,font_color='red')
+#         sm = plt.cm.ScalarMappable(cmap=plt.cm.Reds, norm=plt.Normalize(vmin=0, vmax=1))
+#         sm.set_array(weights)
+#         cbar = plt.colorbar(sm)
+#         cbar.ax.set_title('Weight')
+#         plt.title("Node {}'s {}-hop neighborhood important nodes".format(node_idx, n_hop))
+#     else:
+#         rel = nx.get_edge_attributes(G,'weight')
+#         rel = nx.get_edge_attributes(G,'weight')
+#         rel = {tuple(k): v for k, v in rel.items()}
+#         for k,v in rel.items():
+#             rel[k] = data.i2rel[v][0]
+#         rel = {k: [data.i2rel[i][0] for i in v] for k,v in rel.items()}
+#         col_weights = [sum(weights[i], 3) if len(weights[i]) > 1 else weights[i][0] for i in range(len(weights))]
+#         nx.draw(G, pos,labels = labeldict, edge_color=col_weights,edgelist=edges,node_color =  color_list, cmap="Set2",font_size=7, arrows = True)
+#         nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=8,font_color='red')
+        
+#         res = Counter(unnest_list(rel.values()))
+#         print(res)
+#     if result_weights:
+#         if not os.path.exists(f'chk/{name}_chk/{experiment_name}⁄graphs'):
+#             os.makedirs(f'chk/{name}_chk/{experiment_name}⁄graphs')  
+#         plt.savefig(f'chk/{name}_chk/{experiment_name}⁄graphs/Explanation_{node_idx}_weights.png')
+
+#         #plt.show()
+
+#     else:
+#         if not os.path.exists(f'chk/{name}_chk/{experiment_name}⁄graphs'):
+#             os.makedirs(f'chk/{name}_chk/{experiment_name}⁄graphs')  
+#         plt.savefig(f'chk/{name}_chk/{experiment_name}⁄graphs/Explanation_{node_idx}_relations.png')    
+#         #plt.show()
+#         return res
+    
+
+
+def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=True, low_threshold=False,experiment_name=None, selected_visualization=True, connected_subgraph = True):
     """ 
     Visualize important nodes for node idx prediction
     """
@@ -605,21 +813,25 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
         triples_matched = find_repeating_sublists(triples_matched.tolist())
         for s,p,o in triples_matched:
             G.add_edge(int(s), int(o), weight=p)
-
+    if connected_subgraph:
+        #conncected subgraph
+        connected_components = nx.connected_components(G)
+        component = next(connected_components)
+        G = G.subgraph(component)
 
     edges,weights = zip(*nx.get_edge_attributes(G,'weight').items())
-    
     weights = [[item] if not isinstance(item, list) else item for item in weights]
 
 
     pos = nx.circular_layout(G)
+    #pos = nx.spring_layout(G)
 
     ordered_dict = {}
     for item in list(G.nodes):
         if item in ordered_dict:
             ordered_dict[item].append(dict_index[item])
-        # else:
-        #     ordered_dict[item] =  dict_index[item]
+        else:
+            ordered_dict[item] =  dict_index[item]
 
     dict_index = ordered_dict
 
@@ -627,22 +839,20 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
     for node in G.nodes:
         labeldict[int(node)] = int(node)  
 
-
     dict = {}
     for k,v in dict_index.items():
         for k1,v1 in data.entities_classes.items():
             if v==k1: 
 
                 dict[k] = v1
+                print(v1)
             else:
                 if k not in dict:
                     dict[k] = 0
                 
 
     color_list = list(dict.values())
-    color_list = list(encode_dict(dict_index).values())
-
-
+    #color_list = list(encode_dict(dict_index).values())
     col_weights = [weights[i][0] for i in range(len(weights))]
     if result_weights:
         
@@ -654,14 +864,19 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
         cbar.ax.set_title('Weight')
         plt.title("Node {}'s {}-hop neighborhood important nodes".format(node_idx, n_hop))
     else:
-        rel = nx.get_edge_attributes(G,'weight')
-        # rel = nx.get_edge_attributes(G,'weight')
-        # for k,v in rel.items():
-        #     rel[k] = data.i2rel[v][0]
-        rel = {k: [data.i2rel[i][0] for i in v] for k,v in rel.items()}
-        col_weights = [sum(weights[i], 3) if len(weights[i]) > 1 else weights[i][0] for i in range(len(weights))]
+        re = nx.get_edge_attributes(G, 'weight')
+        rel =  {k: list(set(v)) for k, v in re.items()}
+
+        for k, v in rel.items():
+            if isinstance(v, list):
+                updated_values = [data.i2rel[item][0] for item in v]
+                rel[k] = updated_values
+            else:
+                rel[k] = data.i2rel[v][0]
+
+        col_weights = [sum(weights[i]) if len(weights[i]) > 1 else weights[i][0] for i in range(len(weights))]
         nx.draw(G, pos,labels = labeldict, edge_color=col_weights,edgelist=edges,node_color =  color_list, cmap="Set2",font_size=7, arrows = True)
-        #nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=8,font_color='red')
+        nx.draw_networkx_edge_labels( G, pos,edge_labels=rel,font_size=5,font_color='red')
         
         res = Counter(unnest_list(rel.values()))
         print(res)
@@ -678,7 +893,7 @@ def visualize(node_idx, n_hop, data, masked_ver,threshold,name, result_weights=T
         plt.savefig(f'chk/{name}_chk/{experiment_name}⁄graphs/Explanation_{node_idx}_relations.png')    
         #plt.show()
         return res
-    
+
 
 
 def sub(v, threshold):
@@ -824,10 +1039,10 @@ def find_threshold(sparse_tensor, num_exp):
 
 def threshold_mask(h,v ,data, num_exp):
     ''' Apply a threshold mask to the adjacency matrix'''
-    t =     find_threshold(v, num_exp)
+    t_v, t_h =     find_threshold(v, num_exp), find_threshold(h, num_exp)
     #v, h = convert_back(v, data), convert_back(h, data)
-    v, h =convert_binary(v,t), convert_binary(h,t)
-    return h,v,t
+    v_thresh, h_thresh =convert_binary(v,t_v), convert_binary(h,t_h)
+    return h_thresh,v_thresh,t_h,t_v
 
 
 def important_relation(h,v,data, node_idx, threshold):
@@ -884,3 +1099,64 @@ def most_frequent_relations(data, node_idx, n_hops):
     most_freq_rel = list(sorted_freq.keys())[0]
     id_most_freq_rel = data.r2i[most_freq_rel]
     return most_freq_rel
+
+
+
+
+def get_non_selected_indices(sparse_tensor, selected_indices):
+    original_indices = sparse_tensor.coalesce().indices()
+    selected_set = set(map(tuple, selected_indices.t().tolist()))
+
+    non_selected_indices = []
+    for index in original_indices.t().tolist():
+        if tuple(index) not in selected_set:
+            non_selected_indices.append(index)
+
+    return torch.tensor(non_selected_indices).t()
+
+def select_connected_subgraph(adjacency_matrix, given_node,data):
+    adjacency_matrix = torch.sparse_coo_tensor(
+        adjacency_matrix.coalesce().indices()%data.num_entities, adjacency_matrix.coalesce().values(), size=adjacency_matrix.size()
+    )
+    sub_adj = sub(adjacency_matrix, 0.5)
+    print(adjacency_matrix)
+    num_nodes = sub_adj.size(0)
+    visited = torch.zeros(num_nodes, dtype=torch.bool)
+    connected_nodes = set()
+    stack = []
+
+    # Starting with the given node
+    stack.append(given_node)
+    connected_nodes.add(given_node)
+    visited[given_node] = True
+
+    while len(stack) > 0:
+        node = stack.pop()
+        neighbors = sub_adj[node].coalesce().indices()
+        for i in range(neighbors.size(1)):
+            neighbor = neighbors[:, i]
+            if not visited[neighbor[0]]:
+                stack.append(neighbor[0])
+                connected_nodes.add(neighbor[0])
+                visited[neighbor[0]] = True
+
+    # Select the indices of the connected nodes
+    connected_indices = []
+    for node in connected_nodes:
+        connected_indices.append([node, node])
+
+    # Create the connected adjacency matrix
+    connected_indices = torch.tensor(connected_indices, dtype=torch.long).t()
+    #connected_values = adjacency_matrix._values()[connected_indices[0]]
+    connected_values = torch.ones(connected_indices.size(1))
+
+    #torch.ones(connected_indices.size(1))
+    disconnected_indices = get_non_selected_indices(adjacency_matrix, connected_indices)
+    disconnected_values = torch.zeros(disconnected_indices.size(1))
+    connected_indices = torch.cat([connected_indices, disconnected_indices], dim=1)
+    connected_values = torch.cat([connected_values, disconnected_values])
+    connected_adjacency_matrix = torch.sparse_coo_tensor(
+        connected_indices, connected_values, size=adjacency_matrix.size()
+    )
+
+    return connected_adjacency_matrix

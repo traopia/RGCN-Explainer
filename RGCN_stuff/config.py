@@ -59,7 +59,9 @@ parameters_dict.update({'epochs': {'value': 30},
                         'explain_all': {'value': False}, 
                         'dataset_name': {'value': 'aifb'}, 
                         'prune': {'value': True},
-                        'print': {'value': False}})
+                        'print': {'value': False},
+                        'funky_loss': {'value': False},
+                        'num_exp': {'value': 15}})
 sweep_config['parameters'] = parameters_dict
 
 if sweep==True:
@@ -72,15 +74,15 @@ if sweep==True:
 
 
 default_params={
-"pred": 1,
+"pred": 10,
 "size": 0.00005,  
 #"size_std": num_neighbors, 
-"ent": 10,
+"ent": -1,
 "most_freq_rel": -1,
 "lr": 0.1,
 "weight_decay": 0.9,
 "adaptive": False,
-"epochs": 30,
+"epochs": 1,
 "init_strategy": "normal", 
 "threshold": 0.5,
 #"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
@@ -92,8 +94,10 @@ default_params={
 "break_on_number_of_high": False,
 "print": False,
 "explain_all": False,
-"dataset_name": 'mutag',
-"prune": True
+"dataset_name": 'aifb',
+"prune": True, 
+"funky_loss": False, 
+"num_exp": 15,
 }
 
 if sweep == False:

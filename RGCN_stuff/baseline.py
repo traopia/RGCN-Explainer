@@ -135,8 +135,8 @@ def prediction_with_one_relation(data, model, node_idx,label):
                     print(f'correct only with {data.i2rel[key][0]}, {key}')
                     count[data.i2rel[key][0]] = res.detach().tolist()
                     ones[data.i2rel[key][0]] = 1
-
-    print(f'correct with {len(count)} relations out of {len(Counter(m[:,1].tolist()).keys())} relations')
+    print(count)
+    print(f'correct with {len(count)-2} relations out of {len(Counter(m[:,1].tolist()).keys())} relations')
     return count, ones, id 
 
 
@@ -194,8 +194,8 @@ def main(name,node_idx, prune=True, all = True, test = False):
     else: 
         node_idx = d[list(d.keys())[0]][0]       
         label = data.withheld[data.withheld[:,0]==node_idx,1]
-        count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
-        #count, ones, id = prediction_wrong_if(data, model, node_idx,label)
+        #count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
+        count, ones, id = prediction_wrong_if(data, model, node_idx,label)
         print(count)
         print_cpu_utilization()
         df.loc[str(node_idx)] = count
@@ -208,6 +208,6 @@ def main(name,node_idx, prune=True, all = True, test = False):
     
 
 if __name__ == '__main__':
-    main('mdgenre',7185, prune=True, all = True, test = False)
+    main('mdgenre',7185, prune=True, all = False, test = False)
 
     

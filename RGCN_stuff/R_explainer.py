@@ -1,3 +1,4 @@
+from sqlalchemy import false
 import torch 
 from collections import Counter
 from baseline import baseline_pred
@@ -52,7 +53,7 @@ class Explainer:
         #get hor and ver graph and the subgraphs
         self.hor_graph, self.ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
         self.edge_index_h, self.edge_index_v = self.hor_graph.coalesce().indices(), self.ver_graph.coalesce().indices()
-
+        self.res_full = nn.Softmax(dim=0)(model.forward2(self.hor_graph, self.ver_graph)[node_idx, :])
         self.sub_edges_h, self.neighbors_h, self.sub_edges_tensor_h  = find_n_hop_neighbors(self.edge_index_h, n=self.n_hops, node=self.node_idx)
         self.sub_edges_v, self.neighbors_v, self.sub_edges_tensor_v  = find_n_hop_neighbors(self.edge_index_v, n=self.n_hops, node=self.node_idx)
         self.sub_triples = match_to_triples(self.sub_edges_tensor_v, self.sub_edges_tensor_h,self.data, sparse=False)
@@ -68,9 +69,7 @@ class Explainer:
         sub_h, sub_v = sub_hor_graph, sub_ver_graph
         m = match_to_triples(sub_v, sub_h,self.data, self.node_idx)
         freq = Counter(m[:,1].tolist())
-        print('oj')
         sorted_freq = {self.data.i2r[k]: v for k, v in sorted(freq.items(), key=lambda item: item[1], reverse=True) if k!=0}
-        print('oj')
         most_freq_rel = list(sorted_freq.keys())[0]
         id_most_freq_rel = self.data.r2i[most_freq_rel]
         return id_most_freq_rel
@@ -87,6 +86,7 @@ class Explainer:
         data, node_idx = self.data, self.node_idx
         sub_hor_graph, sub_ver_graph = hor_ver_graph(self.sub_triples, self.n, self.r)
         self.most_freq_rel_node = self.most_freq_rel_f(sub_hor_graph, sub_ver_graph)
+        print('most_freq_relation is:',  self.most_freq_rel_node )
         
         if self.config['kill_most_freq_rel']:
             #for i in self.most_freq_rel_node:
@@ -114,7 +114,7 @@ class Explainer:
         #     74227,
         #     self.node_idx,
         #     self.most_freq_rel_node
-        # )
+        # ) #what if the 2 hop neighborhood is not enough??????
 
         self.model.eval()
         explainer.train()  
@@ -125,6 +125,7 @@ class Explainer:
             explainer.optimizer.zero_grad()
             
             ypred, masked_hor, masked_ver = explainer(self.node_idx)  # forward pass of the explainer
+
             if self.config["break_if_wrong_pred"] and epoch > 0:
                 if torch.argmax(ypred) != self.label or list(ypred) == list(self.baseline) :
                     ypred, masked_hor, masked_ver = ypred_before, masked_hor_before, masked_ver_before
@@ -137,18 +138,26 @@ class Explainer:
                     break
 
             ypred_before, masked_hor_before, masked_ver_before = ypred, masked_hor, masked_ver
-            loss, pred_loss, size_loss, mask_ent_loss, size_std_loss,  num_high, wrong_pred = explainer.loss(ypred, self.config,epoch) 
             m_ver, m_hor = sub(masked_ver, 0.5), sub(masked_hor,0.5)
+
             
 
             m = match_to_triples(m_ver, m_hor, data, node_idx)
             counter = Counter(m[:,1].tolist())
             counter = {data.i2rel[k][0]:v for k,v in counter.items() if k!=0}
+            if self.config.funky_loss==False:
+                loss, pred_loss, size_loss, mask_ent_loss, size_std_loss,  num_high, wrong_pred = explainer.loss(ypred, self.config,epoch) 
+                loss.backward()
+                explainer.optimizer.step()
 
-            loss.backward()
-
-            explainer.optimizer.step()
-            if epoch % 10 == 0:
+            if self.config.funky_loss:
+                ypred_1_m, masked_hor_1_m, masked_ver_1_m = explainer.forward_1_m(self.node_idx)
+                loss, fidelity_minus, fidelity_plus, sparsity = explainer.funky_loss(ypred, self.res_full, ypred_1_m, self.config)
+                loss.backward(retain_graph=True)
+                #loss.backward()
+                explainer.optimizer.step()
+            explainer.scheduler.step()
+            if epoch % 10 == 0 or epoch == self.config.epochs - 1:
                 print(
                     "epoch: ",
                     epoch,
@@ -161,8 +170,12 @@ class Explainer:
                 )
                 print('--------------------------------------------------------------')
             
-            wandb.log({f"len mask > {self.config['threshold']}": len([i for i in masked_ver.coalesce().values() if i > self.config['threshold']]) , "loss": loss,
-            "pred_loss": pred_loss, "size_loss": size_loss, "mask_ent_loss": mask_ent_loss, "size_std_loss": size_std_loss,  "num_high": num_high, "wrong_pred": wrong_pred})
+            if self.config.funky_loss==False:
+                wandb.log({f"len mask > {self.config['threshold']}": len([i for i in masked_ver.coalesce().values() if i > self.config['threshold']]) , "loss": loss,
+                "pred_loss": pred_loss, "size_loss": size_loss, "mask_ent_loss": mask_ent_loss, "size_std_loss": size_std_loss,  "num_high": num_high, "wrong_pred": wrong_pred})
+            if self.config.funky_loss:
+                wandb.log({f"len mask > {self.config['threshold']}": len([i for i in masked_ver.coalesce().values() if i > self.config['threshold']]) , "loss": loss,
+                "fidelity_minus": fidelity_minus, "fidelity_plus": fidelity_plus, "sparsity": sparsity})
         print('Finished Training')
 
 
@@ -182,7 +195,7 @@ class Explainer:
         masked_ver = torch.sparse.FloatTensor(sub_ver_graph.coalesce().indices(), masked_ver_values, sub_ver_graph.size())
 
 
-        return masked_hor, masked_ver
+        return masked_hor, masked_ver, self.res_full
     
 
 class ExplainModule(nn.Module):
@@ -219,6 +232,7 @@ class ExplainModule(nn.Module):
         self.mask = self.construct_edge_mask(num_nodes, self.hor_graph,self.data)
         params = [self.mask]
         self.optimizer = torch.optim.Adam(params, lr=config["lr"], weight_decay=config["weight_decay"])
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=10, gamma=0.1)
 
 
 
@@ -265,11 +279,12 @@ class ExplainModule(nn.Module):
             value_indices = torch.cat((value_indices1, value_indices3), 0)
             mask.data[[self._indices]] = 0
 
-        elif init_strategy == "zero_out_people":
-            class_id=5230
-            nn.init.constant_(mask,1) 
-            value_indices = torch.where(sparse_tensor.coalesce().indices() == class_id)
-            mask.data[[value_indices[1]]] = -10
+        # elif init_strategy == "zero_out_most_freq_node":
+        #     sub_edges = [self.hor_graph.coalesce().indices()[0],self.ver_graph.coalesce().indices()[1]]
+        #     class_id= Counter([num for tup in sub_edges for num in tup]).most_common(1)[0][0]
+        #     nn.init.constant_(mask,1) 
+        #     value_indices = torch.where(sparse_tensor.coalesce().indices() == class_id)
+        #     mask.data[[value_indices[1]]] = -10
 
         elif init_strategy == "one_out":
             #nn.init.uniform_(mask, 0,1) 
@@ -288,6 +303,15 @@ class ExplainModule(nn.Module):
             overall_rel_frequency = dict(Counter(data.triples[:,1].tolist()))
 
             overall_rel_frequency_  = {key: round(value/len(data.triples[:,1].tolist()),5) for key, value in overall_rel_frequency.items()}
+            for i in p:
+                _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
+                mask.data[[value_indices]] = overall_rel_frequency_[i]
+
+        elif init_strategy == "overall_frequency_inverse":
+            '''Initialize the mask with the overall frequency of the relations'''
+            _ ,p = torch.div(sparse_tensor.coalesce().indices(), num_entities, rounding_mode='floor').tolist()
+            overall_rel_frequency = dict(Counter(data.triples[:,1].tolist()))
+            overall_rel_frequency_  = {key: 1 - round(value/len(data.triples[:,1].tolist()),5) for key, value in overall_rel_frequency.items()}
             for i in p:
                 _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
                 mask.data[[value_indices]] = overall_rel_frequency_[i]
@@ -394,6 +418,13 @@ class ExplainModule(nn.Module):
         res = nn.Softmax(dim=0)(node_pred[0:])
         
         return res, self.masked_hor, self.masked_ver
+    
+    def forward_1_m(self, node_idx):
+        self.masked_ver = self._masked_adj_ver()  # masked adj is the adj matrix with the mask applied
+        self.masked_hor = self._masked_adj_hor() 
+        masked_ver, masked_hor = inverse_tensor(self.masked_ver), inverse_tensor(self.masked_hor)
+        res1_m = nn.Softmax(dim=0)(self.model.forward2(masked_hor, masked_ver)[node_idx])
+        return res1_m , masked_hor, masked_ver
 
 
 
@@ -403,7 +434,21 @@ class ExplainModule(nn.Module):
 
 
 
-
+    def funky_loss(self, pred,res_full, res1_m,  config):
+        res_binary = pred
+        label = self.label
+        mask = torch.sigmoid(self.mask)
+        explanation_lenght = torch.mean(mask[mask > config["threshold"]])
+        fidelity_minus = torch.absolute(1 - (res_full[int(label)] - res_binary[int(label)]))
+        fidelity_plus = (res_full[int(label)] - res1_m[int(label)])
+        mask_len  = len(mask)
+        sparsity = torch.tensor(1 - (explanation_lenght)/torch.mean(mask))
+        most_freq_rel_len = len(mask[[self._indices]][mask[[self._indices]] > 0.5])
+        most_freq_rel_loss = most_freq_rel_len/len(mask)
+        size_loss = config['size'] * torch.sum(torch.abs(mask))
+        loss = -(fidelity_minus + fidelity_plus + sparsity - most_freq_rel_loss - size_loss)
+        #print(loss, fidelity_minus, fidelity_plus, sparsity)
+        return loss, fidelity_minus, fidelity_plus, sparsity
      
     def loss(self, pred, config, epoch):
         """
@@ -463,7 +508,7 @@ class ExplainModule(nn.Module):
         
         #type_loss = - config['type']*torch.sum(mask[[self._indices]][mask[[self._indices]] > 0.5])/torch.sum(mask)
         most_freq_rel_loss = config['most_freq_rel'] * most_freq_rel_len/len(mask)
-
+        #this is to be minimized 
         wrong_pred = 1 if torch.argmax(pred) != self.label else 0
 
         
@@ -484,9 +529,11 @@ class ExplainModule(nn.Module):
         return loss, pred_loss, size_loss, mask_ent_loss,size_loss_std, num_high , wrong_pred 
     
 
+
+
 def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold, dict_classes, num_neighbors,config = None):
 
-    wandb.init(config = config, reinit = True)
+    wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}")
     config = wandb.config
     wandb.config.update({"size_std": num_neighbors})
 
@@ -494,28 +541,30 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
 
 
     explainer = Explainer(model,pred_label, data,name,  node_idx, n_hops, prune, config)
-    masked_hor, masked_ver = explainer.explain()
+    masked_hor, masked_ver, res_full = explainer.explain()
 
     breaking = 'wrong_pred' if config["break_if_wrong_pred"] else 'num_high' if config["break_on_number_of_high"] else 'no'
     sweep = True
     if sweep:
 
         experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["most_freq_rel"]}_killtype_{config["kill_most_freq_rel"]}_break_{breaking}'
+        wandb.run.name = experiment_name
     else:
         experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["most_freq_rel"]}_killtype_{config["kill_most_freq_rel"]}_break_{breaking}'
+        wandb.run.name = node_idx
 
     directory = f'chk/{name}_chk/{experiment_name}'
-    wandb.run.name = experiment_name
+    
 
 
     
-    if config.explain_all == True:
-        if not os.path.exists(directory + f'/masked_adj'):
-            os.makedirs(directory + f'/masked_adj')
-        else:
-            print(f"Directory '{directory}' already exists.")
-        torch.save(masked_ver, f'{directory}/masked_adj/masked_ver{node_idx}')
-        torch.save(masked_hor, f'{directory}/masked_adj/masked_hor{node_idx}') 
+    #if config.explain_all == True:
+    if not os.path.exists(directory + f'/masked_adj'):
+        os.makedirs(directory + f'/masked_adj')
+    else:
+        print(f"Directory '{directory}' already exists.")
+    torch.save(masked_ver, f'{directory}/masked_adj/masked_ver{node_idx}')
+    torch.save(masked_hor, f'{directory}/masked_adj/masked_hor{node_idx}') 
 
     #h = visualize(node_idx, n_hops, data, masked_ver,masked_hor, threshold=config['threshold'] , name = name, result_weights=False, low_threshold=False, experiment_name=experiment_name)
     #h = visualize(node_idx, n_hops, data, masked_ver, threshold=config['threshold'] , name = name, result_weights=False, low_threshold=False, experiment_name=experiment_name)
@@ -536,8 +585,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     res1_m = nn.Softmax(dim=0)(model.forward2(h_inv,v_inv)[node_idx])
 
     #Prediction full graph - the one to be explained
-    hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
-    res_full = nn.Softmax(dim=0)(model.forward2(hor_graph, ver_graph)[node_idx, :])
+    # hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+    # res_full = nn.Softmax(dim=0)(model.forward2(hor_graph, ver_graph)[node_idx, :])
 
 
     #Random explanation
@@ -547,7 +596,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     res_random = nn.Softmax(dim=0)(model.forward2(h_random, v_random)[node_idx, :])
 
     #threshold to max of explanation edges
-    h_threshold, v_threshold,t = threshold_mask(masked_hor, masked_ver, data, num_exp = 10)
+    h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, config.num_exp)
     res_threshold = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
     counter_threshold = important_relation(h_threshold, v_threshold,data, node_idx, config['threshold'])
     print('Important relations thresholded to 10', counter_threshold)
@@ -560,11 +609,11 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
     # fidelity_minus = torch.mean(1 - (res_full - res_binary))
     # fidelity_plus = torch.mean((res_full - res1_m))
 
-    fidelity_minus = 1 - (res_full[int(label)] - res_binary[int(label)])
-    fidelity_plus = (res_full[int(label)] - res1_m[int(label)])
+    fidelity_minus = float(1 - (res_full[int(label)] - res_binary[int(label)]))
+    fidelity_plus = float((res_full[int(label)] - res1_m[int(label)]))
     print(fidelity_minus, fidelity_plus)
     explanation_lenght = len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ])
-    sparsity = 1 - explanation_lenght/len(masked_ver.coalesce().values())
+    sparsity = float(1 - explanation_lenght/len(masked_ver.coalesce().values()))
 
   
     score = fidelity_minus + fidelity_plus + sparsity
@@ -598,7 +647,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
 
         ' \n pred prob explain', res, 
         '\n pred prob explain binary', res_binary,
-        '\n pred prob threshold', res_threshold,'threshold',t, 'with num edges', len(v_threshold.coalesce().values()[v_threshold.coalesce().values()>config['threshold'] ]),
+        '\n pred prob threshold', res_threshold,'threshold',t_h,t_v, 'with num edges', len(v_threshold.coalesce().values()[v_threshold.coalesce().values()>config['threshold'] ]),
         '\n pred prob full', res_full,       
         '\n pred prob sub', res_sub,
         '\n pred prob 1-m explain binary', res1_m,
