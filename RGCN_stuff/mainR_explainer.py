@@ -35,9 +35,11 @@ relations = get_relations(data)
 
 relations = ['label', 'node_idx','number_neighbors', 
              'prediction_explain', 'prediction_full', 'prediction_explain_binary',
-             'prediction 1-m explain binary', 
+             'prediction_inverse_binary', 
              'prediction_random','prediction_sub', 'prediction_threshold',
-             'fidelity_minus', 'fidelity_plus', 'sparsity'] + relations
+             'prediction_threshold_lekker',
+             'fidelity_minus', 'fidelity_plus', 'sparsity',
+            'fidelity_minus_threshold','fidelity_plus_threshold','sparsity_threshold'] + relations
 
 dict_classes = d_classes(data)
 

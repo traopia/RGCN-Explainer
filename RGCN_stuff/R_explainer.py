@@ -530,6 +530,23 @@ class ExplainModule(nn.Module):
     
 
 
+def scores(res_full, res_expl,res1_m,label,masked_ver, config):
+    ''' res_expl: res_binary , res_threshold'''
+    fidelity_minus = float(1 - (res_full[int(label)] - res_expl[int(label)]))
+    fidelity_plus = float((res_full[int(label)] - res1_m[int(label)]))
+    print(fidelity_minus, fidelity_plus)
+    explanation_lenght = len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ])
+    sparsity = float(1 - explanation_lenght/len(masked_ver.coalesce().values()))
+
+    if sparsity == 1:
+        sparsity_loss = 0
+    if sparsity == 0:
+        sparsity_loss = - 1
+    else:
+        sparsity_loss = sparsity
+    score = fidelity_minus + fidelity_plus + sparsity_loss
+    return fidelity_minus, fidelity_plus, sparsity, score
+
 
 def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,config):
     if sweep:
@@ -584,16 +601,14 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     v_inv, h_inv = inverse_tensor(masked_ver), inverse_tensor(masked_hor)
     res1_m = nn.Softmax(dim=0)(model.forward2(h_inv,v_inv)[node_idx])
 
-    #Prediction full graph - the one to be explained
-    # hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
-    # res_full = nn.Softmax(dim=0)(model.forward2(hor_graph, ver_graph)[node_idx, :])
-
 
     #Random explanation
     h_random, v_random = random_explanation_baseline(masked_hor), random_explanation_baseline(masked_ver)
     counter = important_relation(h_random, v_random, data,node_idx, 0.5)
     print('Random baseline Important relations', counter)
     res_random = nn.Softmax(dim=0)(model.forward2(h_random, v_random)[node_idx, :])
+
+    res_random_inverse = res1_m = nn.Softmax(dim=0)(model.forward2(inverse_tensor(h_inv),inverse_tensor(v_inv))[node_idx])
 
     #threshold to max of explanation edges
     h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, config.num_exp)
@@ -605,23 +620,47 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     counter = important_relation(masked_hor, masked_ver, data,node_idx, config['threshold'])
     print('Important relations', counter)
 
+    #Threshold until lekker
+    i = 0
+    res_threshold_lekker = res_threshold
+    while res_threshold_lekker.argmax() != label:
+        h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, 1+i, equal=False)
+        i+=1
+        res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
+        if i== masked_hor.shape[0]:
+            break
+    if not os.path.exists(directory + f'/masked_adj'):
+        os.makedirs(directory + f'/masked_adj')
+    else:
+        print(f"Directory '{directory}' already exists.")
+    torch.save(masked_ver, f'{directory}/masked_adj/masked_ver_thresh{node_idx}')
+    torch.save(masked_hor, f'{directory}/masked_adj/masked_hor_thresh{node_idx}') 
+    
+    ##Inverse of threshold until lekker
+    v_inv, h_inv = inverse_tensor(v_threshold), inverse_tensor(h_threshold)
+    res_threshold_inverse = nn.Softmax(dim=0)(model.forward2(h_inv,v_inv)[node_idx])
+    
+
     #metrics
     # fidelity_minus = torch.mean(1 - (res_full - res_binary))
     # fidelity_plus = torch.mean((res_full - res1_m))
 
-    fidelity_minus = float(1 - (res_full[int(label)] - res_binary[int(label)]))
-    fidelity_plus = float((res_full[int(label)] - res1_m[int(label)]))
-    print(fidelity_minus, fidelity_plus)
-    explanation_lenght = len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ])
-    sparsity = float(1 - explanation_lenght/len(masked_ver.coalesce().values()))
+    # fidelity_minus = float(1 - (res_full[int(label)] - res_binary[int(label)]))
+    # fidelity_plus = float((res_full[int(label)] - res1_m[int(label)]))
+    # print(fidelity_minus, fidelity_plus)
+    # explanation_lenght = len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ])
+    # sparsity = float(1 - explanation_lenght/len(masked_ver.coalesce().values()))
 
-    if sparsity == 1:
-        sparsity_loss = 0
-    if sparsity == 0:
-        sparsity_loss = - 1
-    else:
-        sparsity_loss = sparsity
-    score = fidelity_minus + fidelity_plus + sparsity_loss
+    # if sparsity == 1:
+    #     sparsity_loss = 0
+    # if sparsity == 0:
+    #     sparsity_loss = - 1
+    # else:
+    #     sparsity_loss = sparsity
+    # score = fidelity_minus + fidelity_plus + sparsity_loss
+
+    fidelity_minus, fidelity_plus, sparsity, score = scores(res_full, res_binary,res1_m,label,masked_ver, config)
+    fidelity_minus_threshold, fidelity_plus_threshold, sparsity_threshold, score_threshold = scores(res_full, res_threshold_lekker,res1_m_threshold_lekker,label,v_threshold, config)
     wandb.log({'score': score})
 
     #Save in the csv: label, node, number neighbors, predictions
@@ -631,10 +670,12 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
              'prediction_explain': str(res.detach().numpy()), 'prediction 1-m explain binary': str(res1_m.detach().numpy()),
              'prediction_random': str(res_random.detach().numpy()), 
              'prediction_sub': str(res_sub.detach().numpy()), 'prediction_threshold': str(res_threshold.detach().numpy()),
-            'fidelity_minus': str(fidelity_minus), 'fidelity_plus': str(fidelity_plus), 'sparsity': str(sparsity)}
+             'prediction_threshold_lekker': str(res_threshold_lekker.detach().numpy()),
+            'fidelity_minus': str(fidelity_minus), 'fidelity_plus': str(fidelity_plus), 'sparsity': str(sparsity),
+            'fidelity_minus_threshold': str(fidelity_minus_threshold), 'fidelity_plus_threshold': str(fidelity_plus_threshold), 'sparsity_threshold': str(sparsity_threshold)
+            }
     counter.update(info)
     df.loc[str(node_idx)] = counter
-
     counter_threshold.update(info)
     df_threshold.loc[str(node_idx)] = counter_threshold
 

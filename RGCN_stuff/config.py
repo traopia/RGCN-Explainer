@@ -85,7 +85,7 @@ default_params={
 "weight_decay": 0.9,
 "adaptive": False,
 "epochs": 30,
-"init_strategy": "relative_frequency", 
+"init_strategy": "normal", 
 "threshold": 0.5,
 #"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
 "hops": 2,
