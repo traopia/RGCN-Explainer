@@ -15,24 +15,24 @@ metric = {
 sweep_config['metric'] = metric
 
 parameters_dict = {
-    'pred': {'values': [1]},
+    'pred': {'values': [1,10]},
     'lr': {
-        'values': [0.1, 0.5]
+        'values': [0.05,0.1, 0.5]
     },
     'weight_decay': {
         'values': [0.9, 0.1]
     },
     'size': {
-        'values': [0.00005,  0.0005]
+        'values': [0.00005,  0.0005,0.005]
     },
     # 'size_std': {
     #     'values': [10]
     # },
     'ent': {
-        'values': [ -10,10]
+        'values': [ -10,0,1,10]
     },
     'most_freq_rel': {
-        'values': [-1,1]
+        'values': [-1,0,1,10]
     },
     'adaptive': {
         'values': [False]
