@@ -615,8 +615,11 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     explanation_lenght = len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ])
     sparsity = float(1 - explanation_lenght/len(masked_ver.coalesce().values()))
 
-  
-    score = fidelity_minus + fidelity_plus + sparsity
+    if sparsity == 1:
+        sparsity_loss = 0
+    if sparsity == 0:
+        sparsity_loss = - 1
+    score = fidelity_minus + fidelity_plus + sparsity_loss
     wandb.log({'score': score})
 
     #Save in the csv: label, node, number neighbors, predictions
