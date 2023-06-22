@@ -531,9 +531,11 @@ class ExplainModule(nn.Module):
 
 
 
-def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config = None):
-    sweep = False
-    wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}")
+def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,config):
+    if sweep:
+        wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}_{node_idx}")
+    else:
+        wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}")
     config = wandb.config
     wandb.config.update({"size_std": num_neighbors})
 

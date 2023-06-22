@@ -50,15 +50,16 @@ if explain_all == True:
         for node_idx in dict_classes[target_label]:
             num_neighbors = number_neighbors(node_idx, data, n_hops)
             def wrapped_main1():
-                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config = None)
+                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,config = None)
 
             if sweep:
                 sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
+                print('sweep_config', sweep_config)
                 wandb.agent(sweep_id, function= wrapped_main1)
             else:
                 config = default_params
-                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config )
-                wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}"})
+                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep, config)
+                wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
 
 
 
@@ -66,17 +67,15 @@ if explain_all == False:
     num_neighbors = number_neighbors(node_idx, data, n_hops)
 
     def wrapped_main1():
-        main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config = None)
-        return counter, counter_threshold, experiment_name
+        main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,config=None )
     if sweep:
         sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
-        counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config=None )
         wandb.agent(sweep_id, function= wrapped_main1)
     else:
         config = default_params
         
-        counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config )
-        wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}"})
+        main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config )
+        wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
     
 
 

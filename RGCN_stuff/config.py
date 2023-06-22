@@ -61,7 +61,8 @@ parameters_dict.update({'epochs': {'value': 30},
                         'prune': {'value': True},
                         'print': {'value': False},
                         'funky_loss': {'value': False},
-                        'num_exp': {'value': 15}})
+                        'num_exp': {'value': 15},
+                        'sweep': {'value': True}})
 sweep_config['parameters'] = parameters_dict
 
 if sweep==True:
@@ -74,6 +75,7 @@ if sweep==True:
 
 
 default_params={
+"sweep": False,
 "pred": 10,
 "size": 0.00005,  
 #"size_std": num_neighbors, 
