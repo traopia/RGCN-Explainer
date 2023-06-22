@@ -151,7 +151,7 @@ def main(name,node_idx, prune=True, all = True, test = False):
         prune = False
         device = torch.device("cpu")
     print(device)
-    model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
+    model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
     model.to(device)
     if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
         data = load(name, torch=True, final=False)

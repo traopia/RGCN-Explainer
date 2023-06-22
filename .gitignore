@@ -2,5 +2,15 @@ neighbors/
 RGCN_stuff/IMDb_typePeople_data.pt
 data
 datasets-conversion
+chk/aifb_chk/models
+chk/am_chk/models
+chk/mutag_chk/models
+chk/IMDb_us_chk/models
+chk/IMDb_chk/models
+chk/IMDb_us_onegenre_chk/models
+chk/IMDb_us_genre_chk/models
+chk/IMDB_mostgenre_chk/models
+chk/mdgenre_chk/models
 chk
+chk/aifb_chk/bro
 wandb
