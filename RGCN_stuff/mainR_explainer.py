@@ -38,12 +38,13 @@ relations = ['label', 'node_idx','number_neighbors',
              'prediction_inverse_binary', 
              'prediction_random','prediction_sub', 'prediction_threshold',
              'prediction_threshold_lekker',
+             'res_random_inverse','res_threshold_lekker',
              'fidelity_minus', 'fidelity_plus', 'sparsity',
             'fidelity_minus_threshold','fidelity_plus_threshold','sparsity_threshold'] + relations
 
 dict_classes = d_classes(data)
 
-node_idx = dict_classes[list(dict_classes.keys())[1]][0]
+node_idx = 5757#dict_classes[list(dict_classes.keys())[1]][0]
 model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
 pred_label = torch.load(f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
 print('explain all',explain_all)

@@ -638,9 +638,12 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     
     ##Inverse of threshold until lekker
     v_inv, h_inv = inverse_tensor(v_threshold), inverse_tensor(h_threshold)
-    res_threshold_inverse = nn.Softmax(dim=0)(model.forward2(h_inv,v_inv)[node_idx])
+    res1_m_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_inv,v_inv)[node_idx])
     
-
+    fidelity_minus, fidelity_plus, sparsity, score = scores(res_full, res_binary,res1_m,label,masked_ver, config)
+    fidelity_minus_threshold, fidelity_plus_threshold, sparsity_threshold, score_threshold = scores(res_full, res_threshold_lekker,res1_m_threshold_lekker,label,v_threshold, config)
+    wandb.log({'score': score})
+    print('score', score)
     #metrics
     # fidelity_minus = torch.mean(1 - (res_full - res_binary))
     # fidelity_plus = torch.mean((res_full - res1_m))
@@ -659,9 +662,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     #     sparsity_loss = sparsity
     # score = fidelity_minus + fidelity_plus + sparsity_loss
 
-    fidelity_minus, fidelity_plus, sparsity, score = scores(res_full, res_binary,res1_m,label,masked_ver, config)
-    fidelity_minus_threshold, fidelity_plus_threshold, sparsity_threshold, score_threshold = scores(res_full, res_threshold_lekker,res1_m_threshold_lekker,label,v_threshold, config)
-    wandb.log({'score': score})
+
 
     #Save in the csv: label, node, number neighbors, predictions
     target_label = str([k for k, v in dict_classes.items() if node_idx in v])
@@ -671,6 +672,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
              'prediction_random': str(res_random.detach().numpy()), 
              'prediction_sub': str(res_sub.detach().numpy()), 'prediction_threshold': str(res_threshold.detach().numpy()),
              'prediction_threshold_lekker': str(res_threshold_lekker.detach().numpy()),
+             'res_random_inverse': str(res_random_inverse.detach().numpy()),
+             'res_threshold_lekker': str(res_threshold_lekker.detach().numpy()),
             'fidelity_minus': str(fidelity_minus), 'fidelity_plus': str(fidelity_plus), 'sparsity': str(sparsity),
             'fidelity_minus_threshold': str(fidelity_minus_threshold), 'fidelity_plus_threshold': str(fidelity_plus_threshold), 'sparsity_threshold': str(sparsity_threshold)
             }
@@ -681,7 +684,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
 
     
 
-
+    print('score', score)
     print('node_idx', node_idx, 
         '\n node original label',target_label,
         '\n VS label full', torch.argmax(res_full).item(),
