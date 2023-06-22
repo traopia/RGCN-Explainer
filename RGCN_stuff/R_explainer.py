@@ -619,6 +619,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         sparsity_loss = 0
     if sparsity == 0:
         sparsity_loss = - 1
+    else:
+        sparsity_loss = sparsity
     score = fidelity_minus + fidelity_plus + sparsity_loss
     wandb.log({'score': score})
 

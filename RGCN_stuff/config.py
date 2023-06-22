@@ -97,7 +97,7 @@ default_params={
 "print": False,
 "explain_all": True,
 "dataset_name": 'aifb',
-"prune": True, 
+"prune": False, 
 "funky_loss": False, 
 "num_exp": 15,
 }

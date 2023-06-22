@@ -41,9 +41,9 @@ relations = ['label', 'node_idx','number_neighbors',
 
 dict_classes = d_classes(data)
 
-node_idx = 5757 #dict_classes[list(dict_classes.keys())[1]][0]
-model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
-pred_label = torch.load(f'chk/{name}_chk/prediction_{name}_prune_{prune}')
+node_idx = dict_classes[list(dict_classes.keys())[1]][0]
+model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
+pred_label = torch.load(f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
 print('explain all',explain_all)
 if explain_all == True:
     for target_label in range(len(dict_classes.keys())):
