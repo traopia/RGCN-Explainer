@@ -3,6 +3,7 @@ from collections import Counter
 from baseline import baseline_pred
 import torch.nn as nn
 import math
+import pandas as pd
 
 #rgcn 
 from src.rgcn_explainer_utils import *
@@ -530,14 +531,15 @@ class ExplainModule(nn.Module):
 
 
 
-def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold, dict_classes, num_neighbors,config = None):
+def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config = None):
     sweep = False
     wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}")
     config = wandb.config
     wandb.config.update({"size_std": num_neighbors})
 
     label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
-
+    df = pd.DataFrame(columns=relations)
+    df_threshold = pd.DataFrame(columns=relations) 
 
     explainer = Explainer(model,pred_label, data,name,  node_idx, n_hops, prune, config)
     masked_hor, masked_ver, res_full = explainer.explain()
@@ -564,9 +566,6 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
         print(f"Directory '{directory}' already exists.")
     torch.save(masked_ver, f'{directory}/masked_adj/masked_ver{node_idx}')
     torch.save(masked_hor, f'{directory}/masked_adj/masked_hor{node_idx}') 
-
-    #h = visualize(node_idx, n_hops, data, masked_ver,masked_hor, threshold=config['threshold'] , name = name, result_weights=False, low_threshold=False, experiment_name=experiment_name)
-    #h = visualize(node_idx, n_hops, data, masked_ver, threshold=config['threshold'] , name = name, result_weights=False, low_threshold=False, experiment_name=experiment_name)
 
     #Explain prediction
     res = nn.Softmax(dim=0)(model.forward2(masked_hor, masked_ver)[node_idx, :])
@@ -656,9 +655,18 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold,
         '\n overall mean', torch.mean(masked_ver.coalesce().values()), torch.std(masked_ver.coalesce().values()),
         '\n Sparsity', sparsity, '\n fidelity_minus', fidelity_minus, '\n fidelity_plus', fidelity_plus, '\n score', score)
 
-    # if not os.path.exists(directory + f'/Relation_Importance'):
-    #     os.makedirs(directory + f'/Relation_Importance')
-    # df.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}.csv', index=False)
+    if not os.path.exists(directory + f'/Relation_Importance'):
+        os.makedirs(directory + f'/Relation_Importance')
+    if config.explain_all == False:
+        df.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}.csv', index=False)
+        df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}_threshold.csv', index=False)
+    if config.explain_all == True:
+        if node_idx == dict_classes[list(dict_classes.keys())[0]][0]:
+            df.to_csv(f'{directory}/Relation_Importance/Relations_Important_full.csv', mode='a', index=False)
+            df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_full_threshold.csv', mode='a', index=False)
+        else:
+            df.to_csv(f'{directory}/Relation_Importance/Relations_Important_full.csv', mode='a', header=False, index=False)
+            df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_full_threshold.csv', mode='a', header=False, index=False)
     return counter,counter_threshold,  experiment_name
 
 

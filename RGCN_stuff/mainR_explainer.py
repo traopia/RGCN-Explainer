@@ -1,15 +1,9 @@
 import torch 
 import pandas as pd
 import numpy as np
-#import kgbench as kg
-
-#from src.kgbench import load, tic, toc, d
 import src.kgbench as kg
-#rgcn 
 from rgcn import  RGCN
 from src.rgcn_explainer_utils import *
-#import kgbench as kg
-#params
 import wandb
 
 from R_explainer import *
@@ -44,8 +38,6 @@ relations = ['label', 'node_idx','number_neighbors',
              'prediction 1-m explain binary', 
              'prediction_random','prediction_sub', 'prediction_threshold',
              'fidelity_minus', 'fidelity_plus', 'sparsity'] + relations
-df = pd.DataFrame(columns=relations)
-df_threshold = pd.DataFrame(columns=relations) 
 
 dict_classes = d_classes(data)
 
@@ -58,61 +50,36 @@ if explain_all == True:
         for node_idx in dict_classes[target_label]:
             num_neighbors = number_neighbors(node_idx, data, n_hops)
             def wrapped_main1():
-                main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, df_threshold, dict_classes, num_neighbors,config = None)
+                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config = None)
 
             if sweep:
                 sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
-                
-                counter, counter_threshold,experiment_name = wandb.agent(sweep_id, function= wrapped_main1)
+                wandb.agent(sweep_id, function= wrapped_main1)
             else:
                 config = default_params
-                
-                counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold, dict_classes, num_neighbors,config )
+                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config )
                 wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}"})
 
-            directory = f'chk/{name}_chk/{experiment_name}'
-            df.loc[str(node_idx)] = counter
-            df_threshold.loc[str(node_idx)] = counter_threshold
-            if not os.path.exists(directory + f'/Relation_Importance'):
-                os.makedirs(directory + f'/Relation_Importance')
 
-            # df.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}.csv', index=False)
-            # df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}_threshold.csv', index=False)
-            print('saved results to directory', directory)
-    if not os.path.exists(directory + f'/Relation_Importance'):
-        os.makedirs(directory + f'/Relation_Importance')
-    df.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_full.csv', index=False)
-    df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_full_threshold.csv', index=False)
 
 if explain_all == False:
     num_neighbors = number_neighbors(node_idx, data, n_hops)
 
     def wrapped_main1():
-        main1(n_hops, node_idx, model,pred_label, data,name,  prune,df,df_threshold, dict_classes, num_neighbors,config = None)
+        main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config = None)
         return counter, counter_threshold, experiment_name
     if sweep:
         sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
-        counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, df_threshold, dict_classes, num_neighbors,config=None )
+        counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config=None )
         wandb.agent(sweep_id, function= wrapped_main1)
     else:
         config = default_params
         
-        counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,df, df_threshold, dict_classes, num_neighbors,config )
+        counter, counter_threshold, experiment_name = main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config )
         wandb.config.update({'experiment': f"RGCNExplainer_{name}_{node_idx}"})
     
 
-    directory = f'chk/{name}_chk/{experiment_name}'
-    df.loc[str(node_idx)] = counter
-    df_threshold.loc[str(node_idx)] = counter_threshold
-    if not os.path.exists(directory + f'/Relation_Importance'):
-        os.makedirs(directory + f'/Relation_Importance')
-    df.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}.csv', index=False)
-    df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_{name}_{node_idx}_threshold.csv', index=False)
-    print('saved results to directory')
 
-
-
-    #def main(n_hops, node_idx, model,pred_label, data,name,  prune,df, dict_classes, num_neighbors,config, )
 
 
 

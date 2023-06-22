@@ -619,10 +619,12 @@ def domain_range_freq(data,num_classes):
     return dict_domain, dict_range
 
 
-def convert_binary(sparse_tensor, threshold=0.5):
+def convert_binary(sparse_tensor, threshold=0.5,equal=True):
     ''' Converts a sparse tensor to a binary sparse tensor based on a threshold'''
     # convert values to either 0 or 1 based on a threshold of 0.5
     mask = sparse_tensor._values() >= threshold
+    if equal==False:
+        mask = sparse_tensor._values() > threshold
 
     converted_values = torch.zeros_like(sparse_tensor._values())
     converted_values[mask] = 1
@@ -1037,11 +1039,11 @@ def find_threshold(sparse_tensor, num_exp):
     return threshold
 
 
-def threshold_mask(h,v ,data, num_exp):
+def threshold_mask(h,v ,data, num_exp, equal=True):
     ''' Apply a threshold mask to the adjacency matrix'''
     t_v, t_h =     find_threshold(v, num_exp), find_threshold(h, num_exp)
     #v, h = convert_back(v, data), convert_back(h, data)
-    v_thresh, h_thresh =convert_binary(v,t_v), convert_binary(h,t_h)
+    v_thresh, h_thresh =convert_binary(v,t_v,equal), convert_binary(h,t_h,equal)
     return h_thresh,v_thresh,t_h,t_v
 
 
