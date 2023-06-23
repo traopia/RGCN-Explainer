@@ -38,7 +38,7 @@ relations = ['label', 'node_idx','number_neighbors',
              'prediction_inverse_binary', 
              'prediction_random','prediction_sub', 'prediction_threshold',
              'prediction_threshold_lekker',
-             'res_random_inverse','res_threshold_lekker',
+             'res_random_inverse','res_threshold_lekker_inverse',
              'fidelity_minus', 'fidelity_plus', 'sparsity',
             'fidelity_minus_threshold','fidelity_plus_threshold','sparsity_threshold'] + relations
 

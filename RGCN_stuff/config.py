@@ -1,6 +1,6 @@
 
 
-sweep = True
+sweep = False
 
 
 
@@ -74,20 +74,46 @@ if sweep==True:
 
 
 
-default_params={
+# default_params={
+# "sweep": False,
+# "pred": 10,
+# "size": 0.00005,  
+# #"size_std": num_neighbors, 
+# "ent": -1,
+# "most_freq_rel": -1,
+# "lr": 0.1,
+# "weight_decay": 0.9,
+# "adaptive": False,
+# "epochs": 30,
+# "init_strategy": "normal", 
+# "threshold": 0.5,
+# #"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
+# "hops": 2,
+# "try": '', 
+# "kill_most_freq_rel": True,
+# "relation_id": 39, 
+# "break_if_wrong_pred": False,
+# "break_on_number_of_high": False,
+# "print": False,
+# "explain_all": True,
+# "dataset_name": 'aifb',
+# "prune": False, 
+# "funky_loss": False, 
+# "num_exp": 15,
+# }
+
+default_params = {
 "sweep": False,
-"pred": 10,
-"size": 0.00005,  
-#"size_std": num_neighbors, 
-"ent": -1,
-"most_freq_rel": -1,
-"lr": 0.1,
+"pred": 1,
+"size": 0.005,  
+"ent": 10,
+"most_freq_rel": 1,
+"lr": 0.5,
 "weight_decay": 0.9,
 "adaptive": False,
 "epochs": 30,
 "init_strategy": "normal", 
 "threshold": 0.5,
-#"experiment": f"RGCNExplainer_{name}_{node_idx}_playground",
 "hops": 2,
 "try": '', 
 "kill_most_freq_rel": True,
@@ -99,7 +125,7 @@ default_params={
 "dataset_name": 'aifb',
 "prune": False, 
 "funky_loss": False, 
-"num_exp": 15,
+"num_exp": 15,  
 }
 
 if sweep == False:
