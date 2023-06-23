@@ -571,7 +571,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         wandb.run.name = experiment_name
     else:
         experiment_name = f'exp/init_{config["init_strategy"]}_hops_{n_hops}_lr_{config["lr"]}_adaptive_{config["adaptive"]}_size_{config["size"]}_sizestd_adaptive_ent_{config["ent"]}_type_{config["most_freq_rel"]}_killtype_{config["kill_most_freq_rel"]}_break_{breaking}'
-        wandb.run.name = str(node_idx)
+        wandb.run.name = str(f'{node_idx}_{config["init_strategy"]}')
 
     directory = f'chk/{name}_chk/{experiment_name}'
     
