@@ -25,9 +25,9 @@ parameters_dict = {
     'size': {
         'values': [0.00005,  0.0005,0.005]
     },
-    # 'size_std': {
-    #     'values': [10]
-    # },
+    'size_std': {
+        'values': [10]
+    },
     'ent': {
         'values': [ -10,0,1,10]
     },
