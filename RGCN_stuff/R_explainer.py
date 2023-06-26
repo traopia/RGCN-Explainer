@@ -552,9 +552,10 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     if sweep:
         wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}_{node_idx}")
     else:
-        wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}")
+        wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}", mode="disabled")
     config = wandb.config
     wandb.config.update({"size_std": num_neighbors})
+    #wandb.config.update({"size_std": 10})
 
     label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
     df = pd.DataFrame(columns=relations)
@@ -602,19 +603,13 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     res1_m = nn.Softmax(dim=0)(model.forward2(h_inv,v_inv)[node_idx])
 
 
-    #Random explanation
-    h_random, v_random = random_explanation_baseline(masked_hor), random_explanation_baseline(masked_ver)
-    counter = important_relation(h_random, v_random, data,node_idx, 0.5)
-    print('Random baseline Important relations', counter)
-    res_random = nn.Softmax(dim=0)(model.forward2(h_random, v_random)[node_idx, :])
 
-    res_random_inverse = res1_m = nn.Softmax(dim=0)(model.forward2(inverse_tensor(h_inv),inverse_tensor(v_inv))[node_idx])
 
     #threshold to max of explanation edges
     h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, config.num_exp)
     res_threshold = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
-    counter_threshold = important_relation(h_threshold, v_threshold,data, node_idx, config['threshold'])
-    print('Important relations thresholded to 10', counter_threshold)
+    # counter_threshold = important_relation(h_threshold, v_threshold,data, node_idx, config['threshold'])
+    # print('Important relations thresholded to 10', counter_threshold)
 
     #Important relations - mask > threshold 
     counter = important_relation(masked_hor, masked_ver, data,node_idx, config['threshold'])
@@ -623,7 +618,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     #Threshold until lekker
     i = 0
     res_threshold_lekker = res_threshold
-    while res_threshold_lekker.argmax() != label:
+    while res_threshold_lekker.argmax() != res_full.argmax():
         h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, 1+i, equal=False)
         i+=1
         res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
@@ -633,15 +628,25 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         os.makedirs(directory + f'/masked_adj')
     else:
         print(f"Directory '{directory}' already exists.")
-    torch.save(masked_ver, f'{directory}/masked_adj/masked_ver_thresh{node_idx}')
-    torch.save(masked_hor, f'{directory}/masked_adj/masked_hor_thresh{node_idx}') 
-    
+    torch.save(v_threshold, f'{directory}/masked_adj/masked_ver_thresh{node_idx}')
+    torch.save(h_threshold, f'{directory}/masked_adj/masked_hor_thresh{node_idx}') 
+    counter_threshold = important_relation(h_threshold, v_threshold,data, node_idx, config['threshold'])
+    print('Important relations thresholded to 10', counter_threshold)
+
+    #Random explanation
+    h_random, v_random = random_explanation_baseline(h_threshold), random_explanation_baseline(v_threshold)
+    counter = important_relation(h_random, v_random, data,node_idx, 0.5)
+    print('Random baseline Important relations', counter)
+    res_random = nn.Softmax(dim=0)(model.forward2(h_random, v_random)[node_idx, :])
+
+    res_random_inverse = res1_m = nn.Softmax(dim=0)(model.forward2(inverse_tensor(h_random),inverse_tensor(v_random))[node_idx])
     ##Inverse of threshold until lekker
     v_inv, h_inv = inverse_tensor(v_threshold), inverse_tensor(h_threshold)
     res_threshold_lekker_inverse = nn.Softmax(dim=0)(model.forward2(h_inv,v_inv)[node_idx])
     
     fidelity_minus, fidelity_plus, sparsity, score = scores(res_full, res_binary,res1_m,label,masked_ver, config)
     fidelity_minus_threshold, fidelity_plus_threshold, sparsity_threshold, score_threshold = scores(res_full, res_threshold_lekker,res_threshold_lekker_inverse,label,v_threshold, config)
+    fidelity_minus_random, fidelity_plus_random, sparsity_random, score_random = scores(res_full, res_random ,res_random_inverse,label,v_random, config)
     wandb.log({'score_threshold': score_threshold})
     wandb.log({'score': score})
     print('score', score)
@@ -676,7 +681,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
              'res_random_inverse': str(res_random_inverse.detach().numpy()),
              'res_threshold_lekker_inverse': str(res_threshold_lekker_inverse.detach().numpy()),
             'fidelity_minus': str(fidelity_minus), 'fidelity_plus': str(fidelity_plus), 'sparsity': str(sparsity),
-            'fidelity_minus_threshold': str(fidelity_minus_threshold), 'fidelity_plus_threshold': str(fidelity_plus_threshold), 'sparsity_threshold': str(sparsity_threshold)
+            'fidelity_minus_threshold': str(fidelity_minus_threshold), 'fidelity_plus_threshold': str(fidelity_plus_threshold), 'sparsity_threshold': str(sparsity_threshold),
+            'fidelity_minus_random': str(fidelity_minus_random), 'fidelity_plus_random': str(fidelity_plus_random), 'sparsity_random': str(sparsity_random)
             }
     counter.update(info)
     df.loc[str(node_idx)] = counter
@@ -692,6 +698,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         '\n VS label explain', torch.argmax(res).item(),
         '\n VS label explain binary', torch.argmax(res_binary).item(),
         '\n VS label threshold', torch.argmax(res_threshold).item(),
+        '\n VS label threshold lekker', torch.argmax(res_threshold_lekker).item(),
         '\n VS label sub', torch.argmax(res_sub).item(),
         '\n VS label 1-m explain binary', torch.argmax(res1_m).item(),
 
@@ -702,9 +709,9 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         '\n pred prob sub', res_sub,
         '\n pred prob 1-m explain binary', res1_m,
         '\n pred prob random', res_random,
-        '\n final masks and lenght', torch.mean(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ]), torch.std(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ]),#convert_back(masked_ver,data), 
-        len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ]),
-        '\n overall mean', torch.mean(masked_ver.coalesce().values()), torch.std(masked_ver.coalesce().values()),
+        '\n final masks and lenght', torch.mean(v_threshold.coalesce().values()[v_threshold.coalesce().values()>config['threshold'] ]), torch.std(v_threshold.coalesce().values()[v_threshold.coalesce().values()>config['threshold'] ]),#convert_back(masked_ver,data), 
+        len(v_threshold.coalesce().values()[v_threshold.coalesce().values()>config['threshold'] ]),
+        '\n overall mean', torch.mean(v_threshold.coalesce().values()), torch.std(v_threshold.coalesce().values()),
         '\n Sparsity', sparsity, '\n fidelity_minus', fidelity_minus, '\n fidelity_plus', fidelity_plus, '\n score', score)
 
     if not os.path.exists(directory + f'/Relation_Importance'):

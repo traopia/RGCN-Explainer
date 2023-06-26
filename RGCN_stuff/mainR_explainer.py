@@ -40,12 +40,14 @@ relations = ['label', 'node_idx','number_neighbors',
              'prediction_threshold_lekker',
              'res_random_inverse','res_threshold_lekker_inverse',
              'fidelity_minus', 'fidelity_plus', 'sparsity',
-            'fidelity_minus_threshold','fidelity_plus_threshold','sparsity_threshold'] + relations
+            'fidelity_minus_threshold','fidelity_plus_threshold','sparsity_threshold',
+            'fidelity_minus_random','fidelity_plus_random','sparsity_random'] + relations
 
 dict_classes = d_classes(data)
 
 node_idx = 5757#dict_classes[list(dict_classes.keys())[1]][0]
 model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
+#model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
 pred_label = torch.load(f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
 print('explain all',explain_all)
 if explain_all == True:
@@ -77,7 +79,7 @@ if explain_all == False:
     else:
         config = default_params
         
-        main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,config )
+        main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep, config )
         wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
     
 
