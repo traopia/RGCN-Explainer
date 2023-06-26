@@ -103,33 +103,33 @@ if sweep==True:
 # }
 
 
-inits = ['inverse_relative_frequency','domain_frequency','range_frequency']
-for i in inits:
-    default_params = {
-    "sweep": False,
-    "pred": 1,
-    "size": 0.005,  
-    "ent": 10,
-    "most_freq_rel": 1,
-    "lr": 0.5,
-    "weight_decay": 0.9,
-    "adaptive": False,
-    "epochs": 30,
-    "init_strategy": i, 
-    "threshold": 0.5,
-    "hops": 2,
-    "try": '', 
-    "kill_most_freq_rel": True,
-    "relation_id": 39, 
-    "break_if_wrong_pred": False,
-    "break_on_number_of_high": False,
-    "print": False,
-    "explain_all": True,
-    "dataset_name": 'aifb',
-    "prune": True, 
-    "funky_loss": False, 
-    "num_exp": 15,  
-    }
+# inits = ['inverse_relative_frequency','domain_frequency','range_frequency']
+# for i in inits:
+default_params = {
+"sweep": False,
+"pred": 1,
+"size": 0.005,  
+"ent": 10,
+"most_freq_rel": 1,
+"lr": 0.5,
+"weight_decay": 0.9,
+"adaptive": False,
+"epochs": 30,
+"init_strategy": 'normal', 
+"threshold": 0.5,
+"hops": 2,
+"try": '', 
+"kill_most_freq_rel": True,
+"relation_id": 39, 
+"break_if_wrong_pred": False,
+"break_on_number_of_high": False,
+"print": False,
+"explain_all": False,
+"dataset_name": 'mdgenre',
+"prune": False, 
+"funky_loss": False, 
+"num_exp": 15,  
+}
 
 if sweep == False:
     explain_all = default_params['explain_all']
