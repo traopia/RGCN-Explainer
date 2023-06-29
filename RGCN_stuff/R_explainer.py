@@ -1,3 +1,5 @@
+from numpy import True_
+from sympy import true
 import torch 
 from collections import Counter
 from baseline import baseline_pred
@@ -228,8 +230,10 @@ class ExplainModule(nn.Module):
         tensor_list.append(value_indices_v)
         self._indices = torch.cat(tensor_list, 0)
 
-        num_nodes = num_edges
-        self.mask = self.construct_edge_mask(num_nodes, self.hor_graph,self.data)
+        #num_nodes = num_edges
+        num_nodes = torch.Tensor(self.ver_graph.coalesce().values()).shape
+        self.mask = self.construct_edge_mask(num_nodes, self.ver_graph,self.data)
+        #self.mask = self.construct_edge_mask(num_nodes, self.ver_graph,self.data)
         params = [self.mask]
         self.optimizer = torch.optim.Adam(params, lr=config["lr"], weight_decay=config["weight_decay"])
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=10, gamma=0.1)
@@ -386,6 +390,7 @@ class ExplainModule(nn.Module):
         sym_mask = (sym_mask + sym_mask.t()) / 2
 
         adj = torch.Tensor(self.ver_graph.coalesce().values())
+        print('shapes bruh', adj.shape, sym_mask.shape)
         masked_adj = adj * sym_mask 
 
         result = torch.sparse.FloatTensor(indices=self.ver_graph.coalesce().indices(), values= masked_adj, size=self.ver_graph.coalesce().size())
@@ -410,12 +415,16 @@ class ExplainModule(nn.Module):
         self.masked_ver = self._masked_adj_ver()  # masked adj is the adj matrix with the mask applied
         self.masked_hor = self._masked_adj_hor()  # masked adj is the adj matrix with the mask applied
         masked_ver,masked_hor = convert_binary(self.masked_ver, self.config["threshold"]), convert_binary(self.masked_hor, self.config["threshold"])
-        #h_threshold, v_threshold,t = threshold_mask(masked_hor, masked_ver, self.data, num_exp = 10)
-        #masked_ver,masked_hor = self.masked_ver, self.masked_hor
-        #ypred = self.model.forward2(h_threshold, v_threshold)
         ypred = self.model.forward2(masked_hor, masked_ver)
         node_pred = ypred[node_idx,:]
         res = nn.Softmax(dim=0)(node_pred[0:])
+
+        # h_threshold, v_threshold,t_h, t_v = threshold_mask(self.masked_hor, self.masked_ver, self.data, self.config.num_exp)
+        # res = nn.Softmax(dim=0)(self.model.forward2(h_threshold, v_threshold)[node_idx, :])
+        #h_threshold, v_threshold,t = threshold_mask(masked_hor, masked_ver, self.data, num_exp = 10)
+        #masked_ver,masked_hor = self.masked_ver, self.masked_hor
+        #ypred = self.model.forward2(h_threshold, v_threshold)
+
         
         return res, self.masked_hor, self.masked_ver
     
@@ -614,11 +623,20 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     #Important relations - mask > threshold 
     counter = important_relation(masked_hor, masked_ver, data,node_idx, config['threshold'])
     print('Important relations', counter)
+    v_, h_ = masked_ver, masked_hor
+    v_._values().zero_()
+    h_._values().zero_()
+    res_baseline = nn.Softmax(dim=0)(model.forward2(h_,v_)[node_idx])
+    print('res baseline', res_baseline)
 
+
+
+ 
     #Threshold until lekker
     i = 0
-    res_threshold_lekker = res_threshold
-    while res_threshold_lekker.argmax() != res_full.argmax():
+    res_threshold_lekker = res_binary
+    while res_threshold_lekker.argmax() != res_full.argmax() and not torch.equal(res_threshold_lekker, res_baseline):
+        print(res_threshold_lekker, res_baseline)
         h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, 1+i, equal=False)
         i+=1
         res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
@@ -705,6 +723,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         ' \n pred prob explain', res, 
         '\n pred prob explain binary', res_binary,
         '\n pred prob threshold', res_threshold,'threshold',t_h,t_v, 'with num edges', len(v_threshold.coalesce().values()[v_threshold.coalesce().values()>config['threshold'] ]),
+        '\n pred prob threshold lekker', res_threshold_lekker,
         '\n pred prob full', res_full,       
         '\n pred prob sub', res_sub,
         '\n pred prob 1-m explain binary', res1_m,

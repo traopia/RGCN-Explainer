@@ -379,9 +379,9 @@ def prunee(data , n=2):
     return nw
 
 
-def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
+def go(name='dbo_gender', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
 
-    include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre', 'IMDB_most_genre')
+    #include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre', 'IMDB_most_genre', 'imdb_4genres')
     # -- For these datasets, the validation is added to the training for the final eval.
 
     
@@ -393,7 +393,10 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='a
         # data.withheld = data.withheld_people
         if prune:
             data = prunee(data, n=2)
-
+    if 'dbo' in name:
+        data = torch.load(f'data/DBO/finals/{name}.pt')
+        if prune:
+            data = prunee(data, n=2)
     else:
 
         data = kg.load(name, torch=True)   
@@ -504,12 +507,12 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='a
                 print(f'     norm {w:.4} for {rel} ')
         #torch.save(out[idxw, :], 'aifb_chk/prediction_aifb')
 
-        if not os.path.exists(f'{name}_chk'):
-            os.makedirs(f'{name}_chk')
+        if not os.path.exists(f'chk/{name}_chk/models'):
+            os.makedirs(f'chk/{name}_chk/models')
         
-        torch.save(out[idxw, :], f'chk/{name}_chk/prediction_{name}_prune_{prune}')
+        torch.save(out[idxw, :], f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
         #torch.save(rgcn,'aifb_chk/model_aifb')
-        torch.save(rgcn, f'chk/{name}_chk/model_{name}_prune_{prune}')
+        torch.save(rgcn, f'chk/{name}_chk/models/model_{name}_prune_{prune}')
         print(f'epoch {e:02}: loss {loss:.2}, train acc {training_acc:.2}, \t withheld acc {withheld_acc:.2} \t ({toc():.5}s)')
 
 

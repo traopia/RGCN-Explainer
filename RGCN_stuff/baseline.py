@@ -161,8 +161,11 @@ def main(name,node_idx, prune=True, all = True, test = False):
         else:
             data = load(name, torch=True) 
             id_test = 'withheld'
-    else:    
+    if 'IMDb' in name:    
         data = torch.load(f'data/IMDB/finals/{name}.pt')
+        id_test = 'withheld'
+    if 'dbo' in name:
+        data = torch.load(f'data/DBO/finals/{name}.pt')
         id_test = 'withheld'
 
 
@@ -208,6 +211,6 @@ def main(name,node_idx, prune=True, all = True, test = False):
     
 
 if __name__ == '__main__':
-    main('mdgenre',7185, prune=True, all = False, test = False)
+    main('dbo_gender',7185, prune=False, all = True, test = False)
 
     
