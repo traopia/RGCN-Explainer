@@ -1,8 +1,4 @@
 
-
-from cv2 import fastNlMeansDenoisingColored
-
-
 sweep_config = {
     'method': 'grid', #grid, random
 }

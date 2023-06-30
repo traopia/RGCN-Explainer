@@ -12,6 +12,8 @@ from src.kgbench import load, tic, toc, d
 from src.rgcn_explainer_utils import *
 from rgcn import RGCN
 import psutil
+import argparse
+
 
 def print_cpu_utilization():
     # Get CPU utilization percentage
@@ -143,11 +145,18 @@ def prediction_with_one_relation(data, model, node_idx,label):
 
 
 
-def main(name,node_idx, prune=True, all = True, test = False):
+def main(prune=True,test = False):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = torch.device("cpu")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('name',help='name of the dataset')
+    parser.add_argument('explanation_type',help='Relation importance: \'one_relation\' or \'wrong_if\'')
+    parser.add_argument('--explain_all', action='store_true', help='if True: explain all nodes')
+    name = parser.parse_args().name
+    all = parser.parse_args().explain_all
+    explanation_type = parser.parse_args().explanation_type
     
-    if name == 'mdgenre':
+    if name == 'mdgenre' or 'dbo' in name:
         prune = False
         device = torch.device("cpu")
     print(device)
@@ -186,8 +195,10 @@ def main(name,node_idx, prune=True, all = True, test = False):
             for node_idx in d[target_label]:
                 if node_idx in data.withheld[:,0]:
                     label = data.withheld[data.withheld[:,0]==node_idx,1]
-                count, ones, id  = prediction_with_one_relation(data, model, node_idx,label)
-                #count, ones, id = prediction_wrong_if(data, model, node_idx,label)
+                if explanation_type=='one_relation':
+                    count, ones, id = prediction_with_one_relation(data, model, node_idx,label) 
+                if explanation_type=='wrong_if':
+                    count, ones, id = prediction_wrong_if(data, model, node_idx,label)
                 df.loc[str(node_idx)] = count
                 df_ones.loc[str(node_idx)] = ones
         print_cpu_utilization()
@@ -197,8 +208,10 @@ def main(name,node_idx, prune=True, all = True, test = False):
     else: 
         node_idx = d[list(d.keys())[0]][0]       
         label = data.withheld[data.withheld[:,0]==node_idx,1]
-        #count, ones, id = prediction_with_one_relation(data, model, node_idx,label)
-        count, ones, id = prediction_wrong_if(data, model, node_idx,label)
+        if explanation_type=='one_relation':
+            count, ones, id = prediction_with_one_relation(data, model, node_idx,label) 
+        if explanation_type=='wrong_if':
+            count, ones, id = prediction_wrong_if(data, model, node_idx,label)
         print(count)
         print_cpu_utilization()
         df.loc[str(node_idx)] = count
@@ -211,6 +224,6 @@ def main(name,node_idx, prune=True, all = True, test = False):
     
 
 if __name__ == '__main__':
-    main('dbo_gender',7185, prune=False, all = True, test = False)
+    main()
 
     
