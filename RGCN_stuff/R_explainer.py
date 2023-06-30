@@ -1,5 +1,3 @@
-from numpy import True_
-from sympy import true
 import torch 
 from collections import Counter
 from baseline import baseline_pred
@@ -390,7 +388,6 @@ class ExplainModule(nn.Module):
         sym_mask = (sym_mask + sym_mask.t()) / 2
 
         adj = torch.Tensor(self.ver_graph.coalesce().values())
-        print('shapes bruh', adj.shape, sym_mask.shape)
         masked_adj = adj * sym_mask 
 
         result = torch.sparse.FloatTensor(indices=self.ver_graph.coalesce().indices(), values= masked_adj, size=self.ver_graph.coalesce().size())
@@ -563,8 +560,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     else:
         wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}", mode="disabled")
     config = wandb.config
-    wandb.config.update({"size_std": num_neighbors})
-    #wandb.config.update({"size_std": 10})
+    #wandb.config.update({"size_std": num_neighbors})
+    wandb.config.update({"size_std": 10})
 
     label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
     df = pd.DataFrame(columns=relations)

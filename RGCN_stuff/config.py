@@ -129,7 +129,7 @@ default_params = {
 "threshold": 0.3,
 "hops": 2,
 "try": '', 
-"kill_most_freq_rel": True,
+"kill_most_freq_rel": False,
 "relation_id": 39, 
 "break_if_wrong_pred": False,
 "break_on_number_of_high": False,

@@ -1,0 +1,8 @@
+numpy
+torch
+torchvision
+Pillow
+scikit-image
+rdflib
+wget
+fire

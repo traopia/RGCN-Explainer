@@ -1,7 +1,7 @@
 import torch 
 import pandas as pd
 import numpy as np
-import src.kgbench as kg
+import kgbench as kg
 from rgcn import  RGCN
 from src.rgcn_explainer_utils import *
 import wandb
