@@ -1,5 +1,8 @@
 
 
+from cv2 import fastNlMeansDenoisingColored
+
+
 sweep_config = {
     'method': 'grid', #grid, random
 }
@@ -20,9 +23,9 @@ parameters_dict = {
     },
     'size': {
         'values': [0.00005,  0.0005,0.005]
-    },
-    'size_std': {
-        'values': [10]
+    # },
+    # 'size_std': {
+    #     'values': [10]
     },
     'ent': {
         'values': [ -10,0,1,10]
@@ -119,13 +122,13 @@ default_params = {
 #"sweep": False,
 "pred": 1,
 "size": 0.0005,  
-"ent": 10,
+"ent": 1,
 "most_freq_rel": 1,
-"lr": 0.5,
+"lr": 0.1,
 "weight_decay": 0.9,
 "adaptive": False,
 "epochs": 30,
-"init_strategy": 'relative_frequency', 
+"init_strategy": 'normal', 
 "threshold": 0.3,
 "hops": 2,
 "try": '', 

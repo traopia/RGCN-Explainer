@@ -1,3 +1,4 @@
+
 import torch 
 from collections import Counter
 from baseline import baseline_pred
@@ -144,7 +145,7 @@ class Explainer:
 
             m = match_to_triples(m_ver, m_hor, data, node_idx)
             counter = Counter(m[:,1].tolist())
-            counter = {data.i2rel[k][0]:v for k,v in counter.items() if k!=0}
+            counter = {data.i2rel[k][0]:v for k,v in counter.items()}# if k!=0}
             if self.config.funky_loss==False:
                 loss, pred_loss, size_loss, mask_ent_loss, size_std_loss,  num_high, wrong_pred = explainer.loss(ypred, self.config,epoch) 
                 loss.backward()
@@ -229,7 +230,7 @@ class ExplainModule(nn.Module):
         self._indices = torch.cat(tensor_list, 0)
 
         #num_nodes = num_edges
-        num_nodes = torch.Tensor(self.ver_graph.coalesce().values()).shape
+        num_nodes = torch.Tensor(self.ver_graph.coalesce().values()).shape[0]
         self.mask = self.construct_edge_mask(num_nodes, self.ver_graph,self.data)
         #self.mask = self.construct_edge_mask(num_nodes, self.ver_graph,self.data)
         params = [self.mask]
@@ -634,7 +635,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     res_threshold_lekker = res_binary
     while res_threshold_lekker.argmax() != res_full.argmax() and not torch.equal(res_threshold_lekker, res_baseline):
         print(res_threshold_lekker, res_baseline)
-        h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, 1+i, equal=False)
+        h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, 1+i, equal= True)
         i+=1
         res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
         if i== masked_hor.shape[0]:
