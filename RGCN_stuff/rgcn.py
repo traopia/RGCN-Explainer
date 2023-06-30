@@ -5,8 +5,8 @@ import torch.nn.functional as F
 from collections import Counter
 import fire, sys
 import math
-import src.kgbench as kg
-from src.kgbench import load, tic, toc, d, Data
+import kgbench as kg
+from kgbench import load, tic, toc, d, Data
 import os
 
 

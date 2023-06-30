@@ -7,8 +7,8 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
-from src.kgbench import load, tic, toc, d
-
+from kgbench import load, tic, toc, d, Data
+import kgbench as kg
 from src.rgcn_explainer_utils import *
 from rgcn import RGCN
 import psutil
@@ -146,8 +146,8 @@ def prediction_with_one_relation(data, model, node_idx,label):
 
 
 def main(prune=True,test = False):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = torch.device("cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cpu")
     parser = argparse.ArgumentParser()
     parser.add_argument('name',help='name of the dataset')
     parser.add_argument('explanation_type',help='Relation importance: \'one_relation\' or \'wrong_if\'')
@@ -158,10 +158,10 @@ def main(prune=True,test = False):
     
     if name == 'mdgenre' or 'dbo' in name:
         prune = False
-        device = torch.device("cpu")
-    print(device)
+    #     device = torch.device("cpu")
+    # print(device)
     model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
-    model.to(device)
+    # model.to(device)
     if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
         data = load(name, torch=True, final=False)
         if test:
@@ -180,7 +180,8 @@ def main(prune=True,test = False):
 
     if prune:
         data = prunee(data, 2)
-    data.to(device)
+    print(type(data))
+    # data.to(device)
     data.triples = torch.Tensor(data.triples).to(int)
     data.withheld = torch.Tensor(data.withheld).to(int)
     data.training = torch.Tensor(data.training).to(int)

@@ -5,7 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import torch
 from collections import Counter
-from src.kgbench import Data,d
+from kgbench import Data,d
 import os
 from rgcn import adj, enrich, sum_sparse, RGCN
 
@@ -1039,7 +1039,7 @@ def find_threshold(sparse_tensor, num_exp):
     return threshold
 
 
-def threshold_mask(h,v , num_exp, equal=True):
+def threshold_mask(h,v ,data, num_exp, equal=True):
     ''' Apply a threshold mask to the adjacency matrix'''
     t_v, t_h =     find_threshold(v, num_exp), find_threshold(h, num_exp)
     #v, h = convert_back(v, data), convert_back(h, data)
