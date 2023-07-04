@@ -379,21 +379,21 @@ def prunee(data , n=2):
     return nw
 
 
-def go(name='dbo_gender', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
+def go(name='IMDb_us_onegenre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
 
-    #include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre', 'IMDB_most_genre', 'imdb_4genres')
+    #include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre', 'IMDB_most_genre', 'IMDb_4genres')
     # -- For these datasets, the validation is added to the training for the final eval.
 
     
     #if 'IMDb' or 'IMDB' in name:
-    if 'IMDb'  in name:
+    if 'IMDb' in name:
         
         data = torch.load(f'data/IMDB/finals/{name}.pt')
         # data.training = data.training_people
         # data.withheld = data.withheld_people
         if prune:
             data = prunee(data, n=2)
-    if 'dbo' in name:
+    elif 'dbo' in name:
         data = torch.load(f'data/DBO/finals/{name}.pt')
         if prune:
             data = prunee(data, n=2)
@@ -403,7 +403,9 @@ def go(name='dbo_gender', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optim
         if prune:
             data = prunee(data, n=2)
 
-
+    data.triples = torch.tensor(data.triples, dtype=torch.int32)
+    data.training = torch.tensor(data.training, dtype=torch.int32)
+    data.withheld = torch.tensor(data.withheld, dtype=torch.int32)
     #print(f'{data.triples.size(0)} triples')
     print(f'{data.triples.shape[0]} triples ')
     print(f'{data.num_entities} entities')
@@ -412,9 +414,9 @@ def go(name='dbo_gender', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optim
     print(f'{data.num_relations} relations')
     print(f'{len(data.training)} training triples')
     print(f'{len(data.withheld)} validation triples')
-    data.triples = torch.tensor(data.triples, dtype=torch.int32)
-    data.training = torch.tensor(data.training, dtype=torch.int32)
-    data.withheld = torch.tensor(data.withheld, dtype=torch.int32)
+    # data.triples = torch.tensor(data.triples, dtype=torch.int32)
+    # data.training = torch.tensor(data.training, dtype=torch.int32)
+    # data.withheld = torch.tensor(data.withheld, dtype=torch.int32)
 
     tic()
     rgcn = RGCN(data.triples, n=data.num_entities, r=data.num_relations, numcls=data.num_classes, emb=emb, bases=bases)

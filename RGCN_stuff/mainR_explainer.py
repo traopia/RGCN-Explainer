@@ -20,11 +20,13 @@ print(sys.executable)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('name',help='name of the dataset')
+    parser.add_argument('init',  help='Mask initialization strategy',default = 'normal', choices =['normal','const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency', 'most_freq_rel'])
     parser.add_argument('--explain_all', action='store_true', help='if True: explain all nodes')
     parser.add_argument('--sweep', action='store_true', help='if True: sweep over parameters')
     name = parser.parse_args().name
     explain_all = parser.parse_args().explain_all
     sweep = parser.parse_args().sweep
+    init_strategy = parser.parse_args().init
     n_hops = 2
 
 
@@ -66,7 +68,6 @@ def main():
 
     node_idx = dict_classes[list(dict_classes.keys())[1]][0]
     model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
-    #model = torch.load(f'chk/{name}_chk/model_{name}_prune_{prune}')
     pred_label = torch.load(f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
     print('explain all',explain_all)
     if explain_all == True:
@@ -74,7 +75,7 @@ def main():
             for node_idx in dict_classes[target_label]:
                 num_neighbors = number_neighbors(node_idx, data, n_hops)
                 def wrapped_main1():
-                    main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,config = None)
+                    main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,config = None)
 
                 if sweep:
                     sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
@@ -83,7 +84,7 @@ def main():
                 else:
                     config = default_params
                     config.update({'explain_all': explain_all})
-                    main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep, config)
+                    main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy, config)
                     wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
 
 
@@ -92,7 +93,7 @@ def main():
         num_neighbors = number_neighbors(node_idx, data, n_hops)
 
         def wrapped_main1():
-            main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,config=None )
+            main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,config=None )
         if sweep:
             sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
             wandb.agent(sweep_id, function= wrapped_main1)
@@ -100,7 +101,7 @@ def main():
             config = default_params
             config.update({'explain_all': explain_all})
             
-            main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep, config )
+            main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,  config )
             wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
     
 

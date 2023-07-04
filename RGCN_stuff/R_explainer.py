@@ -555,14 +555,17 @@ def scores(res_full, res_expl,res1_m,label,masked_ver, config):
     return fidelity_minus, fidelity_plus, sparsity, score
 
 
-def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,config):
+def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,config):
     if sweep:
         wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}_{node_idx}")
     else:
         wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}", mode="disabled")
     config = wandb.config
-    #wandb.config.update({"size_std": num_neighbors})
-    wandb.config.update({"size_std": 10})
+    if config.adaptive:
+        wandb.config.update({"size_std": num_neighbors})
+    else:
+        wandb.config.update({"size_std": 10})
+    wandb.config.update({"init_strategy": init_strategy })
 
     label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
     df = pd.DataFrame(columns=relations)
@@ -647,11 +650,11 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     torch.save(v_threshold, f'{directory}/masked_adj/masked_ver_thresh{node_idx}')
     torch.save(h_threshold, f'{directory}/masked_adj/masked_hor_thresh{node_idx}') 
     counter_threshold = important_relation(h_threshold, v_threshold,data, node_idx, config['threshold'])
-    print('Important relations thresholded to 10', counter_threshold)
+    print(f'Important relations thresholded to {config.threshold}', counter_threshold)
 
     #Random explanation
     h_random, v_random = random_explanation_baseline(h_threshold), random_explanation_baseline(v_threshold)
-    counter = important_relation(h_random, v_random, data,node_idx, 0.5)
+    counter = important_relation(h_random, v_random, data,node_idx, config['threshold'])
     print('Random baseline Important relations', counter)
     res_random = nn.Softmax(dim=0)(model.forward2(h_random, v_random)[node_idx, :])
 
