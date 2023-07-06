@@ -379,7 +379,7 @@ def prunee(data , n=2):
     return nw
 
 
-def go(name='IMDb_us_onegenre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
+def go(name='IMDb_most_genre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
 
     #include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre', 'IMDB_most_genre', 'IMDb_4genres')
     # -- For these datasets, the validation is added to the training for the final eval.

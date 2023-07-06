@@ -85,26 +85,45 @@ sweep_config['parameters'] = parameters_dict
 
 
 
+# default_params = {
+# "pred": 1,
+# "size": 0.0005,  
+# "ent": 1,
+# "most_freq_rel": 1,
+# "lr": 0.1,
+# "weight_decay": 0.9,
+# "epochs": 30,
+# "threshold": 0.5,
+# "hops": 2,
+# "num_exp": 15,   
+# "adaptive": False,
+# "kill_most_freq_rel": False,
+# "relation_id": 39, 
+# "break_if_wrong_pred": False,
+# "break_on_number_of_high": False,
+# "print": True,
+# "funky_loss": False, 
+# }
+
 default_params = {
 "pred": 1,
-"size": 0.0005,  
-"ent": 1,
+"size": 0.005,  
+"ent": 10,
 "most_freq_rel": 1,
-"lr": 0.1,
+"lr": 0.5,
 "weight_decay": 0.9,
 "epochs": 30,
 "threshold": 0.5,
 "hops": 2,
 "num_exp": 15,   
-"adaptive": True,
-"kill_most_freq_rel": True,
+"adaptive": False,
+"kill_most_freq_rel": False,
 "relation_id": 39, 
 "break_if_wrong_pred": False,
 "break_on_number_of_high": False,
 "print": False,
 "funky_loss": False, 
 }
-
 
 
 

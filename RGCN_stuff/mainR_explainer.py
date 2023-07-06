@@ -1,7 +1,7 @@
 import torch 
 import pandas as pd
 import numpy as np
-import kgbench as kg
+import src.kgbench as kg
 from rgcn import  RGCN
 from src.rgcn_explainer_utils import *
 import wandb
@@ -66,7 +66,7 @@ def main():
 
     dict_classes = d_classes(data)
 
-    node_idx = dict_classes[list(dict_classes.keys())[1]][0]
+    node_idx = dict_classes[list(dict_classes.keys())[1]][0] #8281 6548
     model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
     pred_label = torch.load(f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
     print('explain all',explain_all)

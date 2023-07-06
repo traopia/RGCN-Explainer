@@ -419,7 +419,7 @@ def get_relations(data):
 #     data.entities_classes = d
 #     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
 #     return d  
-def d_classes(data):
+def d_classes(data,name=None):
     """ 
     Get classes of nodes (select only the alphanum - not literals)
     """
@@ -432,7 +432,10 @@ def d_classes(data):
         try:
             #dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i]).split('/')[3]
             if '#' not in str(values_indices_nodes[i][1]) :
-                dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1]).split('/')[3]
+                if name == 'IMDb_us':
+                    dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1]).split('/')[6]
+                else:
+                    dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1]).split('/')[3]
             if '#' in str(values_indices_nodes[i][1]):
                 dict[values_indices_nodes[i][0]] = str(values_indices_nodes[i][1][1]).split('#')[1].split(',')[0].replace("'","")
             
@@ -448,8 +451,11 @@ def d_classes(data):
             d[k] = c
             c+=1
     data.entities_classes = d
+    print(data.entities_classes)
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
-    return d  
+    return d 
+
+
 
 
 

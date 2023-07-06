@@ -1,4 +1,5 @@
 
+from numpy import NAN
 import torch 
 from collections import Counter
 from baseline import baseline_pred
@@ -327,6 +328,9 @@ class ExplainModule(nn.Module):
             for i in p:
                 _,_,value_indices=select_relation(sparse_tensor,num_entities,i)
                 mask.data[[value_indices]] = rel_frequency_[i]
+            if torch.isnan(mask).any():
+                # Replace NaN values with 0
+                mask[torch.isnan(mask)] = 0.0
 
         elif init_strategy == "inverse_relative_frequency":
             ''' Initialize the mask with the relative frequency of the relations-relative for the node to be explained'''
@@ -480,7 +484,7 @@ class ExplainModule(nn.Module):
         ent = config['ent']
         pred_coeff = config['pred']
         e = (epoch + 1)*0.1
-        if adaptive:
+        if adaptive and self.config.print:
             config.update({'size_std': size_std*e}, allow_val_change=True)
             config.update({'size': size*e}, allow_val_change=True)
             config.update({'ent': ent*1/(epoch+1)}, allow_val_change=True)
@@ -502,10 +506,18 @@ class ExplainModule(nn.Module):
         
 
         # entropy edge mask 
+        # if torch.isnan(mask).any():
+        #     # Replace NaN values with 0
+        #     mask[torch.isnan(mask)] = 0.0
         mask_ent = -mask * torch.log(mask) - (1 - mask) * torch.log(1 - mask)
 
-        mask_ent_loss =  config["ent"] * torch.mean(mask_ent)
-
+        if torch.isnan(mask_ent).any():
+            # Replace NaN values with 0
+            mask_ent_loss = 0
+        else:
+        #breakpoint()
+            mask_ent_loss =  config["ent"] * torch.mean(mask_ent)
+ 
 
         #type loss
         
@@ -521,8 +533,8 @@ class ExplainModule(nn.Module):
         
 
         loss = torch.exp(pred_loss + size_loss + mask_ent_loss + size_loss_std +  most_freq_rel_loss)
-        #loss = pred_loss + size_loss + mask_ent_loss
-        #loss = pred_loss + size_loss + mask_ent_loss + size_loss_std + wrong_pred + type_loss
+        #loss = pred_loss + size_loss + mask_ent_loss 
+
         if config.print:
             print('pred_loss', pred_loss)
             print('size_loss', size_loss)
@@ -541,7 +553,6 @@ def scores(res_full, res_expl,res1_m,label,masked_ver, config):
     ''' res_expl: res_binary , res_threshold'''
     fidelity_minus = float(1 - (res_full[int(label)] - res_expl[int(label)]))
     fidelity_plus = float((res_full[int(label)] - res1_m[int(label)]))
-    print(fidelity_minus, fidelity_plus)
     explanation_lenght = len(masked_ver.coalesce().values()[masked_ver.coalesce().values()>config['threshold'] ])
     sparsity = float(1 - explanation_lenght/len(masked_ver.coalesce().values()))
 
@@ -564,10 +575,13 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     if config.adaptive:
         wandb.config.update({"size_std": num_neighbors})
     else:
+
         wandb.config.update({"size_std": 10})
     wandb.config.update({"init_strategy": init_strategy })
 
     label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
+
+
     df = pd.DataFrame(columns=relations)
     df_threshold = pd.DataFrame(columns=relations) 
 
@@ -617,9 +631,25 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
 
     #threshold to max of explanation edges
     h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, config.num_exp)
+    #h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, 100)
+    print(h_threshold.coalesce().values().count_nonzero(), v_threshold.coalesce().values().count_nonzero())
     res_threshold = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
-    # counter_threshold = important_relation(h_threshold, v_threshold,data, node_idx, config['threshold'])
-    # print('Important relations thresholded to 10', counter_threshold)
+    i = 0
+    while res_threshold.argmax() != res_full.argmax():
+        i += 1
+        h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, config.num_exp+i)
+        #print(h_threshold.coalesce().values().count_nonzero(), v_threshold.coalesce().values().count_nonzero())
+        res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
+        if res_threshold_lekker.argmax() == res_full.argmax() or i>500:
+            break
+    else:
+        res_threshold_lekker = res_threshold
+    if not os.path.exists(directory + f'/masked_adj'):
+        os.makedirs(directory + f'/masked_adj')
+    else:
+        print(f"Directory '{directory}' already exists.")
+    torch.save(v_threshold, f'{directory}/masked_adj/masked_ver_thresh{node_idx}')
+    torch.save(h_threshold, f'{directory}/masked_adj/masked_hor_thresh{node_idx}') 
 
     #Important relations - mask > threshold 
     counter = important_relation(masked_hor, masked_ver, data,node_idx, config['threshold'])
@@ -633,24 +663,12 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
 
 
  
-    #Threshold until lekker
-    i = 0
-    res_threshold_lekker = res_binary
-    while res_threshold_lekker.argmax() != res_full.argmax() and not torch.equal(res_threshold_lekker, res_baseline):
-        print(res_threshold_lekker, res_baseline)
-        h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, 1+i, equal= True)
-        i+=1
-        res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
-        if i== masked_hor.shape[0]:
-            break
-    if not os.path.exists(directory + f'/masked_adj'):
-        os.makedirs(directory + f'/masked_adj')
-    else:
-        print(f"Directory '{directory}' already exists.")
-    torch.save(v_threshold, f'{directory}/masked_adj/masked_ver_thresh{node_idx}')
-    torch.save(h_threshold, f'{directory}/masked_adj/masked_hor_thresh{node_idx}') 
+ 
+
+
+
     counter_threshold = important_relation(h_threshold, v_threshold,data, node_idx, config['threshold'])
-    print(f'Important relations thresholded to {config.threshold}', counter_threshold)
+    print(f'Important relations thresholded to {config.num_exp}', counter_threshold)
 
     #Random explanation
     h_random, v_random = random_explanation_baseline(h_threshold), random_explanation_baseline(v_threshold)
@@ -746,6 +764,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         else:
             df.to_csv(f'{directory}/Relation_Importance/Relations_Important_full.csv', mode='a', header=False, index=False)
             df_threshold.to_csv(f'{directory}/Relation_Importance/Relations_Important_full_threshold.csv', mode='a', header=False, index=False)
+    print(directory)
     return counter,counter_threshold,  experiment_name
 
 
