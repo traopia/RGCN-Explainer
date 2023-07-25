@@ -1,6 +1,6 @@
 
 sweep_config = {
-    'method': 'grid', #grid, random
+    'method': 'grid', 
 }
 
 metric = {
@@ -10,21 +10,24 @@ metric = {
 sweep_config['metric'] = metric
 
 parameters_dict = {
-    'pred': {'values': [1,10]},
+    'pred': {'values': [1]},
     'lr': {
-        'values': [0.05,0.1, 0.5]
+        'values': [0.1, 0.5]
     },
     'weight_decay': {
         'values': [0.9, 0.1]
     },
     'size': {
-        'values': [0.00005,  0.0005,0.005]
+        'values': [0.0005,0.005]
+
     },
+    'size_std': {'values': [1380.429*0.01,1380.429*0.1,10]},
+
     'ent': {
-        'values': [ -10,0,1,10]
+        'values': [1]
     },
     'most_freq_rel': {
-        'values': [-1,0,1,10]
+        'values': [1,10]
     },
     'adaptive': {
         'values': [False]
@@ -82,6 +85,7 @@ default_params = {
 "pred": 1,
 "size": 0.005,  
 "ent": 1,
+"size_std": 1380.429*0.1,
 "most_freq_rel": 1,
 "lr": 0.5,
 "weight_decay": 0.9,

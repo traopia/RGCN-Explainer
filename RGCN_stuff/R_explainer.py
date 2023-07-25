@@ -405,8 +405,8 @@ class ExplainModule(nn.Module):
         self.masked_ver = self._masked_adj_ver()  # masked adj is the adj matrix with the mask applied
         self.masked_hor = self._masked_adj_hor()  # masked adj is the adj matrix with the mask applied
         masked_ver, masked_hor = self.masked_ver, self.masked_hor
-        # threshold = torch.mean(masked_ver.coalesce().values()) + torch.std(masked_ver.coalesce().values())
-        # self.config.update({'threshold': threshold}, allow_val_change=True)
+        threshold = torch.mean(masked_ver.coalesce().values()) + torch.std(masked_ver.coalesce().values())
+        self.config.update({'threshold': threshold}, allow_val_change=True)
         masked_ver,masked_hor = convert_binary(self.masked_ver, self.config["threshold"]), convert_binary(self.masked_hor, self.config["threshold"])
     
         ypred = self.model.forward2(masked_hor, masked_ver)
@@ -493,17 +493,18 @@ class ExplainModule(nn.Module):
             mask_ent_loss = 0
         else:
             mask_ent_loss =  config["ent"] * torch.mean(mask_ent)
-        
+
         most_freq_rel_len = len(mask[[self._indices]][mask[[self._indices]] > 0.5])
         if config.print:
-            print('most freq rel',self.data.i2r[most_freq_rel_len])
+            print('most freq rel',most_freq_rel_len)
         most_freq_rel_loss = config['most_freq_rel'] * most_freq_rel_len/len(mask) 
+        #most_freq_rel_loss = config['size'] * torch.sum(mask[[self._indices]][mask[[self._indices]] > 0.5])
         wrong_pred = 1 if torch.argmax(pred) != self.label else 0
 
         
 
         loss = torch.exp(pred_loss + size_loss + mask_ent_loss + size_loss_std +  most_freq_rel_loss)
-        #loss = pred_loss + size_loss + mask_ent_loss 
+        #loss = pred_loss + size_loss + mask_ent_loss + size_loss_std +  most_freq_rel_loss
 
         if config.print:
             print('pred_loss', pred_loss)
@@ -583,7 +584,7 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}", mode="disabled")
     config = wandb.config
 
-    wandb.config.update({"size_std": num_neighbors*0.1})
+    #wandb.config.update({"size_std": num_neighbors*0.1})
     wandb.config.update({"init_strategy": init_strategy })
 
     label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
@@ -662,7 +663,9 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
     while res_threshold.argmax() != res_full.argmax():# and v_threshold.coalesce().values()[row_indices].count_nonzero() == 0:# and res_threshold[label] == res_baseline[label]:
 
         i += 1
-        h_threshold, v_threshold = get_n_highest_sparse(masked_hor, config.num_exp),get_n_highest_sparse(masked_ver, config.num_exp+i)
+        
+        h_threshold, v_threshold,t_h, t_v = threshold_mask(masked_hor, masked_ver, data, config.num_exp+i)
+        h_threshold, v_threshold = get_n_highest_sparse(masked_hor, config.num_exp+i),get_n_highest_sparse(masked_ver, config.num_exp+i)
         res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
         if res_threshold_lekker.argmax() == res_full.argmax() or i>500:
             break
