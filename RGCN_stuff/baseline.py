@@ -55,7 +55,8 @@ def prediction_full(data, model, node_idx):
 def prediction_wrong_if(data,model, node_idx,label):
     ''' 
     Prediction of the full graph.
-    Results  by canceling out the contribution of each relation.'''
+    Results  by canceling out the contribution of each relation.
+    --> backward '''
     id = 'wrong_if'
     print('label', label)
     print('node_idx', node_idx)
@@ -110,7 +111,9 @@ def baseline_pred(data, model, node_idx):
 
 
 def prediction_with_one_relation(data, model, node_idx,label):
-    ''' Get prediction with one relation only to check which relation is the most important for the prediction'''
+    ''' Get prediction with one relation only to check which relation is the most important for the prediction
+    
+    --> forward'''
     id = 'one_relation'
     print('label', label)
     print('node_idx', node_idx)

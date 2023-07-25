@@ -451,7 +451,6 @@ def d_classes(data,name=None):
             d[k] = c
             c+=1
     data.entities_classes = d
-    print(data.entities_classes)
     d = {key.item(): data.withheld[:, 0][data.withheld[:, 1] == key].tolist() for key in torch.unique(data.withheld[:, 1])}
     return d 
 
@@ -1061,11 +1060,11 @@ def important_relation(h,v,data, node_idx, threshold):
     return counter
 
 
-def random_explanation_baseline(sparse_tensor):
+def random_explanation_baseline(sparse_tensor,explanation_lenght):
     ''' Create a random explanation baseline for a given sparse tensor'''
     # Retrieve the indices of non-zero elements
     # explanation_lenght = len(sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values()>config['threshold'] ])
-    explanation_lenght = len(sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values()> 0.5 ])
+    #explanation_lenght = len(sparse_tensor.coalesce().values()[sparse_tensor.coalesce().values()> 0.5 ])
     indices = sparse_tensor._indices()
 
     # Get the total number of non-zero elements
@@ -1168,3 +1167,32 @@ def select_connected_subgraph(adjacency_matrix, given_node,data):
     )
 
     return connected_adjacency_matrix
+
+
+
+def get_n_highest_sparse(tensor, n):
+    ''' Get the n highest elements of a sparse tensor'''
+    # Get the number of non-zero elements in the sparse tensor
+    nnz = tensor._nnz()
+
+    # Check if n is greater than nnz, and handle it accordingly
+    if n >= nnz:
+        # If n is greater than or equal to nnz, select all non-zero elements
+        selected_indices = tensor._indices()
+        selected_values = tensor._values()
+    else:
+        # Get the indices and values of the top n highest elements
+        values, indices = torch.topk(tensor._values(), n)
+
+        # Get the corresponding row and column indices from the original tensor
+        row_indices = tensor._indices()[0][indices]
+        col_indices = tensor._indices()[1][indices]
+
+        # Combine the row and column indices to form the selected indices
+        selected_indices = torch.stack((row_indices, col_indices))
+
+        # Get the corresponding values from the original tensor
+        selected_values = tensor._values()[indices]
+        sel_tensor = torch.sparse_coo_tensor(selected_indices, selected_values, size=tensor.size())
+        sel_tensor = convert_binary(sel_tensor, 0, equal=False)
+    return sel_tensor

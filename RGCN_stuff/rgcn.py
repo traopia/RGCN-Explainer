@@ -183,7 +183,7 @@ class RGCN(nn.Module):
 
     def forward2(self, hor_graph, ver_graph):
 
-
+        torch.set_float32_matmul_precision('medium')
         ## Layer 1
 
         n, rn = hor_graph.size() #horizontally stacked adjacency matrix size
@@ -284,7 +284,6 @@ class RGCN(nn.Module):
             return self.weights1.pow(2).sum()
 
         return self.comps1.pow(p).sum() + self.bases1.pow(p).sum()
-
 
 
 
