@@ -21,7 +21,7 @@ parameters_dict = {
         'values': [0.0005,0.005]
 
     },
-    'size_std': {'values': [1380.429*0.01,1380.429*0.1,10]},
+    # 'size_std': {'values': [1380.429*0.01,1380.429*0.1,10]},
 
     'ent': {
         'values': [1]
@@ -51,7 +51,10 @@ parameters_dict.update({'epochs': {'value': 30},
                         'print': {'value': False},
                         'funky_loss': {'value': False},
                         'num_exp': {'value': 15},
-                        'sweep': {'value': True}})
+                        'sweep': {'value': True},
+                        'random_sample': {'value': True},
+                        'explain_all': {'value': False},
+                        'explain_one': {'value': False}})
 sweep_config['parameters'] = parameters_dict
 
 
@@ -85,7 +88,7 @@ default_params = {
 "pred": 1,
 "size": 0.005,  
 "ent": 1,
-"size_std": 1380.429*0.1,
+# "size_std": 1380.429*0.1,
 "most_freq_rel": 1,
 "lr": 0.5,
 "weight_decay": 0.9,
