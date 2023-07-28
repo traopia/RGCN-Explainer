@@ -179,7 +179,7 @@ class Explainer:
 
             h_0 ,v_0= select_on_relation_sparse(sub_hor_graph,self.data, self.most_frequent_relation), select_on_relation_sparse(sub_ver_graph,self.data, self.most_frequent_relation)
             sub_hor_graph, sub_ver_graph = h_0,v_0 
-            del counter_full['type']
+            del counter_full[self.most_frequent_relation]
 
 
         masked_hor_values = (masked_hor.coalesce().values() * sub_hor_graph.coalesce().values())
