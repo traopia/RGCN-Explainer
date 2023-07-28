@@ -477,7 +477,7 @@ class ExplainModule(nn.Module):
         pred_loss = config["pred"]* -torch.log(logit)
 
 
-        size_loss = config['size'] * torch.sum(torch.abs(mask))
+        size_loss = config['size'] * torch.mean(torch.abs(mask))
 
 
         size_loss_std = -config["size_std"] * torch.std(mask) 
@@ -581,8 +581,8 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         wandb.init(config = config, reinit = True, project= f"RGCN_Explainer_{name}", mode="disabled")
     config = wandb.config
 
-    wandb.config.update({"size_std": num_neighbors*0.1})
-    wandb.config.update({"init_strategy": init_strategy })
+    # wandb.config.update({"size_std": num_neighbors*0.1})
+    # wandb.config.update({"init_strategy": init_strategy })
 
     label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
 
