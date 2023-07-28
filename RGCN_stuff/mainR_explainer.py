@@ -1,3 +1,4 @@
+from calendar import c
 import torch 
 import pandas as pd
 import numpy as np
@@ -20,13 +21,16 @@ print(sys.executable)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('name',help='name of the dataset')
-    parser.add_argument('init',  help='Mask initialization strategy',default = 'normal', choices =['normal','const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency', 'most_freq_rel','More_weight_on_relation'])
+    parser.add_argument('init',  help='Mask initialization strategy',default = 'normal', choices =['normal','const','overall_frequency','relative_frequency','inverse_relative_frequency','domain_frequency','range_frequency', 'most_freq_rel','Domain_Knowledge'])
+    parser.add_argument('--relation_id', help='relation id to which giving more weight on explanation', type=int,required='Domain_Knowledge' in sys.argv,nargs='+')
+    parser.add_argument('--value_for_relations_id', help='weight to give to relations weighted', type=int,required='Domain_Knowledge' in sys.argv)#,nargs='+')
     parser.add_argument('--explain_all', action='store_true', help='if True: explain all nodes')
     parser.add_argument('--random_sample', action='store_true', help='if True: explain sample of nodes')
     parser.add_argument('--explain_one', action='store_true', help='if True: explain one node')
-    #parser.add_argument('--num_samples_per_class', help='Number of samples per class (Required if --random_sample is used)', required='--random_sample' in sys.argv, type=int)
     parser.add_argument('--num_samples_per_class', help='Number of samples per class (Required if --random_sample is used)', type=int)
     parser.add_argument('--sweep', action='store_true', help='if True: sweep over parameters')
+    parser.add_argument('--kill_most_freq_rel', action='store_true', help='if True: exclude most frequent relation from explanation')
+    parser.add_argument('--size_std_neighbors', action='store_true', help='if True: size std is num neighbors')
     name = parser.parse_args().name
     explain_all = parser.parse_args().explain_all
     random_sample = parser.parse_args().random_sample
@@ -34,11 +38,17 @@ def main():
     explain_one = parser.parse_args().explain_one
     sweep = parser.parse_args().sweep
     init_strategy = parser.parse_args().init
+    kill_most_freq_rel = parser.parse_args().kill_most_freq_rel
+    size_std_neighbors = parser.parse_args().size_std_neighbors
     n_hops = 2
+    if init_strategy == 'Domain_Knowledge':
+        relation_id = parser.parse_args().relation_id
+        value_for_relations_id = parser.parse_args().value_for_relations_id
+    
 
 
 
-    if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre']:
+    if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre', 'amplus', 'dmg777k']:
         data = kg.load(name, torch=True, final=False)
     if 'IMDb' in name:    
         data = torch.load(f'data/IMDB/finals/{name}.pt')
@@ -48,7 +58,7 @@ def main():
         prune = False
     else:
         prune = True
-    print(prune)
+    prune = False
     if prune:
         data = prunee(data, 2)
     data.triples = torch.Tensor(data.triples).to(int)
@@ -76,8 +86,17 @@ def main():
                 config.update({'explain_all': explain_all})
                 config.update({'random_sample': random_sample})
                 config.update({'explain_one': explain_one})
+                config.update({'kill_most_freq_rel': kill_most_freq_rel})
+
+                if size_std_neighbors:
+                    config.update({"size_std": num_neighbors*0.1})
+                config.update({"init_strategy": init_strategy })
+                if init_strategy == 'Domain_Knowledge':
+                    config.update({'relation_id': relation_id})
+                    config.update({'value_for_relations_id': value_for_relations_id})
                 main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy, config)
                 wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
+
 
     
     if random_sample:
@@ -95,13 +114,24 @@ def main():
             def wrapped_main1():
                 main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,config=None )
             if sweep:
-                sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
+                label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
+                sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{label}_{node_idx}" )
                 wandb.agent(sweep_id, function= wrapped_main1)
             else:
                 config = default_params
                 config.update({'explain_all': explain_all})
                 config.update({'random_sample': random_sample})
                 config.update({'explain_one': explain_one})
+                config.update({'kill_most_freq_rel': kill_most_freq_rel})
+
+                
+                config.update({"init_strategy": init_strategy })
+                if size_std_neighbors:
+                    config.update({"size_std": num_neighbors*0.1})
+
+                if init_strategy == 'Domain_Knowledge':
+                    config.update({'relation_id': relation_id})
+                    config.update({'value_for_relations_id': value_for_relations_id})
                 
                 main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,  config )
                 wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
@@ -109,7 +139,7 @@ def main():
 
 
     if explain_one:
-        node_idx = 5731 # dict_classes[0][0]
+        node_idx = dict_classes[1][0]
         print('explain one node', node_idx)
         num_neighbors = number_neighbors(node_idx, data, n_hops)
 
@@ -122,11 +152,24 @@ def main():
             config.update({'explain_all': explain_all})
             config.update({'random_sample': random_sample})
             config.update({'explain_one': explain_one})
+            config.update({'kill_most_freq_rel': kill_most_freq_rel})
+
+            if size_std_neighbors:
+                config.update({"size_std": num_neighbors*0.1})
+            config.update({"init_strategy": init_strategy })
         else:
             config = default_params
             config.update({'explain_all': explain_all})
             config.update({'random_sample': random_sample})
             config.update({'explain_one': explain_one})
+            config.update({'kill_most_freq_rel': kill_most_freq_rel})
+
+            if size_std_neighbors:
+                config.update({"size_std": num_neighbors*0.1})
+            config.update({"init_strategy": init_strategy })
+            if init_strategy == 'Domain_Knowledge':
+                config.update({'relation_id': relation_id})
+                config.update({'value_for_relations_id': value_for_relations_id})
             
             main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,  config )
             wandb.config.update({'experiment': f"RGCNExplainer_{name}"})

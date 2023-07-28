@@ -14,3 +14,4 @@ chk/mdgenre_chk/models
 chk
 chk/aifb_chk/bro
 wandb
+RGCN_stuff/datasets

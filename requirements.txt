@@ -1,3 +1,5 @@
+## Developed with python version 3.9.16
+
 networkx==3.0
 pandas==1.4.4
 pytorch_revgrad==0.2.0

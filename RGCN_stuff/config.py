@@ -21,10 +21,9 @@ parameters_dict = {
         'values': [0.0005,0.005]
 
     },
-    # 'size_std': {'values': [1380.429*0.01,1380.429*0.1,10]},
 
     'ent': {
-        'values': [1]
+        'values': [1,10]
     },
     'most_freq_rel': {
         'values': [1,10]
@@ -42,7 +41,7 @@ parameters_dict = {
         'values': [False]
     }
 }
-
+    # 'size_std': {'values': [1380.429*0.01,1380.429*0.1,10]},
 
 parameters_dict.update({'epochs': {'value': 30}, 
                         'threshold': {'value': 0.5},
@@ -88,7 +87,7 @@ default_params = {
 "pred": 1,
 "size": 0.005,  
 "ent": 1,
-# "size_std": 1380.429*0.1,
+"size_std": 10,
 "most_freq_rel": 1,
 "lr": 0.5,
 "weight_decay": 0.9,
@@ -97,8 +96,8 @@ default_params = {
 "hops": 2,
 "num_exp": 15,   
 "adaptive": False,
-"kill_most_freq_rel": False,
-"relation_id": 2, 
+#"kill_most_freq_rel": False,
+"relation_id": 36, 
 "break_if_wrong_pred": False,
 "break_on_number_of_high": False,
 "print": False,

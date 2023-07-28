@@ -7,12 +7,13 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
-from kgbench import load, tic, toc, d, Data
-import kgbench as kg
+from src.kgbench import load, tic, toc, d, Data
+import src.kgbench as kg
 from src.rgcn_explainer_utils import *
 from rgcn import RGCN
 import psutil
 import argparse
+import random
 
 
 def print_cpu_utilization():
@@ -155,9 +156,15 @@ def main(prune=True,test = False):
     parser.add_argument('name',help='name of the dataset')
     parser.add_argument('explanation_type',help='Relation importance: \'one_relation\' or \'wrong_if\'')
     parser.add_argument('--explain_all', action='store_true', help='if True: explain all nodes')
+    parser.add_argument('--random_sample', action='store_true', help='if True: explain sample of nodes')
+    parser.add_argument('--num_samples_per_class', help='Number of samples per class (Required if --random_sample is used)', type=int)
+    parser.add_argument('--explain_one', action='store_true', help='if True: explain one node')
     name = parser.parse_args().name
-    all = parser.parse_args().explain_all
+    explain_all = parser.parse_args().explain_all
+    random_sample = parser.parse_args().random_sample
+    explain_one = parser.parse_args().explain_one
     explanation_type = parser.parse_args().explanation_type
+    num_samples_per_class = parser.parse_args().num_samples_per_class
     
     if name == 'mdgenre' or 'dbo' in name:
         prune = False
@@ -188,15 +195,17 @@ def main(prune=True,test = False):
     data.triples = torch.Tensor(data.triples).to(int)
     data.withheld = torch.Tensor(data.withheld).to(int)
     data.training = torch.Tensor(data.training).to(int)
-    d = d_classes(data)
+    dict_classes = d_classes(data)
     relation = get_relations(data)
     relations = ['node_idx','label'] + [data.i2rel[i][0] for i in range(len(data.i2rel))]
     df = pd.DataFrame(columns=relations)
     df_ones = pd.DataFrame(columns=relations)
+    if not os.path.exists(f'chk/{name}_chk/Relation_Selection'):
+        os.makedirs(f'chk/{name}_chk/Relation_Selection')
 
-    if all:
-        for target_label in range(len(d.keys())):
-            for node_idx in d[target_label]:
+    if explain_all:
+        for target_label in range(len(dict_classes.keys())):
+            for node_idx in dict_classes[target_label]:
                 if node_idx in data.withheld[:,0]:
                     label = data.withheld[data.withheld[:,0]==node_idx,1]
                 if explanation_type=='one_relation':
@@ -206,11 +215,11 @@ def main(prune=True,test = False):
                 df.loc[str(node_idx)] = count
                 df_ones.loc[str(node_idx)] = ones
         print_cpu_utilization()
-        df.to_csv(f'chk/{name}_chk/Important_{id}_{name}_results_{id_test}.csv', index=False)
-        df_ones.to_csv(f'chk/{name}_chk/Important_{id}_{name}_results_ones_{id_test}.csv', index=False)
+        df.to_csv(f'chk/{name}_chk/Relation_Selection/Important_{id}_{name}_results_{id_test}.csv', index=False)
+        df_ones.to_csv(f'chk/{name}_chk/Relation_Selection/Important_{id}_{name}_results_ones_{id_test}.csv', index=False)
 
-    else: 
-        node_idx = d[list(d.keys())[0]][0]       
+    if explain_one: 
+        node_idx = dict_classes[list(dict_classes.keys())[0]][0]       
         label = data.withheld[data.withheld[:,0]==node_idx,1]
         if explanation_type=='one_relation':
             count, ones, id = prediction_with_one_relation(data, model, node_idx,label) 
@@ -219,8 +228,30 @@ def main(prune=True,test = False):
         print(count)
         print_cpu_utilization()
         df.loc[str(node_idx)] = count
-        df.to_csv(f'chk/{name}_chk/Important_{id}_{name}_results{node_idx}_{id_test}.csv', index=False)
+        df.to_csv(f'chk/{name}_chk/Relation_Selection/Important_{id}_{name}_results{node_idx}_{id_test}.csv', index=False)
 
+    if random_sample:
+        print('random sample')
+        random.seed(42)
+        min_length = min(len(value) for value in dict_classes.values())
+        if num_samples_per_class is None:
+            num_samples_per_class = 30 if min_length > 30 else min_length 
+        print('num_samples_per_class', num_samples_per_class)
+        sampled_data = []
+        for key in dict_classes:
+            sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
+        for node_idx in sampled_data:
+            if node_idx in data.withheld[:,0]:
+                label = data.withheld[data.withheld[:,0]==node_idx,1]
+            if explanation_type=='one_relation':
+                count, ones, id = prediction_with_one_relation(data, model, node_idx,label) 
+            if explanation_type=='wrong_if':
+                count, ones, id = prediction_wrong_if(data, model, node_idx,label)
+            df.loc[str(node_idx)] = count
+            df_ones.loc[str(node_idx)] = ones
+    print_cpu_utilization()
+    df.to_csv(f'chk/{name}_chk/Relation_Selection/Important_{id}_{name}_results_sample_{id_test}.csv', index=False)
+    df_ones.to_csv(f'chk/{name}_chk/Relation_Selection/Important_{id}_{name}_results_sample_ones_{id_test}.csv', index=False)
 
 
 

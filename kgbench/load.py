@@ -77,8 +77,10 @@ class Data:
 
             self.torch = use_torch
 
-            #self.triples = fastload(getfile(dir, 'triples.int.csv.gz'))
-            self.triples = fastload((dir + '/triples.int.csv.gz'))
+            self.triples = fastload(getfile(dir, 'triples.int.csv.gz'))
+            #self.triples = fastload((dir + '/triples.int.csv.gz'))
+            print((dir + '/triples.int.csv.gz'))
+            breakpoint()
 
             self.i2r, self.r2i = load_indices(getfile(dir, 'relations.int.csv'))
             self.i2e, self.e2i = load_entities(getfile(dir, 'nodes.int.csv'))

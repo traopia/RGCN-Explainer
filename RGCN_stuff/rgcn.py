@@ -5,9 +5,10 @@ import torch.nn.functional as F
 from collections import Counter
 import fire, sys
 import math
-import kgbench as kg
 from kgbench import load, tic, toc, d, Data
+import src.kgbench as kg
 import os
+import argparse
 
 
 #from rgcn_model import RGCN
@@ -99,6 +100,7 @@ def adj(triples, num_nodes, num_rels, cuda=False, vertical=True):
         
 
     indices = torch.tensor([from_indices, upto_indices], dtype=torch.long, device=d(cuda))
+
 
 
 
@@ -378,7 +380,7 @@ def prunee(data , n=2):
     return nw
 
 
-def go(name='IMDb_most_genre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
+def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, optimizer='adam', final=False,  emb=16, bases=None, printnorms=None):
 
     #include_val = name in ('aifb','mutag','bgs','am', 'IMDb', 'IMDb_us_genre', 'IMDb_us_onegenre', 'mdgenre', 'IMDB_most_genre', 'IMDb_4genres')
     # -- For these datasets, the validation is added to the training for the final eval.
@@ -402,10 +404,9 @@ def go(name='IMDb_most_genre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, 
         if prune:
             data = prunee(data, n=2)
 
-    data.triples = torch.tensor(data.triples, dtype=torch.int32)
-    data.training = torch.tensor(data.training, dtype=torch.int32)
-    data.withheld = torch.tensor(data.withheld, dtype=torch.int32)
-    #print(f'{data.triples.size(0)} triples')
+    data.triples = data.triples.clone().detach()
+    data.training = data.training.clone().detach()
+    data.withheld = data.withheld.clone().detach()
     print(f'{data.triples.shape[0]} triples ')
     print(f'{data.num_entities} entities')
     if prune:
@@ -413,9 +414,7 @@ def go(name='IMDb_most_genre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, 
     print(f'{data.num_relations} relations')
     print(f'{len(data.training)} training triples')
     print(f'{len(data.withheld)} validation triples')
-    # data.triples = torch.tensor(data.triples, dtype=torch.int32)
-    # data.training = torch.tensor(data.training, dtype=torch.int32)
-    # data.withheld = torch.tensor(data.withheld, dtype=torch.int32)
+
 
     tic()
     rgcn = RGCN(data.triples, n=data.num_entities, r=data.num_relations, numcls=data.num_classes, emb=emb, bases=bases)
@@ -442,8 +441,6 @@ def go(name='IMDb_most_genre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, 
         tic()
         opt.zero_grad()
         out = rgcn()
-        #print('pred', nn.Softmax(dim=0)(out[5757][0 :]))
-        #print('out',nn.Softmax(dim=0)(out[0][0 :]) )
 
         idxt, clst = data.training[:, 0], data.training[:, 1]
         idxw, clsw = data.withheld[:, 0], data.withheld[:, 1]
@@ -506,20 +503,18 @@ def go(name='IMDb_most_genre', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=False, 
             print('relations with largest weight norms in layer 2.')
             for rel, w in ctr.most_common(printnorms):
                 print(f'     norm {w:.4} for {rel} ')
-        #torch.save(out[idxw, :], 'aifb_chk/prediction_aifb')
 
         if not os.path.exists(f'chk/{name}_chk/models'):
             os.makedirs(f'chk/{name}_chk/models')
         
         torch.save(out[idxw, :], f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
-        #torch.save(rgcn,'aifb_chk/model_aifb')
         torch.save(rgcn, f'chk/{name}_chk/models/model_{name}_prune_{prune}')
         print(f'epoch {e:02}: loss {loss:.2}, train acc {training_acc:.2}, \t withheld acc {withheld_acc:.2} \t ({toc():.5}s)')
 
 
 
-# print('arguments ', ' '.join(sys.argv))
-# fire.Fire(go)
-
 if __name__ == '__main__':
-    fire.Fire(go)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('name',help='name of the dataset')
+    name = parser.parse_args().name
+    fire.Fire(go(name))
