@@ -16,8 +16,6 @@ print(sys.executable)
 
 
 
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('name',help='name of the dataset')
@@ -58,12 +56,12 @@ def main():
         prune = False
     else:
         prune = True
-    prune = False
     if prune:
         data = prunee(data, 2)
     data.triples = torch.Tensor(data.triples).to(int)
     data.withheld = torch.Tensor(data.withheld).to(int)
     data.training = torch.Tensor(data.training).to(int)
+    data.hor_graph, data.ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
 
     print(f'Number of entities: {data.num_entities}') 
     print(f'Number of classes: {data.num_classes}')
@@ -74,13 +72,14 @@ def main():
     dict_classes = d_classes(data)
     model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
     torch.set_float32_matmul_precision('medium')
-    pred_label = torch.load(f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
+    prediction_model = torch.load(f'chk/{name}_chk/models/prediction_{name}_prune_{prune}')
+    prediction_model = nn.Softmax(dim=1)(prediction_model)
     
     if explain_all :
         print('explain_all')
         for target_label in range(len(dict_classes.keys())):
             for node_idx in dict_classes[target_label]:
-                num_neighbors = number_neighbors(node_idx, data, n_hops)
+                num_edges = number_edges(node_idx, data, n_hops)
 
                 config = default_params
                 config.update({'explain_all': explain_all})
@@ -89,12 +88,12 @@ def main():
                 config.update({'kill_most_freq_rel': kill_most_freq_rel})
 
                 if size_std_neighbors:
-                    config.update({"size_std": num_neighbors*0.1})
+                    config.update({"size_std": num_edges*0.1})
                 config.update({"init_strategy": init_strategy })
                 if init_strategy == 'Domain_Knowledge':
                     config.update({'relation_id': relation_id})
                     config.update({'value_for_relations_id': value_for_relations_id})
-                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy, config)
+                main1(n_hops, node_idx, model,prediction_model, data,name,  prune,relations, dict_classes, num_edges,sweep, config)
                 wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
 
 
@@ -110,9 +109,9 @@ def main():
         for key in dict_classes:
             sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
         for node_idx in sampled_data:
-            num_neighbors = number_neighbors(node_idx, data, n_hops)
+            num_edges = number_edges(node_idx, data, n_hops)
             def wrapped_main1():
-                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,config=None )
+                main1(n_hops, node_idx, model,prediction_model, data,name,  prune,relations, dict_classes, num_edges,sweep,config=None )
             if sweep:
                 label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
                 sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{label}_{node_idx}" )
@@ -127,13 +126,13 @@ def main():
                 
                 config.update({"init_strategy": init_strategy })
                 if size_std_neighbors:
-                    config.update({"size_std": num_neighbors*0.1})
+                    config.update({"size_std": num_edges*0.1})
 
                 if init_strategy == 'Domain_Knowledge':
                     config.update({'relation_id': relation_id})
                     config.update({'value_for_relations_id': value_for_relations_id})
                 
-                main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,  config )
+                main1(n_hops, node_idx, model,prediction_model, data,name,  prune,relations, dict_classes, num_edges,sweep,  config )
                 wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
 
 
@@ -141,21 +140,20 @@ def main():
     if explain_one:
         node_idx = dict_classes[1][0]
         print('explain one node', node_idx)
-        num_neighbors = number_neighbors(node_idx, data, n_hops)
-
+        num_edges = number_edges(node_idx, data, n_hops)
         # def wrapped_main1():
-        #     main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,config=None )
+        #     main1(n_hops, node_idx, model,prediction_model, data,name,  prune,relations, dict_classes, num_edges,sweep,init_strategy,config=None )
         if sweep:
             sweep_id = wandb.sweep(sweep_config, project= f"RGCNExplainer_{name}_{node_idx}" )
             #wandb.agent(sweep_id, function= wrapped_main1)
-            wandb.agent(sweep_id, function=lambda: main1(n_hops, node_idx, model, pred_label, data, name, prune, relations, dict_classes, num_neighbors, sweep, init_strategy, config=None))
+            wandb.agent(sweep_id, function=lambda: main1(n_hops, node_idx, model, prediction_model, data, name, prune, relations, dict_classes, num_edges, sweep, config=None))
             config.update({'explain_all': explain_all})
             config.update({'random_sample': random_sample})
             config.update({'explain_one': explain_one})
             config.update({'kill_most_freq_rel': kill_most_freq_rel})
 
             if size_std_neighbors:
-                config.update({"size_std": num_neighbors*0.1})
+                config.update({"size_std": num_edges*0.1})
             config.update({"init_strategy": init_strategy })
         else:
             config = default_params
@@ -165,13 +163,13 @@ def main():
             config.update({'kill_most_freq_rel': kill_most_freq_rel})
 
             if size_std_neighbors:
-                config.update({"size_std": num_neighbors*0.1})
+                config.update({"size_std": num_edges*0.1})
             config.update({"init_strategy": init_strategy })
             if init_strategy == 'Domain_Knowledge':
                 config.update({'relation_id': relation_id})
                 config.update({'value_for_relations_id': value_for_relations_id})
             
-            main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_classes, num_neighbors,sweep,init_strategy,  config )
+            main1(n_hops, node_idx, model,prediction_model, data,name,  prune,relations, dict_classes, num_edges,sweep,  config )
             wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
     
 

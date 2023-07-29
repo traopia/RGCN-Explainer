@@ -167,12 +167,14 @@ def match_to_triples(v,h, data, sparse=True):
     sparse: if True, the adjacency matrix is sparse, otherwise it is dense
     returns: the triples corresponding to the adjacency matrix (from stack indexes to original indexes)
     """
+
+    n_ent = data.num_entities
     if sparse:
-        pv,_ = torch.div(v.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-        sv,ov = v.coalesce().indices()%data.num_entities
+        pv,_ = torch.div(v.coalesce().indices(), n_ent, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+        sv,ov = v.coalesce().indices()% n_ent
         result_v = torch.stack([sv,pv,ov], dim=1)
-        ph,_ = torch.div(h.coalesce().indices(), data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-        sh,oh = h.coalesce().indices()%data.num_entities
+        ph,_ = torch.div(h.coalesce().indices(),  n_ent, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+        sh,oh = h.coalesce().indices()% n_ent
         result_h = torch.stack([sh,ph,oh], dim=1)
         result = torch.cat((result_v, result_h), 0)
 
@@ -191,12 +193,12 @@ def match_to_triples(v,h, data, sparse=True):
         # result = torch.cat((result_v, result_h), 0)
 
         if len(h )!= 0:
-            _,ph = torch.div(h, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-            sh,oh = h%data.num_entities
+            _,ph = torch.div(h,  n_ent, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+            sh,oh = h% n_ent
             result_h = torch.stack([sh,ph,oh], dim=1)
         if len(v)!=0:
-            pv, _ = torch.div(v, data.num_entities, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
-            sv,ov = v%data.num_entities
+            pv, _ = torch.div(v,  n_ent, rounding_mode='floor')#v.coalesce().indices()//data.num_entities
+            sv,ov = v% n_ent
             result_v = torch.stack([sv,pv,ov], dim=1)
         if len(h) != 0 and len(v) != 0:
             result = torch.cat((result_v, result_h), 0)
@@ -206,7 +208,7 @@ def match_to_triples(v,h, data, sparse=True):
             print('ph is empty')
         if len(v) == 0:
             result = result_h
-            print('pv is empty')
+        
         
 
                     
@@ -1015,15 +1017,15 @@ def convert_back(sparse_tensor, data):
 
 
 
-def number_neighbors(node_idx, data, n_hops):
+def number_edges(node_idx, data, n_hops):
         ''' Get the number of neighbors of a node in a n-hop neighborhood'''
 
         hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
         edge_index_h, edge_index_v = hor_graph.coalesce().indices(), ver_graph.coalesce().indices()
-        sub_edges, neighbors_h, sub_edges_tensor_h  = find_n_hop_neighbors(edge_index_h, n_hops, node_idx)
-        sub_edges, neighbors_v, sub_edges_tensor_v  = find_n_hop_neighbors(edge_index_v, n_hops, node_idx)
-        num_neighbors = len(list(neighbors_h) + list(neighbors_v))
-        return num_neighbors
+        sub_edges_h, neighbors_h, sub_edges_tensor_h  = find_n_hop_neighbors(edge_index_h, n_hops, node_idx)
+        sub_edges_v, neighbors_v, sub_edges_tensor_v  = find_n_hop_neighbors(edge_index_v, n_hops, node_idx)
+        num_edges = len(list(sub_edges_h) + list(sub_edges_v))
+        return num_edges
 
 def find_threshold(sparse_tensor, num_exp):
     ''' Find the threshold value for the sparse tensor'''
