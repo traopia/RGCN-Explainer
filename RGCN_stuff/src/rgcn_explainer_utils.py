@@ -207,11 +207,7 @@ def match_to_triples(v,h, data, sparse=True):
             result = result_v
             print('ph is empty')
         if len(v) == 0:
-            result = result_h
-        
-        
-
-                    
+            result = result_h             
     
     return result
 

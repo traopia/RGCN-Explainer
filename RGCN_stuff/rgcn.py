@@ -398,6 +398,9 @@ def go(name='aifb', lr=0.01, wd=0.0, l2=0.0, epochs=50, prune=True, optimizer='a
         data = torch.load(f'data/DBO/finals/{name}.pt')
         if prune:
             data = prunee(data, n=2)
+        data.triples = torch.tensor(data.triples)
+        data.training = torch.tensor(data.training)
+        data.withheld = torch.tensor(data.withheld)
     else:
 
         data = kg.load(name, torch=True)   
