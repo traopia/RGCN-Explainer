@@ -357,6 +357,7 @@ def get_relations(data):
     for i in range(len(all_relations)):
         dict[i] = [all_relations[i]]
         dict[i].append(data.i2r[i])
+        dict[i].append(data.r2i[data.i2r[i]])
 
     data.i2rel = dict
     relations = [data.i2rel[i][0] for i in range(len(data.i2rel))]
@@ -1023,6 +1024,16 @@ def number_edges(node_idx, data, n_hops):
         num_edges = len(list(sub_edges_h) + list(sub_edges_v))
         return num_edges
 
+def number_neighbors(node_idx, data, n_hops):
+        ''' Get the number of neighbors of a node in a n-hop neighborhood'''
+
+        hor_graph, ver_graph = hor_ver_graph(data.triples, data.num_entities, data.num_relations)
+        edge_index_h, edge_index_v = hor_graph.coalesce().indices(), ver_graph.coalesce().indices()
+        sub_edges_h, neighbors_h, sub_edges_tensor_h  = find_n_hop_neighbors(edge_index_h, n_hops, node_idx)
+        sub_edges_v, neighbors_v, sub_edges_tensor_v  = find_n_hop_neighbors(edge_index_v, n_hops, node_idx)
+        num_neighbors = len(list(neighbors_h) + list(neighbors_v))
+        return num_neighbors
+
 def find_threshold(sparse_tensor, num_exp):
     ''' Find the threshold value for the sparse tensor'''
     # sparse_tensor = torch.sparse_coo_tensor(
@@ -1191,6 +1202,6 @@ def get_n_highest_sparse(tensor, n):
 
         # Get the corresponding values from the original tensor
         selected_values = tensor._values()[indices]
-        sel_tensor = torch.sparse_coo_tensor(selected_indices, selected_values, size=tensor.size())
-        sel_tensor = convert_binary(sel_tensor, 0, equal=False)
+    sel_tensor = torch.sparse_coo_tensor(selected_indices, selected_values, size=tensor.size())
+    sel_tensor = convert_binary(sel_tensor, 0, equal=False)
     return sel_tensor

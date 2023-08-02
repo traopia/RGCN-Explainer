@@ -90,7 +90,7 @@ class Explainer:
         self.most_frequent_relation, mfr_val = self.most_freq_rel_f(sub_hor_graph, sub_ver_graph)
         print('most_freq_relation is:',  data.i2r[self.most_frequent_relation],self.most_frequent_relation ,mfr_val/self.num_edges)
 
-        if mfr_val/self.num_edges > 0.7:
+        if mfr_val/self.num_edges > 0.7 and self.name != 'dbo_gender':
             print(mfr_val/self.num_edges)
             self.config.update({'kill_most_freq_rel': True}, allow_val_change=True)
         if self.config['kill_most_freq_rel']:
@@ -243,7 +243,7 @@ class ExplainModule(nn.Module):
 
 
 
-        elif init_strategy == "Domain_Knowledge":
+        elif "Domain_Knowledge" in init_strategy:
             relations_id = self.config["relation_id"]
             value_for_relations_id = self.config["value_for_relations_id"]
             std = nn.init.calculate_gain("relu") * math.sqrt(
