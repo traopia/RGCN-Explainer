@@ -6,7 +6,6 @@ import torch.nn as nn
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
-#rgcn 
 from src.rgcn_explainer_utils import *
 
 #params
@@ -94,7 +93,6 @@ class Explainer:
             print(mfr_val/self.num_edges)
             self.config.update({'kill_most_freq_rel': True}, allow_val_change=True)
         if self.config['kill_most_freq_rel']:
-            #for i in self.most_frequent_relation:
             sub_ver_graph, sub_hor_graph= select_on_relation_sparse(sub_ver_graph,data, 
                                                                     self.most_frequent_relation), select_on_relation_sparse(sub_hor_graph,data, 
                                                                                                                       self.most_frequent_relation)
@@ -122,23 +120,13 @@ class Explainer:
             ypred, masked_hor, masked_ver = explainer(self.node_idx)  # forward pass of the explainer
 
             m_ver, m_hor = sub(masked_ver, 0.5), sub(masked_hor,0.5)
-
-            
-
             m = match_to_triples(m_ver, m_hor, data, node_idx)
             counter = Counter(m[:,1].tolist())
             counter = {data.i2rel[k][0]:v for k,v in counter.items()}# if k!=0}
-            #if self.config.funky_loss==False:
             loss, pred_loss, size_loss, mask_ent_loss, size_std_loss,  num_high, wrong_pred, most_freq_rel_loss = explainer.loss(ypred, self.config,epoch) 
             loss.backward()
             explainer.optimizer.step()
 
-            # if self.config.funky_loss:
-            #     ypred_1_m, masked_hor_1_m, masked_ver_1_m = explainer.forward_1_m(self.node_idx)
-            #     loss, fidelity_minus, fidelity_plus, sparsity = explainer.funky_loss(ypred, self.res_full, ypred_1_m, self.config)
-            #     loss.backward(retain_graph=True)
-            #     #loss.backward()
-            #     explainer.optimizer.step()
             explainer.scheduler.step()
             if epoch % 10 == 0 or epoch == self.config.epochs - 1:
                 print(
@@ -153,12 +141,10 @@ class Explainer:
                 )
                 print('--------------------------------------------------------------')
             
-            #if self.config.funky_loss==False:
+
             wandb.log({f"len mask > {self.config['threshold']}": len([i for i in masked_ver.coalesce().values() if i > self.config['threshold']]) , "loss": loss,
                 "pred_loss": pred_loss, "size_loss": size_loss, "mask_ent_loss": mask_ent_loss, "size_std_loss": size_std_loss,  "num_high": num_high, "wrong_pred": wrong_pred, "most_freq_rel_loss": most_freq_rel_loss})
-            # if self.config.funky_loss:
-            #     wandb.log({f"len mask > {self.config['threshold']}": len([i for i in masked_ver.coalesce().values() if i > self.config['threshold']]) , "loss": loss,
-            #     "fidelity_minus": fidelity_minus, "fidelity_plus": fidelity_plus, "sparsity": sparsity})
+
         print('Finished Training')
         m = match_to_triples(sub_ver_graph, sub_hor_graph, data, node_idx)
         counter = dict(Counter(m[:,1].tolist()))
@@ -225,9 +211,6 @@ class ExplainModule(nn.Module):
         num_entities = data.num_entities
         torch.manual_seed(42)
         mask = nn.Parameter(torch.FloatTensor(num_nodes))
-        # relations_id = self.config["relation_id"]
-        # value_for_relations_id = self.config["value_for_relations_id"]
-
 
         if init_strategy == "normal":
             std = nn.init.calculate_gain("relu") * math.sqrt(
@@ -391,12 +374,7 @@ class ExplainModule(nn.Module):
     
         ypred = self.model.forward2(masked_hor, masked_ver)
         node_pred = ypred[node_idx,:]
-        res = nn.Softmax(dim=0)(node_pred[0:])
-
-        # h_threshold, v_threshold,t_h, t_v = threshold_mask(self.masked_hor, self.masked_ver, self.data, self.config.num_exp)
-        # res = nn.Softmax(dim=0)(self.model.forward2(h_threshold, v_threshold)[node_idx, :])
-
-        
+        res = nn.Softmax(dim=0)(node_pred[0:])  
         return res, self.masked_hor, self.masked_ver
     
     def forward_1_m(self, node_idx):
@@ -413,21 +391,6 @@ class ExplainModule(nn.Module):
         return dict(Counter(p))
 
 
-
-    def funky_loss(self, pred,res_full, res1_m,  config):
-        res_binary = pred
-        label = self.label
-        mask = torch.sigmoid(self.mask)
-        explanation_lenght = torch.mean(mask[mask > config["threshold"]])
-        fidelity_minus = torch.absolute(1 - (res_full[int(label)] - res_binary[int(label)]))
-        fidelity_plus = (res_full[int(label)] - res1_m[int(label)])
-        mask_len  = len(mask)
-        sparsity = torch.tensor(1 - (explanation_lenght)/torch.mean(mask))
-        most_freq_rel_len = len(mask[[self._indices]][mask[[self._indices]] > 0.5])
-        most_freq_rel_loss = most_freq_rel_len/len(mask)
-        size_loss = config['size'] * torch.sum(torch.abs(mask))
-        loss = -(fidelity_minus + fidelity_plus + sparsity - most_freq_rel_loss - size_loss)
-        return loss, fidelity_minus, fidelity_plus, sparsity
      
     def loss(self, pred, config, epoch):
         """
@@ -478,7 +441,6 @@ class ExplainModule(nn.Module):
         
 
         loss = torch.exp(pred_loss + size_loss + mask_ent_loss + size_loss_std +  most_freq_rel_loss)
-        #loss = pred_loss + size_loss + mask_ent_loss + size_loss_std +  most_freq_rel_loss
         if config.print:
             print('pred_loss', pred_loss)
             print('size_loss', size_loss)
@@ -589,16 +551,6 @@ def main1(n_hops, node_idx, model,pred_label, data,name,  prune,relations, dict_
         res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
         if res_threshold_lekker.argmax() == res_full.argmax() or i>500:
             break
-    
-
-    #while about node being in explanation :-)
-    # row_indices =  torch.nonzero(v_threshold.coalesce().indices()[1] == node_idx, as_tuple=False)[:, 0]
-    # while v_threshold.coalesce().values()[row_indices].count_nonzero() == 0:
-    #     i += 1
-    #     h_threshold, v_threshold = get_n_highest_sparse(masked_hor, config.num_exp),get_n_highest_sparse(masked_ver, config.num_exp+i)
-    #     res_threshold_lekker = nn.Softmax(dim=0)(model.forward2(h_threshold, v_threshold)[node_idx, :])
-    #     if v_threshold.coalesce().values()[row_indices].count_nonzero() != 0 or i>100:
-    #         break
     
 
     else:

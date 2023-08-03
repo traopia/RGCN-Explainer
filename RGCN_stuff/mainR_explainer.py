@@ -9,6 +9,7 @@ import wandb
 import random
 from R_explainer import *
 
+
 from config import * 
 import sys
 import argparse
@@ -42,7 +43,6 @@ def main():
     size_std_neighbors = parser.parse_args().size_std_neighbors
     n_hops = 2
     if init_strategy == 'Domain_Knowledge':
-        #relation_id = parser.parse_args().relation_id
         value_for_relations_id = parser.parse_args().value_for_relations_id
         baseline_id = parser.parse_args().baseline_id
         if baseline_id == 'forward':
@@ -51,10 +51,13 @@ def main():
             init_strategy = 'Domain_Knowledge_backward'
         with open(f'chk/{name}_chk/Relation_Selection/{baseline_id}_dict.json', 'r') as file:
             relation_id_dict = json.load(file)
+        elif baseline_id == 'Domain_Expert'
+            relation_id = parser.parse_args().relation_id
+
     
 
 
-    if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre', 'amplus', 'dmg777k']:
+    if name in ['aifb', 'mutag', 'mdgenre', 'amplus', 'dmg777k']:
         data = kg.load(name, torch=True, final=False)
     if 'IMDb' in name:    
         data = torch.load(f'data/IMDB/finals/{name}.pt')
@@ -99,8 +102,9 @@ def main():
                 config.update({'explain_one': explain_one})
                 config.update({'kill_most_freq_rel': kill_most_freq_rel})
 
-                if size_std_neighbors:
-                    config.update({"size_std": num_edges*0.1})
+            if size_std_neighbors:
+                num_neighbors = number_neighbors(node_idx, data, n_hops)
+                config.update({"size_std": num_neighbors*0.1})
 
                 main1(n_hops, node_idx, model,prediction_model, data,name,  prune,relations, dict_classes, num_edges,sweep, config)
                 wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
@@ -165,8 +169,8 @@ def main():
             config.update({'kill_most_freq_rel': kill_most_freq_rel})
 
             if size_std_neighbors:
-                config.update({"size_std": num_edges*0.1})
-            config.update({"init_strategy": init_strategy })
+                num_neighbors = number_neighbors(node_idx, data, n_hops)
+                config.update({"size_std": num_neighbors*0.1})
         else:
             config = default_params
             config.update({'explain_all': explain_all})
@@ -175,7 +179,8 @@ def main():
             config.update({'kill_most_freq_rel': kill_most_freq_rel})
 
             if size_std_neighbors:
-                config.update({"size_std": num_edges*0.1})
+                num_neighbors = number_neighbors(node_idx, data, n_hops)
+                config.update({"size_std": num_neighbors*0.1})
             config.update({"init_strategy": init_strategy })
             if 'Domain_Knowledge' in init_strategy:
                 relation_id = relation_id_dict[str(label)]
