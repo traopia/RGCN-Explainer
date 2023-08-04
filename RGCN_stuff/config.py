@@ -66,7 +66,7 @@ sweep_config['parameters'] = parameters_dict
 
 default_params = {
 "pred": 1,
-"size": 0.005,  
+"size": 0.0005,  
 "ent": 1,
 "size_std": 10,
 "most_freq_rel": 1,
