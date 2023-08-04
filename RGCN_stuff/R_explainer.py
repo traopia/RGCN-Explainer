@@ -89,9 +89,9 @@ class Explainer:
         self.most_frequent_relation, mfr_val = self.most_freq_rel_f(sub_hor_graph, sub_ver_graph)
         print('most_freq_relation is:',  data.i2r[self.most_frequent_relation],self.most_frequent_relation ,mfr_val/self.num_edges)
 
-        if mfr_val/self.num_edges > 0.7 and self.name != 'dbo_gender':
-            print(mfr_val/self.num_edges)
-            self.config.update({'kill_most_freq_rel': True}, allow_val_change=True)
+        # if mfr_val/self.num_edges > 0.7 and self.name != 'dbo_gender':
+        #     print(mfr_val/self.num_edges)
+        #     self.config.update({'kill_most_freq_rel': True}, allow_val_change=True)
         if self.config['kill_most_freq_rel']:
             sub_ver_graph, sub_hor_graph= select_on_relation_sparse(sub_ver_graph,data, 
                                                                     self.most_frequent_relation), select_on_relation_sparse(sub_hor_graph,data, 
