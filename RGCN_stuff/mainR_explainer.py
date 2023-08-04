@@ -51,8 +51,8 @@ def main():
             init_strategy = 'Domain_Knowledge_backward'
         with open(f'chk/{name}_chk/Relation_Selection/{baseline_id}_dict.json', 'r') as file:
             relation_id_dict = json.load(file)
-        elif baseline_id == 'Domain_Expert'
-            relation_id = parser.parse_args().relation_id
+        # elif baseline_id == 'Domain_Expert'
+        #     relation_id = parser.parse_args().relation_id
 
     
 
