@@ -368,8 +368,8 @@ class ExplainModule(nn.Module):
         self.masked_ver = self._masked_adj_ver()  # masked adj is the adj matrix with the mask applied
         self.masked_hor = self._masked_adj_hor()  # masked adj is the adj matrix with the mask applied
         masked_ver, masked_hor = self.masked_ver, self.masked_hor
-        threshold = torch.mean(masked_ver.coalesce().values()) + torch.std(masked_ver.coalesce().values())
-        self.config.update({'threshold': threshold}, allow_val_change=True)
+        # threshold = torch.mean(masked_ver.coalesce().values()) + torch.std(masked_ver.coalesce().values())
+        # self.config.update({'threshold': threshold}, allow_val_change=True)
         masked_ver,masked_hor = convert_binary(self.masked_ver, self.config["threshold"]), convert_binary(self.masked_hor, self.config["threshold"])
     
         ypred = self.model.forward2(masked_hor, masked_ver)
