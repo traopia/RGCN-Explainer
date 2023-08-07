@@ -234,20 +234,22 @@ class ExplainModule(nn.Module):
             )
             with torch.no_grad():
                 mask.normal_(1.0, std)
-
-            if type(relations_id)== int:
-                _, _, value_indices3=select_relation(self.hor_graph,self.data.num_entities,relations_id)
-                _, _, value_indices1=select_relation(self.ver_graph,self.data.num_entities,relations_id)
-                
-                value_indices = torch.cat((value_indices1, value_indices3), 0)
-                mask.data[[value_indices]] = value_for_relations_id
-            else:
-                for i in relations_id:
-                    _, _, value_indices3=select_relation(self.hor_graph,self.data.num_entities,i)
-                    _, _, value_indices1=select_relation(self.ver_graph,self.data.num_entities,i)
+            if relations_id != None:
+                if type(relations_id)== int:
+                    _, _, value_indices3=select_relation(self.hor_graph,self.data.num_entities,relations_id)
+                    _, _, value_indices1=select_relation(self.ver_graph,self.data.num_entities,relations_id)
                     
                     value_indices = torch.cat((value_indices1, value_indices3), 0)
                     mask.data[[value_indices]] = value_for_relations_id
+                else:
+                    for i in relations_id:
+                        _, _, value_indices3=select_relation(self.hor_graph,self.data.num_entities,i)
+                        _, _, value_indices1=select_relation(self.ver_graph,self.data.num_entities,i)
+                        
+                        value_indices = torch.cat((value_indices1, value_indices3), 0)
+                        mask.data[[value_indices]] = value_for_relations_id
+            else:
+                pass
 
 
 
