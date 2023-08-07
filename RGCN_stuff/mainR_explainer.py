@@ -63,7 +63,7 @@ def main():
         data = torch.load(f'data/IMDB/finals/{name}.pt')
     if 'dbo' in name:
         data = torch.load(f'data/DBO/finals/{name}.pt')
-    if name == 'md' or 'dbo' in name:
+    if 'md' in name or 'dbo' in name:
         prune = False
     else:
         prune = True
