@@ -172,7 +172,7 @@ def main(prune=True,test = False):
     # print(device)
     model = torch.load(f'chk/{name}_chk/models/model_{name}_prune_{prune}')
     # model.to(device)
-    if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre', 'amplus']:
+    if name in ['aifb', 'mutag', 'bgs', 'am', 'mdgenre', 'amplus', 'mdgender']:
         data = load(name, torch=True, final=False)
         if test:
             data = load(name, torch=True, final=True)
