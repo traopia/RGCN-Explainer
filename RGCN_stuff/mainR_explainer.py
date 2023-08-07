@@ -158,8 +158,12 @@ def main():
 
 
     if explain_one:
-        node_idx = dict_classes[1][0]
+        if name == 'mdgender':
+            node_idx = 164115
+        else:
+            node_idx = dict_classes[1][0]
         print('explain one node', node_idx)
+        
         num_edges = number_edges(node_idx, data, n_hops)
         label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])
 
