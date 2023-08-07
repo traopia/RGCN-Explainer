@@ -104,7 +104,10 @@ def main():
 
             if size_std_neighbors:
                 num_neighbors = number_neighbors(node_idx, data, n_hops)
-                config.update({"size_std": num_neighbors*0.1})
+                if num_neighbors > 10000:
+                    config.update({"size_std": num_neighbors*0.01}) 
+                else:
+                    config.update({"size_std": num_neighbors*0.1})
 
                 main1(n_hops, node_idx, model,prediction_model, data,name,  prune,relations, dict_classes, num_edges,sweep, config)
                 wandb.config.update({'experiment': f"RGCNExplainer_{name}"})
@@ -145,7 +148,10 @@ def main():
                 config.update({"init_strategy": init_strategy })
                 if size_std_neighbors:
                     num_neighbors = number_neighbors(node_idx, data, n_hops)
-                    config.update({"size_std": num_neighbors*0.1})
+                    if num_neighbors > 10000:
+                        config.update({"size_std": num_neighbors*0.01}) 
+                    else:
+                        config.update({"size_std": num_neighbors*0.1})
 
                 if 'Domain_Knowledge' in init_strategy:
                     relation_id = relation_id_dict[str(label)]
@@ -187,7 +193,10 @@ def main():
 
             if size_std_neighbors:
                 num_neighbors = number_neighbors(node_idx, data, n_hops)
-                config.update({"size_std": num_neighbors*0.1})
+                if num_neighbors > 10000:
+                    config.update({"size_std": num_neighbors*0.01}) 
+                else:
+                    config.update({"size_std": num_neighbors*0.1})
             config.update({"init_strategy": init_strategy })
             if 'Domain_Knowledge' in init_strategy:
                 relation_id = relation_id_dict[str(label)]
