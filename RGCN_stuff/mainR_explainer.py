@@ -57,13 +57,13 @@ def main():
     
 
 
-    if name in ['aifb', 'mutag', 'mdgenre', 'amplus', 'dmg777k']:
+    if name in ['aifb', 'mutag', 'mdgenre', 'amplus', 'mdgender']:
         data = kg.load(name, torch=True, final=False)
     if 'IMDb' in name:    
         data = torch.load(f'data/IMDB/finals/{name}.pt')
     if 'dbo' in name:
         data = torch.load(f'data/DBO/finals/{name}.pt')
-    if name == 'mdgenre' or 'dbo' in name:
+    if name == 'md' or 'dbo' in name:
         prune = False
     else:
         prune = True
