@@ -120,7 +120,10 @@ def main():
         print('num_samples_per_class', num_samples_per_class)
         sampled_data = []
         for key in dict_classes:
-            sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
+            if data.name == 'mdgender' and key != 0:
+                sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
+            else:
+                sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
         for node_idx in sampled_data:
             num_edges = number_edges(node_idx, data, n_hops)
             label = int(data.withheld[torch.where(data.withheld[:, 0] == torch.tensor([node_idx])),1])

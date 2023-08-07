@@ -238,8 +238,13 @@ def main(prune=True,test = False):
             num_samples_per_class = 30 if min_length > 30 else min_length 
         print('num_samples_per_class', num_samples_per_class)
         sampled_data = []
+        # for key in dict_classes:
+        #     sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
         for key in dict_classes:
-            sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
+            if data.name == 'mdgender' and key != 0:
+                sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
+            else:
+                sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
         for node_idx in sampled_data:
             if node_idx in data.withheld[:,0]:
                 label = data.withheld[data.withheld[:,0]==node_idx,1]
