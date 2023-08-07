@@ -241,7 +241,7 @@ def main(prune=True,test = False):
         # for key in dict_classes:
         #     sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
         for key in dict_classes:
-            if data.name == 'mdgender' and key != 0:
+            if name == 'mdgender' and key != 0:
                 sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
             else:
                 sampled_data.extend(random.sample(dict_classes[key], num_samples_per_class))
