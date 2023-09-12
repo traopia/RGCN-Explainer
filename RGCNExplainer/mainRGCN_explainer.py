@@ -7,7 +7,7 @@ from rgcn import  RGCN
 from src.rgcn_explainer_utils import *
 import wandb
 import random
-from R_explainer import *
+from RGCN_explainer import *
 
 
 from config import * 

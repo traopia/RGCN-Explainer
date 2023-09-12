@@ -1,11 +1,19 @@
 # Environment
 In order to run the code:
 ```
-conda create -n RGCNExplainer python=3.9
+conda create -n RGCNExplainer python=3.9.16
+conda activate RGCNExplainer
 pip install -r requirements.txt
 pip install . (make sure that setup.py and kgbench folder are in the root directory)
 export WANDB_API_KEY='YOUR_API_KEY'
 wandb login
+```
+
+# Train your RGCN model
+Run this command with argument the name of the KG (dataset available: 'aifb', 'AMPLUS')
+
+```
+python3 RGCNExplainer/rgcn.py
 ```
 
 
@@ -28,28 +36,31 @@ The arguments that are to be added are the following:
 9. If you want to sweep over the different possible hyperparameters: --sweep
     
 ```
-python3 RGCN_stuff/mainR_explainer.py
+python3 RGCNExplainer/mainRGCN_explainer.py
+
+example:
+python RGCNExplainer/mainRGCN_explainer.py 'aifb' 'normal' --explain_one
+
 ```
 
 In order to change the hyperparameter configurations, see:
 ```
-RGCN_stuff/config.py
+RGCNExplainer/config.py
 ```
 
 For an analysis of the results at class level. 
 Insert the path of the experiment (which is given as output of r_exp.py).
 
 ```
-RGCN_stuff/result_analysis.ipynb
+RGCNExplainer/result_analysis.ipynb
 ```
-# RELATION SELECTION
+# RELATION ATTRIBUTION
+
+
 ```
-python3 RGCN_stuff/baseline.py
+python3 RGCNExplainer/Relation_Attribution.py
 ```
-For an analysis of the results at class level:
-```
-RGCN_stuff/statistics_baseline.ipynb
-```
+
 
 ## DATASET
 In order to convert a knowledge graph dataset to the format used in this implementation:
