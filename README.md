@@ -2,7 +2,7 @@
 In order to run the code:
 ```
 conda create -n RGCNExplainer python=3.9
-pip install -r req.txt
+pip install -r requirements.txt
 pip install . (make sure that setup.py and kgbench folder are in the root directory)
 export WANDB_API_KEY='YOUR_API_KEY'
 wandb login
