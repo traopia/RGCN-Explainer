@@ -10,7 +10,10 @@ wandb login
 
 
 # RGCN-Explainer
-In the following work GNNExplainer has been expanded to work with relational graph. 
+In the following work GNNExplainer has been expanded to work with relational graph, and experiments have been performed on mask initializations.
+The pipeline of the introduced method RGCNExplainer:
+
+![RGCNExplainer_model](https://github.com/traopia/RGCN-Explainer/assets/91891769/3ca2976a-c5d8-4041-8777-e39573620977)
 
 ```
 python3 RGCN_stuff/mainR_explainer.py
@@ -42,14 +45,8 @@ Follow the instructions in
 ```
 datasets-conversion/scripts/README.md
 ```
-Then remove_relation.py, final_touch.py (TO BE REVIEWED the whole pipeline)
-### TUTORIAL OF GNN EXPLAINER
-In order to expland GNNExplainer for relational graph, I created a tutorial where I go by step by step through the source code of 
-[GNN Explainer](https://arxiv.org/abs/1903.03894).
+Then remove_relation.py, final_touch.py for the final conversions.
 
-```
-GNNExplainer/tutorial.ipynb
-```
 
 
 
