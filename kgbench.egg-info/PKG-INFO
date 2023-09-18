@@ -1,7 +1,0 @@
-Metadata-Version: 2.1
-Name: kgbench
-Version: 0.2
-Summary: A set of benchmark datasets for knowledge graph node classification
-Home-page: https://kgbench.info
-Author: Peter Bloem (Vrije Universiteit), Xander Wilcke (Vrije Universiteit), Lucas van Berkel, Victor de Boer (Vrije Universiteit)
-Author-email: kgbench@peterbloem.nl
