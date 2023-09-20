@@ -13,7 +13,7 @@ wandb login
 Run this command with argument the name of the KG (dataset available: 'aifb', 'AMPLUS')
 
 ```
-python3 RGCNExplainer/rgcn.py
+python3 RGCNExplainer/rgcn.py 'aifb'
 ```
 
 
@@ -38,8 +38,10 @@ The arguments that are to be added are the following:
 ```
 python3 RGCNExplainer/mainRGCN_explainer.py
 
-example:
+example to get explanation for one node:
 python RGCNExplainer/mainRGCN_explainer.py 'aifb' 'normal' --explain_one
+example to get explanations for stratified sample of nodes:
+python RGCNExplainer/mainRGCN_explainer.py 'aifb' 'normal' --random_sample --num_samples_per_class 20
 
 ```
 
@@ -49,13 +51,13 @@ RGCNExplainer/config.py
 ```
 
 For an analysis of the results at class level. 
-Insert the path of the experiment (which is given as output of r_exp.py).
+Insert the path of the experiment (which is given as output of mainRGCN_explainer.py).
 
 ```
 RGCNExplainer/result_analysis.ipynb
 ```
 # RELATION ATTRIBUTION
-
+In order to perform experiments with the relation attribution method, run the code, with argument the name of the KG:
 
 ```
 python3 RGCNExplainer/Relation_Attribution.py
