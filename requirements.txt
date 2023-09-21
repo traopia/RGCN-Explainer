@@ -2,9 +2,9 @@
 #conda install networkx pandas=1.4.4 matplotlib pytorch==1.12.1 
 
 
-#networkx==3.0
+networkx==3.0
 networkx
-#pandas==1.4.4
+pandas==1.4.4
 pytorch_revgrad==0.2.0
 torch #==1.12.1
 torch-geometric==2.3.0
@@ -12,10 +12,11 @@ torchvision #==0.13.1
 wget==3.2
 rdflib==6.2.0
 rdflib-jsonld==0.6.2
-#matplotlib==3.6.3
+matplotlib==3.6.3
 matplotlib
 mpmath==1.3.0
 fire==0.5.0
 wandb==0.15.4
 chardet
 psutil
+bs4

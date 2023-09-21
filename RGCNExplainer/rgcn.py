@@ -11,9 +11,6 @@ import os
 import argparse
 
 
-#from rgcn_model import RGCN
-#from src.gpu_functions import *
-
 
 import numpy as np
 
