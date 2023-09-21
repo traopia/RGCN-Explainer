@@ -73,7 +73,7 @@ For analysis of explanation results at the class level:
 python RGCNExplainer/Result_analysis_per_classes.py 'aifb'
 ```
 
-# RELATION ATTRIBUTION
+# Relation Attribution
 Another method introduced in this work is relation attribution, which investigates the impact of different relation types on RGCN model performance. Two modalities, 'forward' and 'backward', are explored. 'Forward' predicts node class using only edges of one relation type, while 'backward' iteratively excludes one relation type from predictions made on edges of all other relation types.
 
 To perform experiments with the relation attribution method, run the code with the dataset name and chosen modality as arguments. For example:
