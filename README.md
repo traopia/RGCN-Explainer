@@ -87,7 +87,7 @@ datasets-conversion/scripts/README.md
 ```
 
 ## PAPER
-The Master Thesis associated to this repository can be found as RGCNExplainer.pdf
+The Master Thesis associated to this repository can be found as [RGCNExplainer.pdf](https://github.com/traopia/RGCN-Explainer/blob/main/RGCNExplainer.pdf)
 
 
 
