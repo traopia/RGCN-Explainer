@@ -21,7 +21,7 @@ python3 RGCNExplainer/rgcn.py 'aifb'
 In the following work GNNExplainer has been expanded to work with relational graph, and experiments have been performed on mask initializations.
 The pipeline of the introduced method RGCNExplainer:
 
-![RGCNExplainer_model]()
+![RGCNExplainer_model](https://github.com/traopia/RGCN-Explainer/blob/main/Visualizations/RGCNExplainer_model.jpg)
 
 In order to Explain the prediction on one or more nodes:
 The arguments that are to be added are the following:
