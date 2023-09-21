@@ -113,13 +113,7 @@ def select_columns_with_values_above_threshold(df, threshold):
 
     return modified_df
 
-def modified_counter(path,relations):
-    df = pd.read_csv(path, index_col = 'label')[relations]
-    df = keep_columns_with_non_zero_values(df)
-    
-    mean_df = df.groupby('label').mean()
-    mean_df = select_columns_with_values_above_threshold(mean_df, 1)
-    return mean_df   
+
 
 
 def bar_plot(full, explain):
@@ -150,14 +144,7 @@ def path_get(init,data):
     path = f'chk/{data.name}_chk/exp/init_{init}_lr_0.5_size_0.0005_ent_1_type_1_wd_0.9_MFR_1/Relation_Importance/'
     return path
 
-import json
-path_dict = 'chk/mdgenre_chk/name_relations_mdgenre.json'
-# with open(path_dict, 'r') as json_file:
-#     dict_name_relations = json.load(json_file)
 
-def path_get(init,data):
-    path = f'chk/{data.name}_chk/exp/init_{init}_lr_0.5_size_0.0005_ent_1_type_1_wd_0.9_MFR_1/Relation_Importance/'
-    return path
 def modified_counter(path,relations):
     df = pd.read_csv(path, index_col = 'label')[relations]
     df = keep_columns_with_non_zero_values(df)

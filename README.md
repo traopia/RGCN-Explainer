@@ -49,21 +49,22 @@ python RGCNExplainer/mainRGCN_explainer.py 'aifb' 'normal' --explain_one
 ```
 example to get explanations for stratified sample of nodes:
 ```
-python RGCNExplainer/mainRGCN_explainer.py 'aifb' 'normal' --random_sample --num_samples_per_class 20
+python RGCNExplainer/mainRGCN_explainer.py 'aifb' 'normal' --random_sample --num_samples_per_class 
 ```
 Experiments have been conducted to find the best hyperparameter setting, but in order to change the hyperparameter configurations, see:
 ```
 RGCNExplainer/config.py
 ```
 
-For analysis and visualization of a single explanation:
+For analysis (include table reporting explanation metrics and barplot of relation distribution comparison between full and explanation subgraph) and visualization of a single explanation:
 ```
+python RGCNExplainer/Result_analysis_one_node.py 'aifb' --node_idx 5731
 ```
 
 For analysis of the explanation results at class level:
 
 ```
-RGCNExplainer/result_analysis.ipynb
+python RGCNExplainer/Result_analysis_per_classes.py 'aifb'
 ```
 
 # RELATION ATTRIBUTION
@@ -85,9 +86,8 @@ In order to use RGCNExplainer for a different knowledge graph, the dataset has t
 datasets-conversion/scripts/README.md
 ```
 
-
-
-
+## PAPER
+The Master Thesis associated to this repository can be found as RGCNExplainer.pdf
 
 
 
