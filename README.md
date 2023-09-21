@@ -90,6 +90,10 @@ To use RGCNExplainer with a different knowledge graph, the dataset must be conve
 ```
 datasets-conversion/scripts/README.md
 ```
+A preliminary analysis of the dataset can be conducted by using the script in:
+```
+RGCNExplainer/statistics_datasets.ipynb
+```
 
 ## PAPER
 The Master Thesis associated with this repository is available as [RGCNExplainer.pdf](https://github.com/traopia/RGCN-Explainer/blob/main/RGCNExplainer.pdf).
